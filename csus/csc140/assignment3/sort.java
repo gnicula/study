@@ -9,8 +9,11 @@ public class Sorting {
 	final static boolean OUTPUT_DATA = false;
 	
 	public static String sortAlg= null;
+	// 0 - Last element, 1 - Random element, 2 - Median of 3, 3 - Smart with insertion
+	public static int quickSortPivotAlg = 0;
 	public static  int size = 0;
 	public static Random randIntGen = new Random();
+	public static int recursiveCallsCount = 0;
 	
 	public static void main(String[] args) {
 		readInput();
@@ -97,13 +100,7 @@ public class Sorting {
 	{
 		int i;
 		for(i = 0; i < size; i++)
-			data[i] = new Random().nextInt(10000000);
-//		int data_bad[] = new int[] {2871684, 9760106, 4510918, 4660545,
-//		  276628, 6753049, 5867792, 2693707, 456969, 1802116 };
-//		for(i = 0; i < size; i++)
-//			data[i] = data_bad[i]; 
-			
-		
+			data[i] = new Random().nextInt(10000000);		
 	}
 	/*****************************************************************************/
 
@@ -130,6 +127,7 @@ public class Sorting {
 			else if (sortAlg.equals("Q"))
 			{
 			QuickSort(data, 0, size-1);
+			System.out.println("\nTotal number of QuickSort recursive calls: " + recursiveCallsCount);
 			}
 			else if (sortAlg.equals("S"))
 			{
@@ -190,15 +188,89 @@ public class Sorting {
 	{
 		//Write your code here
 		//System.out.println("InserionSort");
-		
+		for (int i = 1; i < size; i++)
+		{
+			int j = i;
+			while (j > 0 && data[j] < data[j - 1])
+			{
+					swap(j, j - 1, data);
+					j--;
+			}
+		}
 	}
 	/*****************************************************************************/
 
+	public static void InsertionSortWithRange(int data[], int lo, int hi)
+	{
+		for (int i = lo + 1; i < hi + 1; i++)
+		{
+			int j = i;
+			while (j > lo && data[j] < data[j - 1])
+			{
+					swap(j, j - 1, data);
+					j--;
+			}
+		}
+	}
+	/*****************************************************************************/
+
+	public static void Merge(int data[], int p, int q, int r)
+	{
+		int n1 = (q - p) + 1;
+		int n2 = r - q;
+
+		int L[] = Arrays.copyOfRange(data, p, (q + 1));
+		int R[] = Arrays.copyOfRange(data, (q + 1), (r + 1));
+		
+		int i = 0;
+		int j = 0;
+		int k = p;
+		
+		while (i < n1 && j < n2)
+		{
+			if (L[i] < R[j])
+			{
+				data[k] = L[i];
+				i++;
+			} else if (L[i] >= R[j])
+			{
+				data[k] = R[j];
+				j++;
+			}
+			k++;
+		}
+		
+		while (i < n1)
+		{
+			data[k] = L[i];
+			k++;
+			i++;
+		}
+	
+		while (j < n2)
+		{
+			data[k] = R[j];
+			k++;
+			j++;
+		}
+		
+		
+	}
+	/*****************************************************************************/
+	
 	public static void MergeSort(int data[], int lo, int hi)
 	{
 		//Write your code here
 		//You may create other functions if needed 
 		//System.out.println("MergeSort");
+		if(hi - lo < 1)
+		{
+			return;
+		}
+		int q = (hi + lo) / 2;
+		MergeSort(data, lo, q);
+		MergeSort(data, q+1, hi);
+		Merge(data, lo, q, hi);
 	}
 	/*****************************************************************************/
 	public static int ChoosePivot(int data[], int lo, int hi, int pivotCase)
@@ -239,14 +311,11 @@ public class Sorting {
 	
 	public static int Partition(int data[], int lo, int hi, int pivotCase)
 	{
+		//Keep track of recursive call count.
+		recursiveCallsCount++;
+		
 		//System.out.println("lo: " + lo + " hi: " + hi);
 		int i = lo - 1;
-		
-//		if(randPivot)
-//		{
-//			int randPivotIndex = lo + new Random().nextInt(hi-lo+1);
-//			swap(randPivotIndex, hi, data);
-//		}
 		
 		int pivotIndex = ChoosePivot(data, lo, hi, pivotCase);
 		swap(pivotIndex, hi, data);
@@ -266,16 +335,40 @@ public class Sorting {
 	}
 	/*****************************************************************************/
 	
+	public static int QuickSortWithDepth(int data[], int lo, int hi, int depth)
+	{
+		//System.out.println("QuickSort");
+		if (quickSortPivotAlg == 3 && hi - lo <= 39)
+		{
+			InsertionSortWithRange(data, lo, hi);
+		} else if (hi - lo >= 1) 
+		{
+			int pivot = Partition(data, lo, hi, quickSortPivotAlg);
+			int depthLeft =	QuickSortWithDepth(data, lo, pivot-1, (depth + 1));
+			int depthRight = QuickSortWithDepth(data, pivot+1, hi, (depth + 1));
+			return Math.max(depthLeft, depthRight);
+		}
+		
+		return depth;
+	}
+	/*****************************************************************************/
+	
 	public static void QuickSort(int data[], int lo, int hi)
 	{
 		//System.out.println("QuickSort");
-		if (hi - lo >= 1) 
+//		if (hi - lo >= 1) 
+//		{
+//			int pivot = Partition(data, lo, hi, 1);
+//			QuickSort(data, lo, pivot-1);
+//			QuickSort(data, pivot+1, hi);
+//		}
+		if (hi - lo + 1 <= 40)
 		{
-			int pivot = Partition(data, lo, hi, 1);
-			QuickSort(data, lo, pivot-1);
-			QuickSort(data, pivot+1, hi);
+			InsertionSort(data, (hi - lo) + 1);
+		} else
+		{
+			System.out.println("\nDepth is " + QuickSortWithDepth(data, lo, hi, 1));
 		}
-		
 	}
 	/*****************************************************************************/
 
