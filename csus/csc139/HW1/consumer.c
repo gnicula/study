@@ -81,7 +81,7 @@ int main()
      // Use the following print statement to report the consumption of an item:
      // printf("Consuming Item %d with value %d at Index %d\n", i, val, out);
      // where i is the item number, val is the item value, out is its index in the bounded buffer
-                
+               
     for(int i=0; i < itemCnt; ++i) {
         // Use GetIn() to get the in value from the shared mem
         // Wait for producer
@@ -172,9 +172,9 @@ void WriteAtBufIndex(int indx, int val)
 int ReadAtBufIndex(int indx)
 {
         // Write the implementation
-        int val;
         void* ptr = gShmPtr + 4*sizeof(int) + indx*sizeof(int);
-        memcpy(&val, ptr, sizeof(int));
-        return val; 
+        int read;
+        memcpy(&read, ptr, sizeof(int));
+        return read;
 }
 

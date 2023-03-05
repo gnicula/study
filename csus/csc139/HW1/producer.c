@@ -154,20 +154,21 @@ void Producer(int bufSize, int itemCnt, int randSeed)
     // printf("Producing Item %d with value %d at Index %d\n", i, val, in);
     // where i is the item number, val is the item value, in is its index in the bounded buffer
 
-    for (int i = 0; i < itemCnt;) {
-        if (((in + 1) % bufSize) != GetOut()) {
-            int val = GetRand(0, 10000);
-            // Use the provided function WriteAtBufIndex() to write val into the bounded buffer
-            WriteAtBufIndex(in, val);
-            // print statement to report the production of an item
-            printf("Producing Item %d with value %d at Index %d\n", i, val, in);
-            in = (in + 1) % bufSize;
-            // **Extremely Important: Remember to set the value of any shared variable you change locally
-            SetIn(in);
-            ++i;
+    int i = 0;
+    int val;
+    while(i < itemCnt){
+	
+	if((in + 1)%bufSize!=GetOut()){
+                
+                val = GetRand(10,2500);
+		WriteAtBufIndex(in, val);
+		printf("Producing Item %d with value %d at Index %d\n", i, val, in);
+		in = (in + 1)%bufSize;
+		i++;
+		SetIn(in);
         }
     }
-
+    
     printf("Producer Completed\n");
 }
 
