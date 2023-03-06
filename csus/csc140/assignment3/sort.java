@@ -9,26 +9,29 @@ public class Sorting {
 	final static boolean OUTPUT_DATA = false;
 	
 	public static String sortAlg= null;
-	// 0 - Last element, 1 - Random element, 2 - Median of 3, 3 - Smart with insertion
-	public static int quickSortPivotAlg = 0;
-	public static  int size = 0;
+	// 0 - Last element, 1 - Random element, 2 - Random with insertion, 3 - median of 3
+	public static int quickSortPivotAlg = 2;
+	public static int size = 0;
 	public static Random randIntGen = new Random();
 	public static int recursiveCallsCount = 0;
 	
 	public static void main(String[] args) {
 		readInput();
 		int [] data = new int[size];
+		GenerateRandomData(data, size);
+		Sort(data, size,"Random Data", true);
+		
 		GenerateSortedData(data, size);
-		Sort(data, size,"Sorted Data");
+		Sort(data, size,"Sorted Data", false);
 
 		GenerateNearlySortedData(data, size);
-		Sort(data, size,"Nearly Sorted Data");
+		Sort(data, size,"Nearly Sorted Data", false);
 		
 		GenerateReverselySortedData(data, size);
-		Sort(data, size,"Reversely Sorted Data");
+		Sort(data, size,"Reversely Sorted Data", false);
 		
 		GenerateRandomData(data, size);
-		Sort(data, size,"Random Data");
+		Sort(data, size,"Random Data", false);
 			
 		System.out.println("\nProgram Completed Successfully.");
 		
@@ -105,10 +108,15 @@ public class Sorting {
 	/*****************************************************************************/
 
 	
-	public static void Sort(int[] data, int size,  String string)
+	public static void Sort(int[] data, int size,  String string, boolean warmup)
 	{
 
-		System.out.print("\n"+string+":");
+		if (!warmup)
+		{
+			System.out.print("\n"+string+":");
+		} else {
+			System.out.print("\nWARM UP RUN\n"+string+":");
+		}
 		if (OUTPUT_DATA)
 		{
 			printData(data, size, "Data before sorting:");
@@ -187,15 +195,17 @@ public class Sorting {
 	public static void InsertionSort(int data[], int size)
 	{
 		//Write your code here
-		//System.out.println("InserionSort");
+		//System.out.println("InsertionSort");
+		int temp = 0;
 		for (int i = 1; i < size; i++)
 		{
+			temp = data[i];
 			int j = i;
-			while (j > 0 && data[j] < data[j - 1])
+			for (; j > 0 && temp < data[j - 1]; --j)
 			{
-					swap(j, j - 1, data);
-					j--;
+				data[j] = data[j - 1];
 			}
+			data[j] = temp;
 		}
 	}
 	/*****************************************************************************/
@@ -282,9 +292,10 @@ public class Sorting {
 //				pivot = hi;
 				break;
 			case 1:
+			case 2:
 				pivot = lo + randIntGen.nextInt(hi-lo+1);
 				break;
-			case 2:
+			case 3:
 				int first = lo + randIntGen.nextInt(hi-lo+1);
 				int second = lo + randIntGen.nextInt(hi-lo+1);
 				int third = lo + randIntGen.nextInt(hi-lo+1);
@@ -337,8 +348,7 @@ public class Sorting {
 	
 	public static int QuickSortWithDepth(int data[], int lo, int hi, int depth)
 	{
-		//System.out.println("QuickSort");
-		if (quickSortPivotAlg == 3 && hi - lo <= 39)
+		if (quickSortPivotAlg == 2 && hi - lo <= 39)
 		{
 			InsertionSortWithRange(data, lo, hi);
 		} else if (hi - lo >= 1) 
@@ -356,19 +366,7 @@ public class Sorting {
 	public static void QuickSort(int data[], int lo, int hi)
 	{
 		//System.out.println("QuickSort");
-//		if (hi - lo >= 1) 
-//		{
-//			int pivot = Partition(data, lo, hi, 1);
-//			QuickSort(data, lo, pivot-1);
-//			QuickSort(data, pivot+1, hi);
-//		}
-		if (hi - lo + 1 <= 40)
-		{
-			InsertionSort(data, (hi - lo) + 1);
-		} else
-		{
-			System.out.println("\nDepth is " + QuickSortWithDepth(data, lo, hi, 1));
-		}
+		System.out.println("\nDepth is " + QuickSortWithDepth(data, lo, hi, 1));
 	}
 	/*****************************************************************************/
 
