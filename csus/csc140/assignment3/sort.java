@@ -7,401 +7,395 @@ public class Sorting {
 
 	// Set this to true if you wish the arrays to be printed.
 	final static boolean OUTPUT_DATA = false;
-	
-	public static String sortAlg= null;
-	// 0 - Last element, 1 - Random element, 2 - Random with insertion, 3 - median of 3
+
+	public static String sortAlg = null;
+
+	// 0 - Last element, 1 - Random element, 2 - Random with insertion,
+	// 3 - median of random 3 no insertion, 4 - median of random 5 and insertion,
+	// 5 - median of 3 elements at lo, mid, hi and insertion
 	public static int quickSortPivotAlg = 2;
 	public static int size = 0;
 	public static Random randIntGen = new Random();
 	public static int recursiveCallsCount = 0;
-	
+	// Data used for median of 5
+	public static int[] pivotCandidates = new int[5];
+	public static int[] pivotCandidatesIndex = new int[5];
+	// Threshold of data length for switching to insertion sort: 20, 40, 48, 64, 96
+	public static int qsInsertionSortSwitch = 20;
+
 	public static void main(String[] args) {
 		readInput();
-		int [] data = new int[size];
+		int[] data = new int[size];
 		GenerateRandomData(data, size);
-		Sort(data, size,"Random Data", true);
-		
+		Sort(data, size, "Random Data", true);
+
 		GenerateSortedData(data, size);
-		Sort(data, size,"Sorted Data", false);
+		Sort(data, size, "Sorted Data", false);
 
 		GenerateNearlySortedData(data, size);
-		Sort(data, size,"Nearly Sorted Data", false);
-		
+		Sort(data, size, "Nearly Sorted Data", false);
+
 		GenerateReverselySortedData(data, size);
-		Sort(data, size,"Reversely Sorted Data", false);
-		
+		Sort(data, size, "Reversely Sorted Data", false);
+
 		GenerateRandomData(data, size);
-		Sort(data, size,"Random Data", false);
-			
+		Sort(data, size, "Random Data", false);
+
 		System.out.println("\nProgram Completed Successfully.");
-		
+
 	}
-	
+
 	@SuppressWarnings("resource")
-	public static void readInput(){
+	public static void readInput() {
 		System.out.println("  I:\tInsertion Sort");
 		System.out.println("  M:\tMergeSort");
 		System.out.println("  Q:\tQuickSort");
 		System.out.println("  S:\tSTLSort");
-	    System.out.println("Enter sorting algorithm:");
-	    Scanner reader = new Scanner(System.in);
-	    sortAlg = reader.next();
-	    System.out.println(sortAlg);
+		System.out.println("Enter sorting algorithm:");
+		Scanner reader = new Scanner(System.in);
+		sortAlg = reader.next();
+		System.out.println(sortAlg);
 		String sortAlgName = "";
-		
-		if(sortAlg.equals("I"))
+
+		if (sortAlg.equals("I"))
 			sortAlgName = "Insertion Sort";
-		else if(sortAlg.equals("M"))
+		else if (sortAlg.equals("M"))
 			sortAlgName = "MergeSort";
-		else if(sortAlg.equals("Q"))
+		else if (sortAlg.equals("Q"))
 			sortAlgName = "QuickSort";
-		else if(sortAlg.equals("S"))
+		else if (sortAlg.equals("S"))
 			sortAlgName = "STLSort";
 		else {
-			System.out.println("Unrecognized sorting algorithm Code:"+sortAlg);
+			System.out.println("Unrecognized sorting algorithm Code:" + sortAlg);
 			System.exit(1);
 		}
 		System.out.println("Enter input size: ");
-	    size = reader.nextInt();
+		size = reader.nextInt();
 		System.out.println("\nSorting Algorithm: " + sortAlgName);
-        System.out.println("\nInput Size = "  + size);
+		System.out.println("\nInput Size = " + size);
 	}
-	
+
 	/******************************************************************************/
 
-	public static void GenerateSortedData(int data[], int size)
-	{
+	public static void GenerateSortedData(int data[], int size) {
 		int i;
-		
-		for(i=0; i<size; i++)
+
+		for (i = 0; i < size; i++)
 			data[i] = i * 3 + 5;
 	}
+
 	/*****************************************************************************/
-	public static void GenerateNearlySortedData(int data[], int size)
-	{
+	public static void GenerateNearlySortedData(int data[], int size) {
 		int i;
-		
+
 		GenerateSortedData(data, size);
-		
-		for(i=0; i<size; i++)
-			if(i % 10 == 0)
-				if(i+1 < size)
-					data[i] = data[i+1] + 7;
+
+		for (i = 0; i < size; i++)
+			if (i % 10 == 0)
+				if (i + 1 < size)
+					data[i] = data[i + 1] + 7;
 	}
+
 	/*****************************************************************************/
 
-	public static void GenerateReverselySortedData(int data[], int size)
-	{
+	public static void GenerateReverselySortedData(int data[], int size) {
 		int i;
-		
-		for(i = 0; i < size; i++)
-			data[i] = (size-i) * 2 + 3;
+
+		for (i = 0; i < size; i++)
+			data[i] = (size - i) * 2 + 3;
 	}
+
 	/*****************************************************************************/
 
-	public static void GenerateRandomData(int data[], int size)
-	{
+	public static void GenerateRandomData(int data[], int size) {
 		int i;
-		for(i = 0; i < size; i++)
-			data[i] = new Random().nextInt(10000000);		
+		for (i = 0; i < size; i++)
+			data[i] = new Random().nextInt(10000000);
 	}
+
 	/*****************************************************************************/
 
-	
-	public static void Sort(int[] data, int size,  String string, boolean warmup)
-	{
+	public static void Sort(int[] data, int size, String string, boolean warmup) {
 
-		if (!warmup)
-		{
-			System.out.print("\n"+string+":");
+		if (!warmup) {
+			System.out.print("\n" + string + ":");
 		} else {
-			System.out.print("\nWARM UP RUN\n"+string+":");
+			System.out.print("\nWARM UP RUN\n" + string + ":");
 		}
-		if (OUTPUT_DATA)
-		{
+		if (OUTPUT_DATA) {
 			printData(data, size, "Data before sorting:");
 		}
 
 		// Sorting is about to begin ... start the timer!
 		long start_time = System.nanoTime();
-			if (sortAlg.equals("I"))
-			{
+		if (sortAlg.equals("I")) {
 			InsertionSort(data, size);
-			}
-			else if (sortAlg.equals("M"))
-			{
-			MergeSort(data, 0, size-1);
-			}
-			else if (sortAlg.equals("Q"))
-			{
-			QuickSort(data, 0, size-1);
-			System.out.println("\nTotal number of QuickSort recursive calls: " + recursiveCallsCount);
-			}
-			else if (sortAlg.equals("S"))
-			{
+		} else if (sortAlg.equals("M")) {
+			MergeSort(data, 0, size - 1);
+		} else if (sortAlg.equals("Q")) {
+			QuickSort(data, 0, size - 1);
+		} else if (sortAlg.equals("S")) {
 			STLSort(data, size);
-			}
-		else
-		{
+		} else {
 			System.out.print("Invalid sorting algorithm!");
 			System.out.print("\n");
 			System.exit(1);
 		}
 
 		// Sorting has finished ... stop the timer!
-		
-		double elapsed = System.nanoTime()-start_time;
-		elapsed=elapsed/1000000;
 
+		double elapsed = System.nanoTime() - start_time;
+		elapsed = elapsed / 1000000;
 
-		if (OUTPUT_DATA)
-		{
+		if (sortAlg.equals("Q")) {
+			System.out.println("\nTotal number of QuickSort recursive calls: " + recursiveCallsCount);
+		}
+
+		if (OUTPUT_DATA) {
 			printData(data, size, "Data after sorting:");
 		}
 
-
-		if (IsSorted(data, size))
-		{
+		if (IsSorted(data, size)) {
 			System.out.print("\nCorrectly sorted ");
 			System.out.print(size);
 			System.out.print(" elements in ");
 			System.out.print(elapsed);
 			System.out.print("ms");
-		}
-		else
-		{
+		} else {
 			System.out.print("ERROR!: INCORRECT SORTING!");
 			System.out.print("\n");
 		}
 		System.out.print("\n-------------------------------------------------------------\n");
 	}
-	
+
 	/*****************************************************************************/
 
-	public static boolean IsSorted(int data[], int size)
-	{
+	public static boolean IsSorted(int data[], int size) {
 		int i;
-		
-		for(i=0; i<(size-1); i++)
-		{
-			if(data[i] > data[i+1])
+
+		for (i = 0; i < (size - 1); i++) {
+			if (data[i] > data[i + 1])
 				return false;
 		}
 		return true;
 	}
-	
+
 	/*****************************************************************************/
 
-	public static void InsertionSort(int data[], int size)
-	{
-		//Write your code here
-		//System.out.println("InsertionSort");
-		int temp = 0;
-		for (int i = 1; i < size; i++)
-		{
+	public static void InsertionSort(int data[], int size) {
+		// Write your code here
+		// System.out.println("InsertionSort");
+		int temp, j;
+		for (int i = 1; i < size; i++) {
 			temp = data[i];
-			int j = i;
-			for (; j > 0 && temp < data[j - 1]; --j)
-			{
+			j = i;
+			for (; j > 0 && temp < data[j - 1]; --j) {
 				data[j] = data[j - 1];
 			}
 			data[j] = temp;
 		}
 	}
+
 	/*****************************************************************************/
 
-	public static void InsertionSortWithRange(int data[], int lo, int hi)
-	{
-		for (int i = lo + 1; i < hi + 1; i++)
-		{
-			int j = i;
-			while (j > lo && data[j] < data[j - 1])
-			{
-					swap(j, j - 1, data);
-					j--;
+	public static void InsertionSortWithRange(int data[], int lo, int hi) {
+		int temp, j;
+		for (int i = lo + 1; i < hi + 1; i++) {
+			temp = data[i];
+			j = i;
+			while (j > lo && temp < data[j - 1]) {
+				data[j] = data[j - 1];
+				--j;
 			}
+			data[j] = temp;
 		}
 	}
+
 	/*****************************************************************************/
 
-	public static void Merge(int data[], int p, int q, int r)
-	{
+	public static void Merge(int data[], int p, int q, int r) {
 		int n1 = (q - p) + 1;
 		int n2 = r - q;
 
 		int L[] = Arrays.copyOfRange(data, p, (q + 1));
 		int R[] = Arrays.copyOfRange(data, (q + 1), (r + 1));
-		
+
 		int i = 0;
 		int j = 0;
 		int k = p;
-		
-		while (i < n1 && j < n2)
-		{
-			if (L[i] < R[j])
-			{
+
+		while (i < n1 && j < n2) {
+			if (L[i] < R[j]) {
 				data[k] = L[i];
 				i++;
-			} else if (L[i] >= R[j])
-			{
+			} else if (L[i] >= R[j]) {
 				data[k] = R[j];
 				j++;
 			}
 			k++;
 		}
-		
-		while (i < n1)
-		{
+
+		while (i < n1) {
 			data[k] = L[i];
 			k++;
 			i++;
 		}
-	
-		while (j < n2)
-		{
+
+		while (j < n2) {
 			data[k] = R[j];
 			k++;
 			j++;
 		}
-		
-		
+
 	}
+
 	/*****************************************************************************/
-	
-	public static void MergeSort(int data[], int lo, int hi)
-	{
-		//Write your code here
-		//You may create other functions if needed 
-		//System.out.println("MergeSort");
-		if(hi - lo < 1)
-		{
+
+	public static void MergeSort(int data[], int lo, int hi) {
+		// Write your code here
+		// You may create other functions if needed
+		// System.out.println("MergeSort");
+		if (hi - lo < 1) {
 			return;
 		}
 		int q = (hi + lo) / 2;
 		MergeSort(data, lo, q);
-		MergeSort(data, q+1, hi);
+		MergeSort(data, q + 1, hi);
 		Merge(data, lo, q, hi);
 	}
+
 	/*****************************************************************************/
-	public static int ChoosePivot(int data[], int lo, int hi, int pivotCase)
-	{
+	public static int ChoosePivot(int data[], int lo, int hi, int pivotCase) {
 		int pivot = hi;
-		switch(pivotCase)
-		{
-			case 0: 
-//				pivot = hi;
+		switch (pivotCase) {
+			case 0:
+				// pivot = hi;
 				break;
 			case 1:
 			case 2:
-				pivot = lo + randIntGen.nextInt(hi-lo+1);
+				pivot = lo + randIntGen.nextInt(hi - lo + 1);
 				break;
 			case 3:
-				int first = lo + randIntGen.nextInt(hi-lo+1);
-				int second = lo + randIntGen.nextInt(hi-lo+1);
-				int third = lo + randIntGen.nextInt(hi-lo+1);
-				
+				int first = lo + randIntGen.nextInt(hi - lo + 1);
+				int second = lo + randIntGen.nextInt(hi - lo + 1);
+				int third = lo + randIntGen.nextInt(hi - lo + 1);
+
 				pivot = second;
-				
-				if ((data[second] <= data[first] && data[second] >= data[third]) || 
-						data[second] >= data[first] && data[second] <= data[third])
-				{
-					pivot = second;
-				} else if ((data[first] >= data[third] && data[first] <= data[second]) ||
-						(data[first] <= data[third] && data[first] >= data[second]))
-				{
+
+				if ((data[first] >= data[third] && data[first] <= data[second]) ||
+						(data[first] <= data[third] && data[first] >= data[second])) {
 					pivot = first;
 				} else if ((data[third] >= data[first] && data[third] <= data[second]) ||
-						(data[third] <= data[first] && data[third] >= data[second]))
-				{
+						(data[third] <= data[first] && data[third] >= data[second])) {
 					pivot = third;
 				}
+				break;
+			case 4:
+				// Generate 5 random indexes and find the index of the median
+				for (int i = 0; i < 5; ++i) {
+					pivotCandidatesIndex[i] = lo + randIntGen.nextInt(hi - lo + 1);
+					pivotCandidates[i] = data[pivotCandidatesIndex[i]];
+				}
+				Arrays.sort(pivotCandidates);
+				// Choose index of median of the five random elements
+				for (int i = 0; i < 5; ++i) {
+					if (pivotCandidates[2] == data[pivotCandidatesIndex[i]]) {
+						pivot = pivotCandidatesIndex[i];
+						break;
+					}
+				}
+				break;
+			case 5:
+				// Lomuto partition taken from https://en.wikipedia.org/wiki/Quicksort
+				int mid = (lo + hi) / 2;
+				if ((data[mid] < data[lo] && data[lo] < data[hi]) || (data[hi] < data[lo] && data[lo] < data[mid])) {
+					pivot = lo;
+				} else if ((data[lo] < data[mid] && data[mid] < data[hi])
+						|| (data[hi] < data[mid] && data[mid] < data[lo])) {
+					pivot = mid;
+				}
+				break;
 		}
 		return pivot;
 	}
+
 	/*****************************************************************************/
-	
-	public static int Partition(int data[], int lo, int hi, int pivotCase)
-	{
-		//Keep track of recursive call count.
+
+	public static int Partition(int data[], int lo, int hi, int pivotCase) {
+		// Keep track of recursive call count.
 		recursiveCallsCount++;
-		
-		//System.out.println("lo: " + lo + " hi: " + hi);
+
+		// System.out.println("lo: " + lo + " hi: " + hi);
 		int i = lo - 1;
-		
+
 		int pivotIndex = ChoosePivot(data, lo, hi, pivotCase);
 		swap(pivotIndex, hi, data);
-		
+
 		int x = data[hi];
-		//System.out.println("data[]: " + Arrays.toString(data) + "pivot: " + x);
-		for (int j = lo; j < hi; ++j)
-		{
-			if(data[j] < x)
-			{
-				swap(j, (i+1), data);
+		// System.out.println("data[]: " + Arrays.toString(data) + "pivot: " + x);
+		for (int j = lo; j < hi; ++j) {
+			if (data[j] < x) {
+				swap(j, (i + 1), data);
 				++i;
 			}
 		}
-		swap(hi, (i+1), data);
-		return i+1;
+		swap(hi, (i + 1), data);
+		return i + 1;
 	}
-	/*****************************************************************************/
-	
-	public static int QuickSortWithDepth(int data[], int lo, int hi, int depth)
-	{
-		if (quickSortPivotAlg == 2 && hi - lo <= 39)
-		{
-			InsertionSortWithRange(data, lo, hi);
-		} else if (hi - lo >= 1) 
-		{
-			int pivot = Partition(data, lo, hi, quickSortPivotAlg);
-			int depthLeft =	QuickSortWithDepth(data, lo, pivot-1, (depth + 1));
-			int depthRight = QuickSortWithDepth(data, pivot+1, hi, (depth + 1));
-			return Math.max(depthLeft, depthRight);
-		}
-		
-		return depth;
-	}
-	/*****************************************************************************/
-	
-	public static void QuickSort(int data[], int lo, int hi)
-	{
-		//System.out.println("QuickSort");
-		System.out.println("\nDepth is " + QuickSortWithDepth(data, lo, hi, 1));
-	}
+
 	/*****************************************************************************/
 
-	public static void STLSort(int data[], int size)
-	{
-		//Write your code here
-		//Your code should simply call the STL sorting function  
-		//System.out.println("STLSort");
-		Arrays.sort(data);
-		
+	public static int QuickSortWithDepth(int data[], int lo, int hi, int depth) {
+		if ((quickSortPivotAlg == 2 || quickSortPivotAlg == 4 || quickSortPivotAlg == 5)
+				&& ((hi - lo) < qsInsertionSortSwitch)) {
+			InsertionSortWithRange(data, lo, hi);
+		} else if (hi - lo >= 1) {
+			int pivot = Partition(data, lo, hi, quickSortPivotAlg);
+			int depthLeft = QuickSortWithDepth(data, lo, pivot - 1, (depth + 1));
+			int depthRight = QuickSortWithDepth(data, pivot + 1, hi, (depth + 1));
+			return Math.max(depthLeft, depthRight);
+		}
+
+		return depth;
 	}
+
 	/*****************************************************************************/
-	
-	public static void swap(int x , int y ,int data[])
-	{
+
+	public static void QuickSort(int data[], int lo, int hi) {
+		// System.out.println("QuickSort");
+		System.out.println("\nDepth is " + QuickSortWithDepth(data, lo, hi, 1));
+	}
+
+	/*****************************************************************************/
+
+	public static void STLSort(int data[], int size) {
+		// Write your code here
+		// Your code should simply call the STL sorting function
+		// System.out.println("STLSort");
+		Arrays.sort(data);
+
+	}
+
+	/*****************************************************************************/
+
+	public static void swap(int x, int y, int data[]) {
 		int temp = data[x];
 		data[x] = data[y];
-	    data[y] = temp;
+		data[y] = temp;
 	}
-	
+
 	/*****************************************************************************/
-	
-	public static void printData(int[] data, int size, String title)
-	{
+
+	public static void printData(int[] data, int size, String title) {
 		int i;
 
 		System.out.print("\n");
 		System.out.print(title);
 		System.out.print("\n");
-		for (i = 0; i < size; i++)
-		{
+		for (i = 0; i < size; i++) {
 			System.out.print(data[i]);
 			System.out.print(" ");
-			if (i % 10 == 9 && size > 10)
-			{
+			if (i % 10 == 9 && size > 10) {
 				System.out.print("\n");
 			}
 		}
