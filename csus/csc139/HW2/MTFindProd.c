@@ -1,9 +1,34 @@
 /*
 	Gabriele Nicula
 	Section 01
+
 	TESTED ON: 
-		a) MacBook Air, Apple M1 CPU, OS version: MacOS Ventura 13.2.1, clang version: 14.0.0
-		b) ecs lab computer, Linux ecs-pa-coding1.ecs.csus.edu, Intel(R) Xeon(R) Gold 6254 CPU, RHELL 7.9, gcc 4.8.5
+		a) ecs lab computer, Linux ecs-pa-coding3.ecs.csus.edu, Intel(R) Xeon(R) Gold 6254 CPU, RHELL 7.9, gcc 4.8.5
+
+		-bash-4.2$ lscpu
+		Architecture:          x86_64
+		CPU op-mode(s):        32-bit, 64-bit
+		Byte Order:            Little Endian
+		CPU(s):                4
+		On-line CPU(s) list:   0-3
+		Thread(s) per core:    1
+		Core(s) per socket:    2
+		Socket(s):             2
+		NUMA node(s):          1
+		Vendor ID:             GenuineIntel
+		CPU family:            6
+		Model:                 58
+		Model name:            Intel(R) Xeon(R) Gold 6254 CPU @ 3.10GHz
+		Stepping:              0
+		CPU MHz:               3092.734
+		BogoMIPS:              6185.46
+		Hypervisor vendor:     VMware
+		Virtualization type:   full
+		L1d cache:             32K
+		L1i cache:             32K
+		L2 cache:              1024K
+		L3 cache:              25344K
+		NUMA node0 CPU(s):     0-3
 
 */
 
@@ -97,16 +122,17 @@ int main(int argc, char *argv[]){
 	// Initialize threads, create threads, and then let the parent wait for all threads using pthread_join
 	// The thread start function is ThFindProd
 	// Don't forget to properly initialize shared variables
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	int th_ID = 0;
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		int error = pthread_create(&tid[th_ID], NULL, ThFindProd, &indices[th_ID]);
 		if (error != 0) {
-			// printf("Could not create thread: %d, error: %d\n", th_ID, error);
+			printf("Could not create thread: %d, error: %d\n", th_ID, error);
 		}
 	}
 	//sleep(0);
 
 	// Now threads are running and we wait for all of them to complete.
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		pthread_join(tid[th_ID], NULL);
 	}
 
@@ -123,21 +149,26 @@ int main(int argc, char *argv[]){
 	// The thread start function is ThFindProd
 	// Don't forget to properly initialize shared variables
 
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		int error = pthread_create(&tid[th_ID], NULL, ThFindProd, &indices[th_ID]);
 		if (error != 0) {
-			// printf("Could not create thread: %d, error: %d\n", th_ID, error);
+			printf("Could not create thread: %d, error: %d\n", th_ID, error);
 		}
 	}
 	
+	// make sure that the shared variables that the busy-waiting loop checks on are declared as volatile.
 	volatile int numDone = 0;
 	volatile bool seenZero = false;
-	while( numDone != gThreadCount && !seenZero) {
+	// Start a loop where we continuously check on two conditions
+	// 1) Number of threads that finished
+	// 2) A zero result from any of the threads
+	while (numDone != gThreadCount && !seenZero) {
 		numDone = 0;
-		for (int i = 0; i < gThreadCount; ++i) {
-			if(gThreadProd[i] == 0) {
+		for (i = 0; i < gThreadCount; ++i) {
+			if (gThreadProd[i] == 0) {
 				seenZero = true;
 				// printf("found a zero, index: %d", i);
+				// Break out for loop and while will stop because seenZero is true
 				break;
 			}
 			if (gThreadDone[i]) {
@@ -146,22 +177,23 @@ int main(int argc, char *argv[]){
 		}
 		// printf("numDone: %d\n", numDone);
 	}
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		pthread_cancel(tid[th_ID]);
 	}
 	
-	// for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
-	// 	pthread_join(tid[th_ID], NULL);
-	// }
-
     prod = ComputeTotalProduct();
 	printf("Threaded multiplication with parent continually checking on children completed in %ld ms. Product = %d\n", GetTime(), prod);
+
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+		pthread_join(tid[th_ID], NULL);
+	}
 
 	// Multi-threaded with semaphores
 
 	InitSharedVars();
     // Initialize your semaphores here
 	sem_init(&completed, 0, 0);
+	// Give an initial value of 1 so the first thread can enter the critical section
 	sem_init(&mutex, 0, 1);
 
 	SetTime();
@@ -171,12 +203,12 @@ int main(int argc, char *argv[]){
 	// The thread start function is ThFindProdWithSemaphore
 	// Don't forget to properly initialize shared variables and semaphores using sem_init
 
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		// printf("Starting thread: %d\n", th_ID);
 		int error = pthread_create(&tid[th_ID], NULL, ThFindProdWithSemaphore, &indices[th_ID]);
-		// if (error != 0) {
-		// 	printf("Could not create thread: %d, error: %d\n", th_ID, error);
-		// }
+		if (error != 0) {
+			printf("Could not create thread: %d, error: %d\n", th_ID, error);
+		}
 	}
 
 	int err = sem_wait(&completed);
@@ -185,40 +217,41 @@ int main(int argc, char *argv[]){
 	}
 	//printf("Main thread gDoneThreadCount: %d\n" , gDoneThreadCount);
 	
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	for (th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		pthread_cancel(tid[th_ID]);
 	}
 	
+    prod = ComputeTotalProduct();
+	printf("Threaded multiplication with parent waiting on a semaphore completed in %ld ms. Product = %d\n", GetTime(), prod);
+
 	// for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 	// 	pthread_join(tid[th_ID], NULL);
 	// }
-
-    prod = ComputeTotalProduct();
-	printf("Threaded multiplication with parent waiting on a semaphore completed in %ld ms. Product = %d\n", GetTime(), prod);
 }
 
 // Write a regular sequential function to multiply all the elements in gData mod NUM_LIMIT
 // REMEMBER TO MOD BY NUM_LIMIT AFTER EACH MULTIPLICATION TO PREVENT YOUR PRODUCT VARIABLE FROM OVERFLOWING
 int SqFindProd(int size) {
 	int result = 1;
+	int i = 0;
 
-	for (int i = 0; i < size; ++i) {
+	for (i = 0; i < size; ++i) {
 		if(gData[i] == 0) {
 			result = 0;
 			break;
 		}
 		result *= gData[i];
-		// if (result == 0) {
-		// 	break;
-		// }
 		result %= NUM_LIMIT;
+		// We could also take advantage of result being zero because the product can be a multiple of NUM_LIMIT
+		// We could also adjust the result to be NUM_LIMIT in this situation
+		// TODO: Ask about these cases in class
+
 		// if (result == 0) {
 		// 	break;
 		// }
 		// if (result == 0) {
 		// 	result = NUM_LIMIT;
 		// }
-		// printf("result: %d\n", result);
 	}
     
 	return result;
@@ -232,13 +265,13 @@ void* ThFindProd(void *param) {
 	int threadIndxStart = ((int*)param)[1];
 	int threadIndxEnd = ((int*)param)[2];
 	int result = 1;
+	int i = 0;
 	// printf("thread: %d, start: %d, end: %d\n", threadNum, threadIndxStart, threadIndxEnd);
-	for (int i = threadIndxStart; i <= threadIndxEnd; ++i) {
+	for (i = threadIndxStart; i <= threadIndxEnd; ++i) {
 		if(gData[i] == 0) {
 			result = 0;
 			break;
 		} else {
-
 			result *= gData[i];
 			// if (result == 0) {
 			// 	break;
@@ -247,7 +280,6 @@ void* ThFindProd(void *param) {
 			// if (result == 0) {
 			// 	result = NUM_LIMIT;
 			// }
-			//printf("result: %d\n", result);
 		}
 	}
 	gThreadProd[threadNum] = result;
@@ -268,37 +300,48 @@ void* ThFindProdWithSemaphore(void *param) {
 	int threadIndxStart = ((int*)param)[1];
 	int threadIndxEnd = ((int*)param)[2];
 	int result = 1;
+	int i = 0;
+
 	// printf("thread: %d, start: %d, end: %d\n", threadNum, threadIndxStart, threadIndxEnd);
-	for (int i = threadIndxStart; i <= threadIndxEnd; ++i) {
+	for (i = threadIndxStart; i <= threadIndxEnd; ++i) {
+		// check if a zero is in the input and if so, set the thread result to zero
+		// and raise the semaphore so the parent thread can compute the result
 		if(gData[i] == 0) {
 			result = 0;
 			gThreadProd[threadNum] = 0;
 			// printf("thread ID: %d saw a zero\n" , threadNum);
 			sem_post(&completed);
 			break;
+		} else {
+			result *= gData[i];
+			// if (result == 0) {
+			// 	break;
+			// }
+			result %= NUM_LIMIT;
+			// if (result == 0) {
+			// 	result = NUM_LIMIT;
+			// }
 		}
-
-		result *= gData[i];
-		// if (result == 0) {
-		// 	break;
-		// }
-		result %= NUM_LIMIT;
-		// if (result == 0) {
-		// 	result = NUM_LIMIT;
-		// }
-		//printf("result: %d\n", result);
 	}
 	gThreadProd[threadNum] = result;
 	gThreadDone[threadNum] = true;
 	
+	// Acquire the mutex and enter critical section to update gDoneThreadCount
 	sem_wait(&mutex);
+	// gDoneThreadCount can be updated by only one thread at a time
 	++gDoneThreadCount;
+
 	// printf("thread ID: %d gDoneThreadCount: %d\n" , threadNum, gDoneThreadCount);
 
+	// In the critical section we check if gDoneThreadCount reached the gThreadCount value
+	// which would mean that all threads have finished and updated their result
 	if (gDoneThreadCount == gThreadCount) {
 		// printf("thread ID: %d was the last one\n" , threadNum);
+		
+		// All threads done so we post that the computation is completed
 		sem_post(&completed);
 	}
+	// Release the mutex with sem_post() so other threads can enter their critical section
 	sem_post(&mutex);
 	
 	pthread_exit(NULL);
@@ -346,15 +389,17 @@ void GenerateInput(int size, int indexForZero) {
 // indices[i][1] should be set to the start index, and indices[i][2] should be set to the end index
 void CalculateIndices(int arraySize, int thrdCnt, int indices[MAX_THREADS][3]) {
 	int threadSize = arraySize / thrdCnt;
+	int i = 0;
 
 	if (arraySize % thrdCnt > 0) {
 		threadSize += 1;
 	}
 
-	for (int i = 0; i < thrdCnt; ++i) {
+	for (i = 0; i < thrdCnt; ++i) {
 		indices[i][0] = i;
 		indices[i][1] = i * threadSize;
 		if ((i+1) * threadSize-1 >= arraySize) {
+			// Adjusts end for the last thread to arraySize.
 			indices[i][2] = arraySize - 1;
 		} else {
 			indices[i][2] = (i+1) * threadSize - 1;
