@@ -1,3 +1,12 @@
+/*
+	Gabriele Nicula
+	Section 01
+	TESTED ON: 
+		a) MacBook Air, Apple M1 CPU, OS version: MacOS Ventura 13.2.1, clang version: 14.0.0
+		b) ecs lab computer, Linux ecs-pa-coding1.ecs.csus.edu, Intel(R) Xeon(R) Gold 6254 CPU, RHELL 7.9, gcc 4.8.5
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -66,8 +75,14 @@ int main(int argc, char *argv[]){
 	}
 
     GenerateInput(arraySize, indexForZero);
+	// for (int i = 0; i < arraySize; ++i ) {
+	// 	printf("%d ", gData[i]);
+	// }
 
     CalculateIndices(arraySize, gThreadCount, indices);
+	// for (int i = 0; i < gThreadCount; ++i ) {
+	// 	printf("%d %d %d \n", indices[i][0], indices[i][1], indices[i][2]);
+	// }
 
 	// Code for the sequential part
 	SetTime();
@@ -82,7 +97,29 @@ int main(int argc, char *argv[]){
 	// Initialize threads, create threads, and then let the parent wait for all threads using pthread_join
 	// The thread start function is ThFindProd
 	// Don't forget to properly initialize shared variables
+	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+		int error = pthread_create(&tid[th_ID], NULL, ThFindProd, &indices[th_ID]);
+		if (error =! 0) {
+			printf("Could not create thread: %d, error: %d\n", th_ID, error);
+		}
+	}
+	//sleep(0);
 
+	// Now threads are running and we wait for all of them to complete.
+	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+		pthread_join(tid[th_ID], NULL);
+	}
+
+
+	// int numDone = 0;
+	// for (int i = 0; i < gThreadCount; ++i) {
+	// 	if (gThreadDone[i]) {
+	// 		++numDone;
+	// 	}
+	// }
+	// if (numDone == gThreadCount) {
+	// 	pthread_
+	// }
 
     prod = ComputeTotalProduct();
 	printf("Threaded multiplication with parent waiting for all children completed in %ld ms. Product = %d\n", GetTime(), prod);
@@ -123,7 +160,24 @@ int main(int argc, char *argv[]){
 // Write a regular sequential function to multiply all the elements in gData mod NUM_LIMIT
 // REMEMBER TO MOD BY NUM_LIMIT AFTER EACH MULTIPLICATION TO PREVENT YOUR PRODUCT VARIABLE FROM OVERFLOWING
 int SqFindProd(int size) {
+	int result = 1;
 
+	for (int i = 0; i < size; ++i) {
+		result *= gData[i];
+		// if (result == 0) {
+		// 	break;
+		// }
+		result %= NUM_LIMIT;
+		if (result == 0) {
+			break;
+		}
+		// if (result == 0) {
+		// 	result = NUM_LIMIT;
+		// }
+		// printf("result: %d\n", result);
+	}
+    
+	return result;
 }
 
 // Write a thread function that computes the product of all the elements in one division of the array mod NUM_LIMIT
@@ -131,6 +185,24 @@ int SqFindProd(int size) {
 // When it is done, this function should store the product in gThreadProd[threadNum] and set gThreadDone[threadNum] to true
 void* ThFindProd(void *param) {
 	int threadNum = ((int*)param)[0];
+	int threadIndxStart = ((int*)param)[1];
+	int threadIndxEnd = ((int*)param)[2];
+	int result = 1;
+	printf("thread: %d, start: %d, end: %d\n", threadNum, threadIndxStart, threadIndxEnd);
+	for (int i = threadIndxStart; i <= threadIndxEnd; ++i) {
+		result *= gData[i];
+		if (result == 0) {
+			break;
+		}
+		result %= NUM_LIMIT;
+		if (result == 0) {
+			result = NUM_LIMIT;
+		}
+		printf("result: %d\n", result);
+	}
+	gThreadProd[threadNum] = result;
+	gThreadDone[threadNum] = true;
+	pthread_exit(NULL);
 
 }
 
@@ -150,10 +222,12 @@ int ComputeTotalProduct() {
 
 	for(i=0; i<gThreadCount; i++)
 	{
+		printf("gthreadprod[%d] = %d\n" , i, gThreadProd[i]);
 		prod *= gThreadProd[i];
 		prod %= NUM_LIMIT;
+		printf("compute total loop: %d" , prod);
 	}
-
+	printf("compute total product: %d" , prod);
 	return prod;
 }
 
@@ -170,6 +244,13 @@ void InitSharedVars() {
 // Write a function that fills the gData array with random numbers between 1 and MAX_RANDOM_NUMBER
 // If indexForZero is valid and non-negative, set the value at that index to zero
 void GenerateInput(int size, int indexForZero) {
+	int i = 0;
+	for (i = 0; i < size; ++i) {
+		gData[i] = GetRand(1, MAX_RANDOM_NUMBER);
+	}
+	if (0 <= indexForZero && indexForZero < size) {
+		gData[indexForZero] = 0;
+	}
 
 }
 
@@ -177,7 +258,21 @@ void GenerateInput(int size, int indexForZero) {
 // For each division i, indices[i][0] should be set to the division number i,
 // indices[i][1] should be set to the start index, and indices[i][2] should be set to the end index
 void CalculateIndices(int arraySize, int thrdCnt, int indices[MAX_THREADS][3]) {
+	int threadSize = arraySize / thrdCnt;
 
+	if (arraySize % thrdCnt > 0) {
+		threadSize += 1;
+	}
+
+	for (int i = 0; i < thrdCnt; ++i) {
+		indices[i][0] = i;
+		indices[i][1] = i * threadSize;
+		if ((i+1) * threadSize-1 >= arraySize) {
+			indices[i][2] = arraySize - 1;
+		} else {
+			indices[i][2] = (i+1) * threadSize - 1;
+		}
+	}
 }
 
 // Get a random number in the range [x, y]
