@@ -150,9 +150,9 @@ int main(int argc, char *argv[]){
 		pthread_cancel(tid[th_ID]);
 	}
 	
-	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
-		pthread_join(tid[th_ID], NULL);
-	}
+	// for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
+	// 	pthread_join(tid[th_ID], NULL);
+	// }
 
     prod = ComputeTotalProduct();
 	printf("Threaded multiplication with parent continually checking on children completed in %ld ms. Product = %d\n", GetTime(), prod);
