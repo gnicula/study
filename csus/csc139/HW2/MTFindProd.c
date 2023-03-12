@@ -75,9 +75,9 @@ int main(int argc, char *argv[]){
 	}
 
     GenerateInput(arraySize, indexForZero);
-	for (int i = 0; i < arraySize; ++i ) {
-		printf("%d ", gData[i]);
-	}
+	// for (int i = 0; i < arraySize; ++i ) {
+	// 	printf("%d ", gData[i]);
+	// }
 
     CalculateIndices(arraySize, gThreadCount, indices);
 	// for (int i = 0; i < gThreadCount; ++i ) {
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]){
 		for (int i = 0; i < gThreadCount; ++i) {
 			if(gThreadProd[i] == 0) {
 				seenZero = true;
-				printf("found a zero, index: %d", i);
+				// printf("found a zero, index: %d", i);
 				break;
 			}
 			if (gThreadDone[i]) {
@@ -172,18 +172,18 @@ int main(int argc, char *argv[]){
 	// Don't forget to properly initialize shared variables and semaphores using sem_init
 
 	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
-		printf("Starting thread: %d\n", th_ID);
+		// printf("Starting thread: %d\n", th_ID);
 		int error = pthread_create(&tid[th_ID], NULL, ThFindProdWithSemaphore, &indices[th_ID]);
-		if (error != 0) {
-			printf("Could not create thread: %d, error: %d\n", th_ID, error);
-		}
+		// if (error != 0) {
+		// 	printf("Could not create thread: %d, error: %d\n", th_ID, error);
+		// }
 	}
 
 	int err = sem_wait(&completed);
 	if (err == -1) {
 		printf("Could not wait on semaphore completed\n");
 	}
-	printf("Main thread gDoneThreadCount: %d\n" , gDoneThreadCount);
+	//printf("Main thread gDoneThreadCount: %d\n" , gDoneThreadCount);
 	
 	for (int th_ID = 0; th_ID < gThreadCount; ++th_ID) {
 		pthread_cancel(tid[th_ID]);
@@ -268,12 +268,12 @@ void* ThFindProdWithSemaphore(void *param) {
 	int threadIndxStart = ((int*)param)[1];
 	int threadIndxEnd = ((int*)param)[2];
 	int result = 1;
-	printf("thread: %d, start: %d, end: %d\n", threadNum, threadIndxStart, threadIndxEnd);
+	// printf("thread: %d, start: %d, end: %d\n", threadNum, threadIndxStart, threadIndxEnd);
 	for (int i = threadIndxStart; i <= threadIndxEnd; ++i) {
 		if(gData[i] == 0) {
 			result = 0;
 			gThreadProd[threadNum] = 0;
-			printf("thread ID: %d saw a zero\n" , threadNum);
+			// printf("thread ID: %d saw a zero\n" , threadNum);
 			sem_post(&completed);
 			break;
 		}
@@ -293,10 +293,10 @@ void* ThFindProdWithSemaphore(void *param) {
 	
 	sem_wait(&mutex);
 	++gDoneThreadCount;
-	printf("thread ID: %d gDoneThreadCount: %d\n" , threadNum, gDoneThreadCount);
+	// printf("thread ID: %d gDoneThreadCount: %d\n" , threadNum, gDoneThreadCount);
 
 	if (gDoneThreadCount == gThreadCount) {
-		printf("thread ID: %d was the last one\n" , threadNum);
+		// printf("thread ID: %d was the last one\n" , threadNum);
 		sem_post(&completed);
 	}
 	sem_post(&mutex);
@@ -309,7 +309,7 @@ int ComputeTotalProduct() {
 
 	for(i=0; i<gThreadCount; i++)
 	{
-		printf("gthreadprod[%d] = %d\n" , i, gThreadProd[i]);
+		// printf("gthreadprod[%d] = %d\n" , i, gThreadProd[i]);
 		prod *= gThreadProd[i];
 		prod %= NUM_LIMIT;
 		// printf("compute total loop: %d" , prod);
