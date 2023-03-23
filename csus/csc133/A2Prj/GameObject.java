@@ -8,10 +8,6 @@ public class GameObject {
 	private int color;
 	private GameWorld world;
 	
-//	public GameObject(){
-//		
-//	}
-	
 	public GameObject(int size, double x, double y, int color, GameWorld w) {
 		this.size = size;
 		this.xPos = x;

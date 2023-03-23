@@ -18,6 +18,7 @@ import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.layouts.FlowLayout;
 import com.codename1.ui.layouts.GridLayout;
 import com.codename1.ui.plaf.Border;
+import com.codename1.ui.plaf.Style;
 
 public class Game extends Form {
 	private GameWorld gw;
@@ -153,15 +154,15 @@ public class Game extends Form {
 		//start adding components at a location 50 pixels below the upper border of the container
 		leftContainer.getAllStyles().setPadding(Component.TOP, 50);
 		
-		Button accel = new Button("Accelerate");
+		BlueButton accel = new BlueButton("Accelerate");
 		accel.setCommand(new AccelerateCommand("Accelerate", gw));
 		leftContainer.add(accel);
 		
-		Button left = new Button("Left");
+		BlueButton left = new BlueButton("Left");
 		left.setCommand(new LeftCommand("Left", gw));
 		leftContainer.add(left);
 		
-		Button strats = new Button("Change Strategies");
+		BlueButton strats = new BlueButton("Change Strategies");
 		strats.setCommand(new StrategiesCommand("Strategy", gw));
 		leftContainer.add(strats);
 		
@@ -169,6 +170,7 @@ public class Game extends Form {
 		ColorUtil.BLUE));
 		add(BorderLayout.WEST,leftContainer);
 	}
+	
 
 	// new ActionListener()
 // addActionListener

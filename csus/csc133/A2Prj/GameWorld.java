@@ -10,6 +10,7 @@ public class GameWorld extends Observable {
 
 	private int count = 0;
 	private boolean sound = false;
+	private int numBases = 0;
 
 	private GameObjectCollection goc = new GameObjectCollection();
 
@@ -26,13 +27,26 @@ public class GameWorld extends Observable {
 
 		goc.add(new Drone(10, 75, 75, ColorUtil.BLUE, 20, 0, this));
 		goc.add(new Drone(10, 95, 95, ColorUtil.BLUE, 20, 0, this));
-
-		// Player Robot will always be the last one initialized.
+		
+		// get the first base to initialize Robot locations.
 		IIterator it = goc.getIterator();
 		GameObject first = it.getNext();
-
+		
+		// initialize 3 enemy non player robots.
+		NonPlayerRobot npr = new NonPlayerRobot(10, first.getX()+50, first.getY()+25, ColorUtil.MAGENTA, 25, 100, 1, this); 
+		npr.setStrategy(new NextBaseStrategy(npr));
+		goc.add(npr);
+		npr = new NonPlayerRobot(10, first.getX()+35, first.getY()+45, ColorUtil.MAGENTA, 25, 100, 1, this);
+		npr.setStrategy(new AttackStrategy(npr));
+		goc.add(npr);
+		npr = new NonPlayerRobot(10, first.getX()+60, first.getY()+40, ColorUtil.MAGENTA, 25, 100, 1, this);
+		npr.setStrategy(new AttackStrategy(npr));
+		goc.add(npr);
+		
+		// Player Robot will always be the last one initialized.
 		goc.add(new Robot(10, first.getX(), first.getY(), ColorUtil.CYAN, 30, 50, 2, this));
 
+		numBases = getNumBases();
 	}
 
 	public void mCommand() {
@@ -56,11 +70,11 @@ public class GameWorld extends Observable {
 	public int getLivesLeft() {
 		return getPlayerRobot().getLives();
 	}
-	
+
 	public boolean getSoundSetting() {
 		return sound;
 	}
-	
+
 	public void setSoundSetting() {
 		if (!sound) {
 			sound = true;
@@ -68,7 +82,7 @@ public class GameWorld extends Observable {
 			sound = false;
 		}
 	}
-	
+
 	public void accelerate() {
 		getPlayerRobot().accelerate();
 	}
@@ -77,9 +91,38 @@ public class GameWorld extends Observable {
 		count++;
 		setChanged();
 		notifyObservers(this);
-
+	}
+	
+	public void changeStrategy() {
+		IIterator it = goc.getIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof NonPlayerRobot) {
+				((NonPlayerRobot)go).changeStrategy();
+			}
+		}
 	}
 
+	public Base getNextBaseInSequence(int sequenceNumber) {
+		IIterator it = goc.getIterator();
+		
+		sequenceNumber += 1;
+		if (sequenceNumber > numBases) {
+			sequenceNumber %= numBases;
+		}
+		
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof Base) {
+				int baseSequenceNum = ((Base)go).getSequenceNumber();
+				if (sequenceNumber == baseSequenceNum) {
+					return (Base)go;
+				}
+			}
+		}
+		return null;
+	}
+	
 	public void exit() {
 		System.exit(0);
 	}
@@ -98,7 +141,25 @@ public class GameWorld extends Observable {
 		}
 
 		return (Robot) go;
+	}
 
+	public void turnLeft() {
+		Robot myRobot = getPlayerRobot();
+
+		myRobot.steerLeft();
+	}
+	
+	private int getNumBases() {
+		int countBases = 0;
+		IIterator it = goc.getIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof Base) {
+				++countBases;
+			}
+		}
+		
+		return countBases;
 	}
 
 }

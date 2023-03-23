@@ -13,7 +13,6 @@ public class StrategiesCommand extends Command {
 	}
 
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Changed Strategies");
-		//gw.accelerate();
+		gw.changeStrategy();
 	}
 }

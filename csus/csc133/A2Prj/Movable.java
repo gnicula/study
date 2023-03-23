@@ -3,6 +3,7 @@ package com.mycompany.a2;
 public class Movable extends GameObject {
     // Class Attributes
     private int speed;
+    // heading is the angle in degrees in range 0-359
     private int heading;
     
 
@@ -38,7 +39,7 @@ public class Movable extends GameObject {
 	
     public String toString() { 
 		String parentDesc = super.toString();
-		String myDesc = parentDesc + ", speed=" + speed + " ,heading=" + heading;
+		String myDesc = parentDesc + ", speed=" + speed + ", heading=" + heading;
 		return myDesc ; 
 	}
 }

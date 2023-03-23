@@ -3,7 +3,10 @@ package com.mycompany.a2;
 public class Robot extends Movable implements ISteerable {
 
 	private final int SPEED_INCREASE = 5;
-	
+	private final int MAX_LEFT_DIRECTION = -40;
+	private final int MAX_RIGHT_DIRECTION = 40;
+
+	// steeringDirection is the adjustment angle in degrees in range -40 to 40.
 	private int steeringDirection;
 	private int maximumSpeed;
 	private int energyLevel;
@@ -12,8 +15,7 @@ public class Robot extends Movable implements ISteerable {
 	private int damageLevel;
 	private int lastBaseReached;
 	private int lives;
-	private GameWorld world;
-
+	
 	// Constructor
 	public Robot(int size, double x, double y, int color, int maximumSpeed, int energyLevel, int energyConsumptionRate,
 			GameWorld world) {
@@ -26,14 +28,12 @@ public class Robot extends Movable implements ISteerable {
 		this.lastBaseReached = 1;
 		this.setSpeed(0);
 		this.setLives(3);
-		this.world = world;
-	
 	}
-	
+
 	public void accelerate() {
 		int speed = getSpeed();
 		speed += SPEED_INCREASE;
-		
+
 		adjustSpeed(speed);
 	}
 
@@ -50,12 +50,16 @@ public class Robot extends Movable implements ISteerable {
 	public void steerLeft() {
 		if (this.steeringDirection > -40) {
 			this.steeringDirection -= 5;
+			this.steeringDirection = Math.max(MAX_LEFT_DIRECTION, steeringDirection);
 		}
+
 	}
 
 	public void steerRight() {
 		if (this.steeringDirection < 40) {
 			this.steeringDirection += 5;
+			this.steeringDirection = Math.min(MAX_RIGHT_DIRECTION, steeringDirection);
+
 		}
 	}
 
@@ -65,6 +69,9 @@ public class Robot extends Movable implements ISteerable {
 	}
 
 	public void setSteeringDirection(int steeringDirection) {
+		
+		steeringDirection = Math.min(MAX_RIGHT_DIRECTION, Math.max(MAX_LEFT_DIRECTION, steeringDirection));
+
 		this.steeringDirection = steeringDirection;
 	}
 
@@ -110,26 +117,26 @@ public class Robot extends Movable implements ISteerable {
 
 	public String toString() {
 		String parentDesc = super.toString();
-		String myDesc = "Robot: " + parentDesc + "\n" + ", Max Speed=" + maximumSpeed + " ,steeringDirection="
-				+ steeringDirection + " ,energyLevel=" + energyLevel + " ,damageLevel=" + damageLevel
-				+ " ,Last base reached= " + lastBaseReached + " ,clock= " + world.getCount() + " ,lives= " + lives;
+		String myDesc = "Robot: " + parentDesc + ", Max Speed=" + maximumSpeed + ", steeringDirection="
+				+ steeringDirection + ", energyLevel=" + energyLevel + ", damageLevel=" + damageLevel
+				+ ", Last base reached=" + lastBaseReached + ", clock=" + getWorld().getCount() + ", lives=" + lives;
 		return myDesc;
 	}
 
 	private void setLives(int lives) {
 		this.lives = lives;
 	}
-	
+
 	private void adjustSpeed(int speed) {
-		
+
 		speed = Math.min(maximumSpeed, speed);
-		
-		speed *= (100 - damageLevel)/100;
-		
+
+		speed *= (100 - damageLevel) / 100;
+
 		if (energyLevel == 0) {
 			speed = 0;
 		}
-		
+
 		setSpeed(speed);
 
 	}

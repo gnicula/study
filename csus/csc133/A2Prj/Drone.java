@@ -7,8 +7,8 @@ public class Drone extends Movable {
 	public Drone(int size, double x, double y, int color, int speed, int heading, GameWorld world) {
 		super(size, x, y, color, speed, heading, world);
 		Random rand = new Random();
-		setHeading(rand.nextInt() * 360); // initialize heading to a random value between 0 and 359 degrees
-		setSpeed(rand.nextInt() * 5 + 5); // initialize speed to a random value between 5 and 10
+		setHeading(rand.nextInt(360)); // initialize heading to a random value between 0 and 359 degrees
+		setSpeed(rand.nextInt(5) + 5); // initialize speed to a random value between 5 and 10
 	}
 
 	public void move() {

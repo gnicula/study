@@ -13,7 +13,7 @@ public class TickCommand extends Command {
 	}
 
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Tick");
 		gw.tick();
+		gw.mCommand();
 	}
 }

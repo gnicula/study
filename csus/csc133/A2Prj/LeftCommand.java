@@ -14,6 +14,6 @@ public class LeftCommand extends Command {
 
 	public void actionPerformed(ActionEvent ev) {
 		System.out.println("Left");
-		//gw.accelerate();
+		gw.turnLeft();
 	}
 }
