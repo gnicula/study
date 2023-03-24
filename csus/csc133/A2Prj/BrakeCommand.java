@@ -3,16 +3,16 @@ package com.mycompany.a2;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
-public class TickCommand extends Command {
-	
+public class BrakeCommand extends Command {
 	private GameWorld gw;
 
-	public TickCommand(String command, GameWorld world) {
+	public BrakeCommand(String command, GameWorld world) {
 		super(command);
 		gw = world;
 	}
 
 	public void actionPerformed(ActionEvent ev) {
-		gw.tick();
+		System.out.println("Decreased Speed");
+		gw.brake();
 	}
 }

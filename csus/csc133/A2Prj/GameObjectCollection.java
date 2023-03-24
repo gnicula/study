@@ -2,8 +2,6 @@ package com.mycompany.a2;
 
 import java.util.ArrayList;
 
-import com.codename1.charts.util.ColorUtil;
-
 public class GameObjectCollection implements ICollection {
 	private ArrayList<GameObject> objectList;
 	private IIterator it;
@@ -37,6 +35,14 @@ public class GameObjectCollection implements ICollection {
 
 	public void add(GameObject go) {
 		objectList.add(go);
+	}
+	
+	public void add(int index, GameObject go) {
+		objectList.add(index, go);
+	}
+	
+	public int size() {
+		return objectList.size();
 	}
 
 	public IIterator getIterator() {

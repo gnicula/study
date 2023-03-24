@@ -3,16 +3,17 @@ package com.mycompany.a2;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
-public class TickCommand extends Command {
+public class RightCommand extends Command {
 	
 	private GameWorld gw;
 
-	public TickCommand(String command, GameWorld world) {
+	public RightCommand(String command, GameWorld world) {
 		super(command);
 		gw = world;
 	}
 
 	public void actionPerformed(ActionEvent ev) {
-		gw.tick();
+		System.out.println("Right");
+		gw.turnRight();
 	}
 }

@@ -5,7 +5,6 @@ import java.util.Observer;
 import com.codename1.ui.Container;
 import com.codename1.ui.Label;
 import com.codename1.ui.layouts.FlowLayout;
-import com.codename1.ui.layouts.GridLayout;
 
 public class ScoreView extends Container implements Observer {
 	// This class is the view class for displaying the game status.
@@ -27,12 +26,19 @@ public class ScoreView extends Container implements Observer {
 		GameWorld gw = (GameWorld) o;
 		Robot playerRobot = gw.getPlayerRobot();
 		String count = String.valueOf(gw.getCount());
+		String livesLeft = String.valueOf(gw.getLivesLeft());
 		timeValue.setText(count);
-		lifeValue.setText(String.valueOf(gw.getLivesLeft()));
+		lifeValue.setText(livesLeft);
 		lastBaseReachedValue.setText(String.valueOf(playerRobot.getLastBaseReached()));
 		playerEnergyValue.setText(String.valueOf(playerRobot.getEnergyLevel()));
 		playerDamageValue.setText(String.valueOf(playerRobot.getDamageLevel()));
 		soundSettingValue.setText(String.valueOf(gw.getSoundSetting()));
+		
+		if (gw.getLivesLeft() <= 0) {
+			System.out.println("Game over, you failed!");
+			gw.exit();
+		}
+		
 	}
 
 	public void createUiElements() {

@@ -1,4 +1,5 @@
 package com.mycompany.a2;
+
 import com.codename1.charts.util.ColorUtil;
 
 public class GameObject {
@@ -7,7 +8,7 @@ public class GameObject {
 	private double yPos;
 	private int color;
 	private GameWorld world;
-	
+
 	public GameObject(int size, double x, double y, int color, GameWorld w) {
 		this.size = size;
 		this.xPos = x;
@@ -15,43 +16,45 @@ public class GameObject {
 		this.color = color;
 		this.world = w;
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
-	
+
 	public double getX() {
 		return xPos;
 	}
-	
+
 	public void setX(int x) {
 		xPos = x;
 	}
-	
+
 	public double getY() {
 		return yPos;
 	}
-	
+
 	public void setY(int y) {
 		yPos = y;
 	}
-	
+
 	public void setColor(int c) {
 		color = c;
 	}
-	
-	public int color() {
+
+	public int getColor() {
 		return color;
 	}
-	
+
 	public GameWorld getWorld() {
 		return world;
 	}
-	
-	public String toString() {      
-		String myDesc = "location=" + xPos + ", " + yPos + ", color=" + "["  + ColorUtil.red(color) + 
-				","  + ColorUtil.green(color) + ","  + ColorUtil.blue(color) + "]" + ", size=" + size;
-	;    return myDesc ; 
+
+	public String toString() {
+		String myDesc = "location=" + xPos + ", " + yPos + ", color(ARGB)=" + "[" + ColorUtil.alpha(color) + ","
+				+ ColorUtil.red(color) + "," + ColorUtil.green(color) + "," + ColorUtil.blue(color) + "]" + ", size="
+				+ size;
+		;
+		return myDesc;
 	}
-	
+
 }

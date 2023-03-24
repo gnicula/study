@@ -1,13 +1,12 @@
 package com.mycompany.a2;
 
 public class EnergyStation extends Fixed {
+	private int capacity;
 	
 	public EnergyStation(int size, double x, double y, int color, GameWorld w) {
 		super(size, x, y, color, w);
 		this.capacity = size * 1;
 	}
-
-	private int capacity;
 	
 	public int getCapacity() {
 		return capacity;

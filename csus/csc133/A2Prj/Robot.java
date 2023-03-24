@@ -3,8 +3,10 @@ package com.mycompany.a2;
 public class Robot extends Movable implements ISteerable {
 
 	private final int SPEED_INCREASE = 5;
+	private final int SPEED_DECREASE = 5;
 	private final int MAX_LEFT_DIRECTION = -40;
 	private final int MAX_RIGHT_DIRECTION = 40;
+	private final int MAX_POSSIBLE_DAMAGE = 100;
 
 	// steeringDirection is the adjustment angle in degrees in range -40 to 40.
 	private int steeringDirection;
@@ -36,7 +38,17 @@ public class Robot extends Movable implements ISteerable {
 
 		adjustSpeed(speed);
 	}
+	
+	public void brake() {
+		int speed = getSpeed();
+		speed -= SPEED_DECREASE;
+		
+		speed = Math.max(0, speed);
+		setSpeed(speed);
+		System.out.println(speed);
 
+	}
+	
 	public int getLives() {
 		return lives;
 	}
@@ -105,6 +117,15 @@ public class Robot extends Movable implements ISteerable {
 
 	public void setDamageLevel(int damageLevel) {
 		this.damageLevel = damageLevel;
+		adjustSpeed(getSpeed());
+		
+		if (damageLevel >= MAX_POSSIBLE_DAMAGE) {
+			if (lives > 0) {
+				--lives;
+			} else {
+				System.out.println("Out of lives \n GAME OVER");
+			}
+		}
 	}
 
 	public int getLastBaseReached() {
