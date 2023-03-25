@@ -53,11 +53,6 @@ public class Robot extends Movable implements ISteerable {
 		return lives;
 	}
 
-	// private void setSpeed(int s) {
-	// speed = s;
-	//
-	// }
-
 	// Methods for ISteerable interface
 	public void steerLeft() {
 		if (this.steeringDirection > -40) {
@@ -162,22 +157,19 @@ public class Robot extends Movable implements ISteerable {
 
 	}
 
-}
 
-// Override the move method from MoveableGameObject
-//    @Override
-//    public void move(int elapsedTicks) {
-//        // Calculate the new speed and heading based on elapsedTicks and steeringDirection
-//        int newSpeed = Math.min(this.getSpeed() + elapsedTicks * (this.maximumSpeed - this.energyConsumptionRate * this.damageLevel) / 10, this.maximumSpeed);
-//        int newHeading = (this.getHeading() + elapsedTicks * (this.steeringDirection / 5)) % 360;
-//        // Update the speed and heading of the robot
-//        this.setSpeed(newSpeed);
-//        this.setHeading(newHeading);
-//        // Update the location of the robot based on speed and heading
-//        this.setX(this.getX() + elapsedTicks * this.getSpeed() * Math.cos(Math.toRadians(this.getHeading())));
-//        this.setY(this.getY() + elapsedTicks * this.getSpeed() * Math.sin(Math.toRadians(this.getHeading())));
-//        // Reduce the energy level based on energyConsumptionRate and current speed
-//        this.setEnergyLevel(this.energyLevel - elapsedTicks * this.energyConsumptionRate * this.getSpeed());
-//        // Check if the robot has reached a new base
+    @Override
+    public void move() {
+    	super.move();
+        // Calculate the heading based on steeringDirection
+    	int newHeading = (getHeading() + steeringDirection + 360) % 360;
+        // Update the heading of the robot
+        setHeading(newHeading);
+        // Reduce the energy level based on energyConsumptionRate
+        setEnergyLevel(energyLevel - energyConsumptionRate);
+        // Check if the robot has reached a new base
 //        int currentBase = GameWorld.getInstance().getCurrentBase(this);
 //        if (currentBase > this.lastBaseReached)
+    }
+}
+

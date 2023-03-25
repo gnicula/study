@@ -8,7 +8,7 @@ public class Drone extends Movable {
 		super(size, x, y, color, speed, heading, world);
 		Random rand = new Random();
 		setHeading(rand.nextInt(360)); // initialize heading to a random value between 0 and 359 degrees, 0 is North.
-		setSpeed(rand.nextInt(5) + 5); // initialize speed to a random value between 5 and 10
+		setSpeed(rand.nextInt(50) + 5); // initialize speed to a random value between 5 and 10
 	}
 
 	@Override
@@ -16,33 +16,34 @@ public class Drone extends Movable {
 		// add small random value (e.g., 5 degrees) to heading while moving
 		Random rand = new Random();
 		int headingChange = rand.nextInt(10) - 5;
-		setHeading(getHeading() + headingChange);
+		setHeading((getHeading() + headingChange + 360) % 360);
 
 		// calculate the new position of the drone based on its speed and heading
-		double dx = this.getSpeed() * Math.cos(Math.toRadians(this.getHeading()));
-		double dy = this.getSpeed() * Math.sin(Math.toRadians(this.getHeading()));
+		double dx = this.getSpeed() * Math.cos(Math.toRadians(90 - this.getHeading()));
+		double dy = this.getSpeed() * Math.sin(Math.toRadians(90 - this.getHeading()));
 		double newX = this.getX() + dx;
 		double newY = this.getY() + dy;
 
+		int currentHeading = getHeading();
 		// check if the new position is within the world bounds
+		System.out.println("new X: " + newX + " new Y: " + newY + " width: " + getWorld().getWidth() + " height: " + getWorld().getHeight());
+		// if the drone hits the left side of the world, change heading and do not move out of bounds
 		if (newX < 0) {
-			// if the drone hits a side of the world, change heading and do not move out of
-			// bounds
-			setHeading((getHeading() - 180) % 360);
-			newX = 0;			
+			setHeading(360 - currentHeading);
+		//if the drone hits the right side of the world, change heading and do not move out of bounds
 		} else if (newX > this.getWorld().getWidth()) {
-			
-		} else if (newY < 0 || newY > this.getWorld().getHeight()) {
-			// if the drone hits a top or bottom of the world, change heading and do not
-			// move out of bounds
-			setHeading((int) ((180 - getHeading()) % 360));
-			dx = this.getSpeed() * Math.cos(Math.toRadians(this.getHeading()));
-			dy = this.getSpeed() * Math.sin(Math.toRadians(this.getHeading()));
-		} else {
-			// move the drone to the new position
-			this.setX(newX);
-			this.setY(newY);
+			setHeading(360 - currentHeading);
+		//if the drone hits the top border of the world, change heading and do not move out of bounds.
+		} else if (newY < 0) {
+			setHeading(currentHeading < 90 ? 180 - currentHeading : (540 - currentHeading) % 360);
+		//if the drone hits the bottom border of the world, change heading and do not move out of bounds.
+		} else if (newY > this.getWorld().getHeight()){
+			setHeading(currentHeading <= 180 ? 180 - currentHeading : 540 - currentHeading);
 		}
+		locationBoundAdjust();
+		
+		this.setX(newX);
+		this.setY(newY);
 	}
 	
 	@Override

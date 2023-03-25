@@ -4,9 +4,11 @@ import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.CheckBox;
 import com.codename1.ui.Command;
 import com.codename1.ui.Component;
+import com.codename1.ui.ComponentImage;
 import com.codename1.ui.Container;
 import com.codename1.ui.Dialog;
 import com.codename1.ui.Form;
+import com.codename1.ui.Image;
 import com.codename1.ui.Label;
 import com.codename1.ui.TextField;
 import com.codename1.ui.Toolbar;
@@ -35,6 +37,10 @@ public class Game extends Form {
 		gw.addObserver(sv);
 		gw.addObserver(mv);
 		// play();
+		
+		// DEBUG VIEW ONLY
+		mv.createDebugMapviewImage();
+		
 		this.show();
 	}
 	
@@ -51,7 +57,7 @@ public class Game extends Form {
 		createBottomContainer();
 		createLeftContainer();
 		createRightContainer();
-		Container centerContainer = new Container();
+		Container centerContainer = mv;
 		centerContainer.getAllStyles().setBgTransparency(255);
 		centerContainer.getAllStyles().setBgColor(ColorUtil.LTGRAY);
 		centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.MAGENTA));

@@ -37,6 +37,7 @@ public class Movable extends GameObject {
         double deltaY = Math.sin(theta) * speed;
         setX(getX() + deltaX);
         setY(getY() + deltaY);
+        locationBoundAdjust();
     }
     
     public String toString() { 
@@ -44,5 +45,20 @@ public class Movable extends GameObject {
 		String myDesc = parentDesc + ", speed=" + speed + ", heading=" + heading;
 		return myDesc ; 
 	}
+    
+    protected void locationBoundAdjust() {
+    	if (getX() < 0) {
+    		setX(0);
+    	}
+    	if (getX() > getWorld().getWidth()) {
+    		setX(getWorld().getWidth());
+    	}
+    	if (getY() < 0) {
+    		setY(0);
+    	}
+    	if (getY() > getWorld().getHeight()) {
+    		setY(getWorld().getHeight());
+    	}
+    }
 }
 
