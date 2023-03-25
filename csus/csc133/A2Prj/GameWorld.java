@@ -84,8 +84,8 @@ public class GameWorld extends Observable {
 	}
 	
 	public void setDimensions(int height, int width) {
-		this.height = height;
-		this.width = width;
+		this.setHeight(height);
+		this.setWidth(width);
 	}
 
 	public void accelerate() {
@@ -98,6 +98,7 @@ public class GameWorld extends Observable {
 
 	public void tick() {
 		count++;
+		updateMoveableObjects();
 		setChanged();
 		notifyObservers(this);
 	}
@@ -134,6 +135,23 @@ public class GameWorld extends Observable {
 
 	public void exit() {
 		System.exit(0);
+	}
+	
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
 	}
 
 	public Robot getPlayerRobot() {
@@ -249,5 +267,15 @@ public class GameWorld extends Observable {
 		}
 
 		return countBases;
+	}
+	
+	private void updateMoveableObjects() {
+		IIterator it = goc.getIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof Movable) {
+				((Movable)go).move();
+			}
+		}
 	}
 }

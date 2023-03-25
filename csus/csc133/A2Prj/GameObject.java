@@ -25,7 +25,7 @@ public class GameObject {
 		return xPos;
 	}
 
-	public void setX(int x) {
+	public void setX(double x) {
 		xPos = x;
 	}
 
@@ -33,7 +33,7 @@ public class GameObject {
 		return yPos;
 	}
 
-	public void setY(int y) {
+	public void setY(double y) {
 		yPos = y;
 	}
 

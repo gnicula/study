@@ -2,6 +2,8 @@ package com.mycompany.a2;
 
 import java.util.Observable;
 import java.util.Observer;
+
+import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Container;
 import com.codename1.ui.Label;
 import com.codename1.ui.layouts.FlowLayout;
@@ -11,15 +13,24 @@ public class ScoreView extends Container implements Observer {
 	// Time, lives left, player last base reached, player energy level, damage
 	// level, sound
 
-	Label timeValue;
-	Label lifeValue;
-	Label lastBaseReachedValue;
-	Label playerEnergyValue;
-	Label playerDamageValue;
-	Label soundSettingValue;
-
-	public ScoreView() {
-		createUiElements();
+	private Label timeValue;
+	private Label lifeValue;
+	private Label lastBaseReachedValue;
+	private Label playerEnergyValue;
+	private Label playerDamageValue;
+	private Label soundSettingValue;
+	
+	public ScoreView(GameWorld gw) {
+		super();
+				
+		Robot playerRobot = gw.getPlayerRobot();
+		int timeStep = gw.getCount();
+		int livesLeft = gw.getLivesLeft();
+		int lastBase = playerRobot.getLastBaseReached();
+		int energyValue = playerRobot.getEnergyLevel();
+		int damageValue = playerRobot.getDamageLevel();
+		boolean soundSetting = gw.getSoundSetting();
+		createUiElements(timeStep, livesLeft, lastBase, energyValue, damageValue, soundSetting);
 	}
 
 	public void update(Observable o, Object arg) {
@@ -32,7 +43,12 @@ public class ScoreView extends Container implements Observer {
 		lastBaseReachedValue.setText(String.valueOf(playerRobot.getLastBaseReached()));
 		playerEnergyValue.setText(String.valueOf(playerRobot.getEnergyLevel()));
 		playerDamageValue.setText(String.valueOf(playerRobot.getDamageLevel()));
-		soundSettingValue.setText(String.valueOf(gw.getSoundSetting()));
+		boolean soundON = gw.getSoundSetting();
+		String soundLabelText = "ON";
+		if (!soundON) {
+			soundLabelText = "OFF";
+		}
+		soundSettingValue.setText(soundLabelText);
 		
 		if (gw.getLivesLeft() <= 0) {
 			System.out.println("Game over, you failed!");
@@ -41,31 +57,51 @@ public class ScoreView extends Container implements Observer {
 		
 	}
 
-	public void createUiElements() {
-		this.setLayout(new FlowLayout(CENTER));
+	public void createUiElements(int timeStep, int livesLeft, int lastBase, int energyValue, int damageValue, boolean soundSetting) {
+		FlowLayout myLayout = new FlowLayout(LEFT);
+		myLayout.setFillRows(true);
+		setLayout(myLayout);
+
 		Label timeText = new Label("Time:");
+		timeText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(timeText);
-		timeValue = new Label("0");
+		timeValue = new Label(String.valueOf(timeStep));
+		timeValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(timeValue);
+		
 		Label lifeText = new Label("Lives left:");
+		lifeText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(lifeText);
-		lifeValue = new Label("0");
+		lifeValue = new Label(String.valueOf(livesLeft));
+		lifeValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(lifeValue);
+
 		Label lastBaseReachedText = new Label("Player Last Base Reached:");
+		lastBaseReachedText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(lastBaseReachedText);
-		lastBaseReachedValue = new Label("1");
+		lastBaseReachedValue = new Label(String.valueOf(lastBase));
+		lastBaseReachedValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(lastBaseReachedValue);
+		
 		Label playerEnergyText = new Label("Player Energy Level:");
+		playerEnergyText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(playerEnergyText);
-		playerEnergyValue = new Label("15");
+		playerEnergyValue = new Label(String.valueOf(energyValue));
+		playerEnergyValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(playerEnergyValue);
+		
 		Label playerDamageText = new Label("Player Damage Level:");
+		playerDamageText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(playerDamageText);
-		playerDamageValue = new Label("0");
+		playerDamageValue = new Label(String.valueOf(damageValue));
+		playerDamageValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(playerDamageValue);
+		
 		Label soundSettingText = new Label("Sound:");
+		soundSettingText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(soundSettingText);
-		soundSettingValue = new Label("OFF");
+		soundSettingValue = new Label(soundSetting ? "ON" : "OFF");
+		soundSettingValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(soundSettingValue);
 	}
 }

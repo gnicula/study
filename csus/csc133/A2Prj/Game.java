@@ -25,12 +25,13 @@ public class Game extends Form {
 
 	public Game() {
 		gw = new GameWorld();
+		gw.init();
 		mv = new MapView();
-		sv = new ScoreView();
+		// Sending model for the initial values.
+		sv = new ScoreView(gw);
 
 		createGUI();
 		gw.setDimensions(mv.getHeight(), mv.getWidth());
-		gw.init();
 		gw.addObserver(sv);
 		gw.addObserver(mv);
 		// play();
@@ -45,7 +46,7 @@ public class Game extends Form {
 	private void createGUI() {
 		setLayout(new BorderLayout());
 		Container topContainer = sv;
-		topContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.YELLOW));
+		topContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.LTGRAY));
 		add(BorderLayout.NORTH, topContainer);
 		createBottomContainer();
 		createLeftContainer();
@@ -63,7 +64,8 @@ public class Game extends Form {
 		Toolbar myToolbar = new Toolbar();
 		setToolbar(myToolbar);
 		
-		TextField myTF = new TextField("Robo-Track Game");
+		Label myTF = new Label("Robo-Track Game");
+		myTF.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 0));
 		myToolbar.setTitleComponent(myTF);
 		
 		Command sideMenuItem1 = new AccelerateCommand("Accelerate", gw);
@@ -77,18 +79,13 @@ public class Game extends Form {
 		Command sideMenuItem3 = new AboutCommand("About", gw);
 		myToolbar.addCommandToSideMenu(sideMenuItem3);
 		
-		Command sideMenuItem4 = Command.create("Exit", null, new ActionListener(){
-			public void actionPerformed(ActionEvent evt) {
-				gw.exit();
-			} //actionPerformed
-		}); //new ActionListener()
+		Command sideMenuItem4 = new ExitDialogCommand("Exit", gw);
 		myToolbar.addCommandToSideMenu(sideMenuItem4);
 		
 		Command overflowMenuItem1 = new Command("Overflow Menu Item 1");
 		myToolbar.addCommandToOverflowMenu(overflowMenuItem1);
 		Command helpCommand = new HelpCommand("Help", gw);
 		myToolbar.addCommandToRightBar(helpCommand);
-		 
 	}
 
 	private void createLeftContainer() {
