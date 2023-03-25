@@ -39,7 +39,7 @@ public class Game extends Form {
 		// play();
 		
 		// DEBUG VIEW ONLY
-		mv.createDebugMapviewImage();
+		mv.createDebugMapviewImage(gw);
 		
 		this.show();
 	}

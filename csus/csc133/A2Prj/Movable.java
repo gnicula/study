@@ -32,6 +32,7 @@ public class Movable extends GameObject {
     
     // move method
     public void move() {
+    	System.out.println("Movable::move()\n");
         double theta = Math.toRadians(90 - heading);
         double deltaX = Math.cos(theta) * speed;
         double deltaY = Math.sin(theta) * speed;

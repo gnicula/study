@@ -12,51 +12,48 @@ import com.codename1.ui.Label;
 
 public class MapView extends Container implements Observer {
 
-	// DEBUG view only
-	private Label imgLabel;
-	private Graphics gDbg;
+	// DEBUG view of objects only
+	private MapViewLabel imgLabel;
 
 	public void update(Observable o, Object arg) {
-		// code here to call the method in GameWorld (Observable) that output the
-		// game object information to the console
-
+		// Call the method in GameWorld (Observable) that outputs the
+		// game object information to the console.
 		GameWorld gw = (GameWorld) o;
 		gw.mCommand();
 
 		// DEBUG view only
-//		gDbg.fillRect(200, 200, 200, 200);
-//		imgLabel.paintComponent(gDbg);
+		repaint();
 	}
 
-	// DEBUG view only
-	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
-
+	// DEBUG view of objects only
+	private class MapViewLabel extends Label {
+		private GameWorld gwo;
+		
+		public MapViewLabel(GameWorld gw) {
+			super();
+			gwo = gw;
+		}
+		
+		@Override
+		public void paint(Graphics g) {
+			// Set a light gray background 
+			g.setColor(0xeeeeee);
+			g.fillRect(getX(), getY(), getWidth(), getHeight());
+			// Now paint all objects as rectangles on the image
+			IIterator it = gwo.getGameObjectsIterator();
+			while (it.hasNext() ) {
+				GameObject go = it.getNext();
+				g.setColor(go.getColor());
+				g.fillRect((int)go.getX(), (int)go.getY(), go.getSize(), go.getSize());	
+			}
+		}
 	}
 
-	public void setGraphics(Graphics g) {
-		gDbg = g;
-		gDbg.setColor(ColorUtil.BLUE);
-	}
-
-	public void createDebugMapviewImage() {
+	public void createDebugMapviewImage(GameWorld gw) {
 		Image img = Image.createImage(getHeight(), getWidth());
-		imgLabel = new Label() {
-			@Override
-			public void paint(Graphics g) {
-			 // red color
-			 g.setColor(0xff0000);
-			 // paint the screen in red
-			 g.fillRect(getX(), getY(), getWidth(), getHeight());
-			 // draw hi world in white text at the top left corner of the screen
-			 g.setColor(0xffffff);
-			 g.drawString("Hi World", getX(), getY());
-			 }
-		};
-//		imgLabel.setIcon(img);
+		imgLabel = new MapViewLabel(gw);
+		imgLabel.setIcon(img);
 		add(imgLabel);
-//		setGraphics(img.getGraphics());
 	}
 
 }

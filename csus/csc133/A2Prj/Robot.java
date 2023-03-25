@@ -14,21 +14,20 @@ public class Robot extends Movable implements ISteerable {
 	private int energyLevel;
 	private int energyConsumptionRate;
 	// damage level is an int between 0-100.
-	private int damageLevel;
+	protected int damageLevel;
 	private int lastBaseReached;
 	private int lives;
 	
 	// Constructor
-	public Robot(int size, double x, double y, int color, int maximumSpeed, int energyLevel, int energyConsumptionRate,
+	public Robot(int size, double x, double y, int color, int speed, int maximumSpeed, int energyLevel, int energyConsumptionRate,
 			GameWorld world) {
-		super(size, x, y, color, energyConsumptionRate, energyConsumptionRate, world);
+		super(size, x, y, color, speed, energyConsumptionRate, world);
 		this.steeringDirection = 0;
 		this.maximumSpeed = maximumSpeed;
 		this.energyLevel = energyLevel;
 		this.energyConsumptionRate = energyConsumptionRate;
 		this.damageLevel = 0;
 		this.lastBaseReached = 1;
-		this.setSpeed(0);
 		this.setLives(3);
 	}
 
@@ -117,8 +116,11 @@ public class Robot extends Movable implements ISteerable {
 		if (damageLevel >= MAX_POSSIBLE_DAMAGE) {
 			if (lives > 0) {
 				--lives;
+				System.out.println("lives left = " + lives);
+				getWorld().reInitialize(lives);
 			} else {
-				System.out.println("Out of lives \n GAME OVER");
+				System.out.println("Game over, you failed!");
+				getWorld().exit();
 			}
 		}
 	}
@@ -129,6 +131,11 @@ public class Robot extends Movable implements ISteerable {
 
 	public void setLastBaseReached(int lastBaseReached) {
 		this.lastBaseReached = lastBaseReached;
+		
+		if (lastBaseReached == getWorld().getNumBases()) { 
+			System.out.println("Game over, you win! Total time: #" + getWorld().getCount());
+			getWorld().exit();
+		}
 	}
 
 	public String toString() {
@@ -139,7 +146,7 @@ public class Robot extends Movable implements ISteerable {
 		return myDesc;
 	}
 
-	private void setLives(int lives) {
+	public void setLives(int lives) {
 		this.lives = lives;
 	}
 
@@ -152,24 +159,28 @@ public class Robot extends Movable implements ISteerable {
 		if (energyLevel == 0) {
 			speed = 0;
 		}
-
+		System.out.println("Speed after adjustment: " + speed);
 		setSpeed(speed);
 
 	}
 
 
-    @Override
-    public void move() {
-    	super.move();
-        // Calculate the heading based on steeringDirection
-    	int newHeading = (getHeading() + steeringDirection + 360) % 360;
-        // Update the heading of the robot
-        setHeading(newHeading);
-        // Reduce the energy level based on energyConsumptionRate
-        setEnergyLevel(energyLevel - energyConsumptionRate);
-        // Check if the robot has reached a new base
+	@Override
+	public void move() {
+		System.out.println("Robot::move()\n");
+		// Reduce the energy level based on energyConsumptionRate
+		setEnergyLevel(Math.max(0, energyLevel - energyConsumptionRate));
+		if (energyLevel > 0) {
+			super.move();
+			// Calculate the heading based on steeringDirection
+			int newHeading = (getHeading() + steeringDirection + 360) % 360;
+			// Update the heading of the robot
+			setHeading(newHeading);
+		}
+		
+		// Check if the robot has reached a new base
 //        int currentBase = GameWorld.getInstance().getCurrentBase(this);
 //        if (currentBase > this.lastBaseReached)
-    }
+	}
 }
 

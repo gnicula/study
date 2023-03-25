@@ -16,7 +16,7 @@ public class Base extends Fixed {
 		return this.sequenceNumber;
 	}
 	
-	public void setSequenceNumber() {
+	public void setSequenceNumber(int sequenceNumber) {
 		this.sequenceNumber = sequenceNumber;
 	}
 	

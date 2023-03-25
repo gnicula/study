@@ -15,18 +15,20 @@ public class GameWorld extends Observable {
 	private boolean sound = false;
 	private int numBases = 0;
 
-	private GameObjectCollection goc = new GameObjectCollection();
+	private GameObjectCollection goc = null;
 
 	public void init() {
 
-		goc.add(new Base(8, 50, 50, ColorUtil.BLACK, this, 1));
-		goc.add(new Base(8, 100, 100, ColorUtil.BLACK, this, 2));
-		goc.add(new Base(8, 150, 150, ColorUtil.BLACK, this, 3));
-		goc.add(new Base(8, 200, 200, ColorUtil.BLACK, this, 4));
-		goc.add(new Base(8, 300, 300, ColorUtil.BLACK, this, 5));
+		goc = new GameObjectCollection();
 
-		goc.add(new EnergyStation(10, 20, 50, ColorUtil.GREEN, this));
-		goc.add(new EnergyStation(10, 70, 40, ColorUtil.GREEN, this));
+		goc.add(new Base(10, 50, 50, ColorUtil.BLACK, this, 1));
+		goc.add(new Base(10, 250, 50, ColorUtil.BLACK, this, 2));
+		goc.add(new Base(10, 450, 50, ColorUtil.BLACK, this, 3));
+		goc.add(new Base(10, 50, 250, ColorUtil.BLACK, this, 4));
+		goc.add(new Base(10, 50, 450, ColorUtil.BLACK, this, 5));
+
+		goc.add(new EnergyStation(10, 200, 200, ColorUtil.GREEN, this));
+		goc.add(new EnergyStation(10, 600, 300, ColorUtil.GREEN, this));
 
 		goc.add(new Drone(10, 75, 75, ColorUtil.BLUE, 20, 0, this));
 		goc.add(new Drone(10, 95, 95, ColorUtil.BLUE, 20, 0, this));
@@ -36,19 +38,19 @@ public class GameWorld extends Observable {
 		GameObject first = it.getNext();
 
 		// initialize 3 enemy non player robots.
-		NonPlayerRobot npr = new NonPlayerRobot(10, first.getX() + 50, first.getY() + 25, ColorUtil.MAGENTA, 25, 100, 1,
+		NonPlayerRobot npr = new NonPlayerRobot(10, first.getX() + 250, first.getY() + 25, ColorUtil.MAGENTA, 15, 25, 100, 1,
 				this);
-		npr.setStrategy(new NextBaseStrategy(npr));
-		goc.add(npr);
-		npr = new NonPlayerRobot(10, first.getX() + 35, first.getY() + 45, ColorUtil.MAGENTA, 25, 100, 1, this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(10, first.getX() + 60, first.getY() + 40, ColorUtil.MAGENTA, 25, 100, 1, this);
+		npr = new NonPlayerRobot(10, first.getX() + 35, first.getY() + 145, ColorUtil.MAGENTA, 20, 25, 100, 1, this);
+		npr.setStrategy(new AttackStrategy(npr));
+		goc.add(npr);
+		npr = new NonPlayerRobot(10, first.getX() + 160, first.getY() + 140, ColorUtil.MAGENTA, 25, 25, 100, 1, this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
 
 		// Player Robot will always be the last one initialized.
-		goc.add(new Robot(10, first.getX(), first.getY(), ColorUtil.CYAN, 30, 50, 2, this));
+		goc.add(new Robot(20, first.getX(), first.getY(), ColorUtil.argb(255, 200, 100, 255), 5, 30, 50, 2, this));
 
 		numBases = getNumBases();
 	}
@@ -137,7 +139,11 @@ public class GameWorld extends Observable {
 		System.exit(0);
 	}
 	
-
+	public void reInitialize(int livesLeft) {
+		init();
+		getPlayerRobot().setLives(livesLeft);
+	}
+	
 	public int getHeight() {
 		return height;
 	}
@@ -235,6 +241,23 @@ public class GameWorld extends Observable {
 			}
 		}
 	}
+	
+	public int getNumBases() {
+		int countBases = 0;
+		IIterator it = goc.getIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof Base) {
+				++countBases;
+			}
+		}
+
+		return countBases;
+	}
+
+	public IIterator getGameObjectsIterator() {
+		return goc.getIterator();
+	}
 
 	private void addRandomEnergyStation() {
 		Random rand = new Random();
@@ -256,19 +279,6 @@ public class GameWorld extends Observable {
 				ColorUtil.blue(currentColor)));
 	}
 
-	private int getNumBases() {
-		int countBases = 0;
-		IIterator it = goc.getIterator();
-		while (it.hasNext()) {
-			GameObject go = it.getNext();
-			if (go instanceof Base) {
-				++countBases;
-			}
-		}
-
-		return countBases;
-	}
-	
 	private void updateMoveableObjects() {
 		IIterator it = goc.getIterator();
 		while (it.hasNext()) {
