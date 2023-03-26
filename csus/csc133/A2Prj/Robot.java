@@ -1,11 +1,17 @@
 package com.mycompany.a2;
 
+// This is the player controlled Robot class.
+// It is moveable and steerable, and it is a singleton
+// which means there is going to be only one Robot object
+// throughout the program. 
 public class Robot extends Movable implements ISteerable {
 
+	// Instance to keep the singleton Robot object.
+	private static Robot robotInstance = null;
+	
 	private final int SPEED_INCREASE = 5;
 	private final int SPEED_DECREASE = 5;
-	private final int MAX_LEFT_DIRECTION = -40;
-	private final int MAX_RIGHT_DIRECTION = 40;
+	private final int MAX_STEERING_DIRECTION = 40;
 	private final int MAX_POSSIBLE_DAMAGE = 100;
 
 	// steeringDirection is the adjustment angle in degrees in range -40 to 40.
@@ -17,20 +23,50 @@ public class Robot extends Movable implements ISteerable {
 	protected int damageLevel;
 	private int lastBaseReached;
 	private int lives;
+	// Use the following attributes to memorize initial position and energy value.
+	// These are used for reinitializing after losing a life.
+	private double initialXLocation;
+	private double initialYLocation;
+	private int initialEnergyValue;
 	
 	// Constructor
-	public Robot(int size, double x, double y, int color, int speed, int maximumSpeed, int energyLevel, int energyConsumptionRate,
+	protected Robot(int size, double x, double y, int color, int speed, int maximumSpeed, int energyLevel, int energyConsumptionRate,
 			GameWorld world) {
 		super(size, x, y, color, speed, energyConsumptionRate, world);
-		this.steeringDirection = 0;
 		this.maximumSpeed = maximumSpeed;
 		this.energyLevel = energyLevel;
 		this.energyConsumptionRate = energyConsumptionRate;
+		this.steeringDirection = 0;
+		this.damageLevel = 0;
+		this.lastBaseReached = 1;	
+		this.lives = 3;
+		// For reinitializing with the same energy and position.
+		this.initialEnergyValue = energyLevel;
+		this.initialXLocation = x;
+		this.initialYLocation = y;
+	}
+	
+	// getInstance is the only way to create a Robot object and it will create it only once.
+	synchronized public static Robot getInstance(int size, double x, double y, int color, int speed, int maximumSpeed, int energyLevel, int energyConsumptionRate,
+			GameWorld world) {
+		if (robotInstance == null) {
+			robotInstance = new Robot(size, x, y, color, speed, maximumSpeed, energyLevel, energyConsumptionRate, world);
+		}
+		return robotInstance;
+	}
+	
+	// Robot gets reset to the first base and loses a life upon "dying".
+	public void reinitializeRobot() {
+		this.steeringDirection = 0;
 		this.damageLevel = 0;
 		this.lastBaseReached = 1;
-		this.setLives(3);
+		this.setSpeed(0);
+		this.setEnergyLevel(initialEnergyValue);
+		this.setX(initialXLocation);
+		this.setY(initialYLocation);
 	}
 
+	// Increases speed based on constant SPEED_INCREASE
 	public void accelerate() {
 		int speed = getSpeed();
 		speed += SPEED_INCREASE;
@@ -38,14 +74,13 @@ public class Robot extends Movable implements ISteerable {
 		adjustSpeed(speed);
 	}
 	
+	// Decreases speed based on constant SPEED_DECREASE
 	public void brake() {
 		int speed = getSpeed();
-		speed -= SPEED_DECREASE;
-		
+		speed -= SPEED_DECREASE;		
 		speed = Math.max(0, speed);
+		
 		setSpeed(speed);
-		System.out.println(speed);
-
 	}
 	
 	public int getLives() {
@@ -54,19 +89,13 @@ public class Robot extends Movable implements ISteerable {
 
 	// Methods for ISteerable interface
 	public void steerLeft() {
-		if (this.steeringDirection > -40) {
-			this.steeringDirection -= 5;
-			this.steeringDirection = Math.max(MAX_LEFT_DIRECTION, steeringDirection);
-		}
-
+		this.steeringDirection -= 5;
+		clampSteering();
 	}
 
 	public void steerRight() {
-		if (this.steeringDirection < 40) {
-			this.steeringDirection += 5;
-			this.steeringDirection = Math.min(MAX_RIGHT_DIRECTION, steeringDirection);
-
-		}
+		this.steeringDirection += 5;
+		clampSteering();
 	}
 
 	// Getter and setter methods
@@ -75,10 +104,8 @@ public class Robot extends Movable implements ISteerable {
 	}
 
 	public void setSteeringDirection(int steeringDirection) {
-		
-		steeringDirection = Math.min(MAX_RIGHT_DIRECTION, Math.max(MAX_LEFT_DIRECTION, steeringDirection));
-
 		this.steeringDirection = steeringDirection;
+		clampSteering();
 	}
 
 	public int getMaximumSpeed() {
@@ -117,7 +144,7 @@ public class Robot extends Movable implements ISteerable {
 			if (lives > 0) {
 				--lives;
 				System.out.println("lives left = " + lives);
-				getWorld().reInitialize(lives);
+				getWorld().reInitialize();
 			} else {
 				System.out.println("Game over, you failed!");
 				getWorld().exit();
@@ -138,11 +165,12 @@ public class Robot extends Movable implements ISteerable {
 		}
 	}
 
+	@Override
 	public String toString() {
 		String parentDesc = super.toString();
 		String myDesc = "Robot: " + parentDesc + ", Max Speed=" + maximumSpeed + ", steeringDirection="
 				+ steeringDirection + ", energyLevel=" + energyLevel + ", damageLevel=" + damageLevel
-				+ ", Last base reached=" + lastBaseReached + ", clock=" + getWorld().getCount() + ", lives=" + lives;
+				+ ", Last base reached=" + lastBaseReached + ", lives=" + lives;
 		return myDesc;
 	}
 
@@ -150,16 +178,16 @@ public class Robot extends Movable implements ISteerable {
 		this.lives = lives;
 	}
 
+	// Adjusts speed based on damage taken.
 	private void adjustSpeed(int speed) {
 
 		speed = Math.min(maximumSpeed, speed);
-
-		speed *= (100 - damageLevel) / 100;
+		speed = (int)((float)speed * ((100.0 - (float)damageLevel) / 100.0));
 
 		if (energyLevel == 0) {
 			speed = 0;
 		}
-		System.out.println("Speed after adjustment: " + speed);
+		// System.out.println("Speed after adjustment: " + speed);
 		setSpeed(speed);
 
 	}
@@ -167,20 +195,28 @@ public class Robot extends Movable implements ISteerable {
 
 	@Override
 	public void move() {
-		System.out.println("Robot::move()\n");
+		// System.out.println("Robot::move()\n");
 		// Reduce the energy level based on energyConsumptionRate
 		setEnergyLevel(Math.max(0, energyLevel - energyConsumptionRate));
 		if (energyLevel > 0) {
-			super.move();
 			// Calculate the heading based on steeringDirection
 			int newHeading = (getHeading() + steeringDirection + 360) % 360;
 			// Update the heading of the robot
-			setHeading(newHeading);
+			setHeading(newHeading);			
+			super.move();
+		} else {
+			System.out.println("Out of Energy, you lose a life.");
+			--lives;
+			getWorld().reInitialize();
 		}
 		
 		// Check if the robot has reached a new base
 //        int currentBase = GameWorld.getInstance().getCurrentBase(this);
 //        if (currentBase > this.lastBaseReached)
+	}
+	
+	private void clampSteering() {
+		this.steeringDirection = Math.min(MAX_STEERING_DIRECTION, Math.max(this.steeringDirection, -MAX_STEERING_DIRECTION));
 	}
 }
 

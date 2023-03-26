@@ -12,8 +12,10 @@ public class LeftCommand extends Command {
 		gw = world;
 	}
 
+	// This method is called by the 'Left' button on the left panel
+	// and dispatches to the model to perform the left steering input.
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Left");
+		// System.out.println("Left");
 		gw.turnLeft();
 	}
 }

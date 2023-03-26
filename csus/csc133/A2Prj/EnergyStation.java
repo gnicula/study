@@ -1,5 +1,6 @@
 package com.mycompany.a2;
 
+// Energy station is a Fixed object which additionally has an energy capacity.
 public class EnergyStation extends Fixed {
 	private int capacity;
 	

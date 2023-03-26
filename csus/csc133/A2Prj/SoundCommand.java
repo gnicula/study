@@ -12,6 +12,8 @@ public class SoundCommand extends Command {
 		gw = world;
 	}
 
+	// This method is called by the sound setting checkbox in the side menu.
+	// It then dispatches to the model to update the ScoreView.
 	public void actionPerformed(ActionEvent ev) {
 		CheckBox cb = (CheckBox)ev.getComponent();
 		gw.setSoundSetting(cb.isSelected());

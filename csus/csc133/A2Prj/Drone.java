@@ -26,7 +26,7 @@ public class Drone extends Movable {
 
 		int currentHeading = getHeading();
 		// check if the new position is within the world bounds
-		System.out.println("new X: " + newX + " new Y: " + newY + " width: " + getWorld().getWidth() + " height: " + getWorld().getHeight());
+		// System.out.println("Drone::move new X: " + newX + " new Y: " + newY + " width: " + getWorld().getWidth() + " height: " + getWorld().getHeight());
 		// if the drone hits the left side of the world, change heading and do not move out of bounds
 		if (newX < 0) {
 			setHeading(360 - currentHeading);
@@ -39,11 +39,10 @@ public class Drone extends Movable {
 		//if the drone hits the bottom border of the world, change heading and do not move out of bounds.
 		} else if (newY > this.getWorld().getHeight()){
 			setHeading(currentHeading <= 180 ? 180 - currentHeading : 540 - currentHeading);
-		}
-		locationBoundAdjust();
-		
+		}		
 		this.setX(newX);
 		this.setY(newY);
+		locationBoundAdjust();
 	}
 	
 	@Override
@@ -52,15 +51,4 @@ public class Drone extends Movable {
 		String myDesc = "Drone: " + parentDesc;
 		return myDesc;
 	}
-
-		// check if the drone is directly over a robot and cause damage to the robot if
-		// necessary
-//		for (Robots robot : this.getWorld().getRobots()) {
-//			if (robot.contains(this.getX(), this.getY())) {
-//				double damage = robot.getCollisionDamage() / 2;
-//				robot.takeDamage(damage);
-//				break;
-//			}
-//		}
-	//}
 }

@@ -5,6 +5,8 @@ import com.codename1.ui.Component;
 import com.codename1.ui.Dialog;
 import com.codename1.ui.events.ActionEvent;
 
+// This class creates an exit dialog with two buttons and exits if
+// 'Confirm' was pressed.
 public class ExitDialogCommand extends Command {
 	private GameWorld gw;
 

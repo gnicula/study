@@ -12,6 +12,7 @@ public class TickCommand extends Command {
 		gw = world;
 	}
 
+	// Calls tick() when 'Tick' is pressed in the bottom container.
 	public void actionPerformed(ActionEvent ev) {
 		gw.tick();
 	}

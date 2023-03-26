@@ -19,12 +19,18 @@ import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.layouts.FlowLayout;
 import com.codename1.ui.plaf.Border;
 
+// Game class acts like a view for the GameWorld model.
+// It creates all the GUI components and arranges them 
+// in a BorderLayout with 5 areas.
+// It also creates the toolbar and the side menu.
 public class Game extends Form {
 	private GameWorld gw;
 	private MapView mv;
 	private ScoreView sv;
 
-
+	// Constructor of Game creates and initializes the model and
+	// the views (MapView and ScoreView) and attaches them as
+	// observers to the model.
 	public Game() {
 		gw = new GameWorld();
 		gw.init();
@@ -33,22 +39,15 @@ public class Game extends Form {
 		sv = new ScoreView(gw);
 
 		createGUI();
-		gw.setDimensions(mv.getHeight(), mv.getWidth());
+//		gw.setDimensions(mv.getLayoutHeight(), mv.getLayoutWidth());
+		gw.setDimensions(1000, 1000);
 		gw.addObserver(sv);
 		gw.addObserver(mv);
-		// play();
-		
-		// DEBUG VIEW ONLY
-		mv.createDebugMapviewImage(gw);
 		
 		this.show();
 	}
-	
-	public void actionPerformed(ActionEvent evt) {
-		// TODO Auto-generated method stub
 
-	} // actionPerformed
-
+	// Creates all the GUI elements.
 	private void createGUI() {
 		setLayout(new BorderLayout());
 		Container topContainer = sv;
@@ -60,12 +59,12 @@ public class Game extends Form {
 		Container centerContainer = mv;
 		centerContainer.getAllStyles().setBgTransparency(255);
 		centerContainer.getAllStyles().setBgColor(ColorUtil.LTGRAY);
-		centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.MAGENTA));
+		centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255, 0, 0)));
 		add(BorderLayout.CENTER, centerContainer);
 		createToolbar();
-
 	}
 
+	// Creates a toolbar with a menu and labels as defined in the assignment.
 	private void createToolbar() {
 		Toolbar myToolbar = new Toolbar();
 		setToolbar(myToolbar);
@@ -88,12 +87,15 @@ public class Game extends Form {
 		Command sideMenuItem4 = new ExitDialogCommand("Exit", gw);
 		myToolbar.addCommandToSideMenu(sideMenuItem4);
 		
-		Command overflowMenuItem1 = new Command("Overflow Menu Item 1");
-		myToolbar.addCommandToOverflowMenu(overflowMenuItem1);
 		Command helpCommand = new HelpCommand("Help", gw);
 		myToolbar.addCommandToRightBar(helpCommand);
+
+		// DEBUG view of components
+		Command overflowMenuItem1 = new DebugMapViewCommand("Activate DEBUG view", mv, gw);
+		myToolbar.addCommandToOverflowMenu(overflowMenuItem1);
 	}
 
+	// Left container has three buttons in a vertical BoxLayout.
 	private void createLeftContainer() {
 		Container leftContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
 		leftContainer.getAllStyles().setPadding(Component.TOP, 100);
@@ -117,6 +119,7 @@ public class Game extends Form {
 		add(BorderLayout.WEST,leftContainer);
 	}
 	
+	// Right container has two buttons in a vertical BoxLayout.
 	private void createRightContainer() {
 		Container rightContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
 		rightContainer.getAllStyles().setPadding(Component.TOP, 100);
@@ -137,6 +140,8 @@ public class Game extends Form {
 		add(BorderLayout.EAST, rightContainer);
 	}
 	
+	// Bottom container has the collision simulation buttons as well the tick button.
+	// I used FlowLayout and custom buttons trying to fit the text of all the buttons.
 	private void createBottomContainer() {
 		Container bottomContainer = new Container(new FlowLayout(Component.CENTER));
 		
@@ -168,20 +173,4 @@ public class Game extends Form {
 		
 		add(BorderLayout.SOUTH, bottomContainer);
 	}
-
-	public static int createBaseCollisionDialog() {
-		Command cOk = new Command("Confirm");
-		Command cCancel = new Command("Cancel");
-		Command[] cmds = new Command[]{cOk, cCancel};
-		TextField myTF = new TextField();
-		Command c = Dialog.show("Enter Base number:", myTF, cmds);
-		int baseNum = 0;
-		if (c == cOk) {
-			baseNum = Integer.parseInt(myTF.getText());
-		} 
-		return baseNum;
-	}
-
-	// new ActionListener()
-// addActionListener
 }

@@ -1,6 +1,10 @@
 package com.mycompany.a2;
 
+// The 'Base' class implements basic methods and it has a toString() 
+// that builds the Base string representation on top of its 
+// inherited toString method.
 public class Base extends Fixed {
+	// Base objects are Fixed objects with a sequence number.
 	private int sequenceNumber;
 	
 	public Base(int size, double x, double y, int color, GameWorld w, int sequenceNumber) {
@@ -8,6 +12,7 @@ public class Base extends Fixed {
 		this.sequenceNumber = sequenceNumber;		
 	}
 	
+	@Override
 	public void setColor(int color) {
 		System.out.println("Color cannot be changed once set");
 	}

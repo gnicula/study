@@ -12,8 +12,10 @@ public class CollideWithNPRCommand extends Command {
 		gw = world;
 	}
 	
+	// Similar to the other 'collide' commands, this one
+	// dispatches to the corresponding method in the model.
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Collided with NPR");
+		// System.out.println("Collided with NPR");
 		gw.collideWithNPR();
 	}
 }

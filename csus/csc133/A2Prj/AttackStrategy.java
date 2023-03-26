@@ -8,7 +8,10 @@ public class AttackStrategy implements IStrategy {
 		npr = enemyRobot;
 	}
 	
+	// This strategy steers the non player robot towards 
+	// the player robot.
+	// The strategy is set to the NPR by the model.
 	public void apply() {
-		npr.moveTowardPlayerRobot();
+		npr.steerTowardPlayerRobot();
 	}
 }

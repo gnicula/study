@@ -12,6 +12,8 @@ public class StrategiesCommand extends Command {
 		gw = world;
 	}
 
+	// Calls changeStrategy when the 'change strategy' button is pushed 
+	// in the bottom container. 
 	public void actionPerformed(ActionEvent ev) {
 		gw.changeStrategy();
 	}

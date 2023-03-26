@@ -30,9 +30,9 @@ public class Movable extends GameObject {
         this.heading = heading;
     }
     
-    // move method
+    // Move method that all Movable objects derive.
     public void move() {
-    	System.out.println("Movable::move()\n");
+    	// System.out.println("Movable::move()\n");
         double theta = Math.toRadians(90 - heading);
         double deltaX = Math.cos(theta) * speed;
         double deltaY = Math.sin(theta) * speed;
@@ -47,6 +47,9 @@ public class Movable extends GameObject {
 		return myDesc ; 
 	}
     
+    // Makes sure that movable objects do not go out of bounds.
+    // It accomplishes this by resetting the specific out of bounds coordinate
+    // to the edge of the boundary. 
     protected void locationBoundAdjust() {
     	if (getX() < 0) {
     		setX(0);

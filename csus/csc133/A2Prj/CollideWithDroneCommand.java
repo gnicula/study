@@ -11,8 +11,9 @@ private GameWorld gw;
 		gw = world;
 	}
 	
+	// Called by the 'collide with a drone' button in the bottom container.
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Collided with Drone");
+		// System.out.println("Collided with Drone");
 		gw.collideWithDrone();
 	}
 }

@@ -8,8 +8,10 @@ public class NextBaseStrategy implements IStrategy {
 		npr = enemyRobot;
 	}
 	
+	// This is called by the invokeStrategy().
+	// It decouples the NPR GameObjects from the set of strategies they can have.
 	public void apply() {
-		npr.moveTowardNextBase();
+		npr.steerTowardNextBase();
 	}
 	
 }

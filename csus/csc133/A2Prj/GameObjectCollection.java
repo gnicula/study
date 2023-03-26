@@ -2,10 +2,17 @@ package com.mycompany.a2;
 
 import java.util.ArrayList;
 
+// As required by the assignment, I use my own implementation
+// of a collection class.
+// It uses a custom Iterator implemented as a private class.
 public class GameObjectCollection implements ICollection {
-	private ArrayList<GameObject> objectList;
-	private IIterator it;
 
+	private ArrayList<GameObject> objectList;
+
+	// Basic forward iterator that has its own index
+	// and does not use the Iterator of the Java ArrayList.
+	// Does not use generics because we know the only objects
+	// in this collection will be of the type 'GameObject'.
 	private class GameObjectIterator implements IIterator {
 
 		public int index = 0;
@@ -24,13 +31,10 @@ public class GameObjectCollection implements ICollection {
 		public void Reset() {
 			index = 0;
 		}
-
 	}
 
 	public GameObjectCollection() {
 		objectList = new ArrayList<GameObject>();
-
-		it = new GameObjectIterator();
 	}
 
 	public void add(GameObject go) {
@@ -47,8 +51,7 @@ public class GameObjectCollection implements ICollection {
 
 	public IIterator getIterator() {
 
-		it.Reset();
-		return it;
+		return new GameObjectIterator();
 	}
 
 	

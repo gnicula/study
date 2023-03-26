@@ -13,7 +13,7 @@ import com.codename1.ui.Label;
 public class MapView extends Container implements Observer {
 
 	// DEBUG view of objects only
-	private MapViewLabel imgLabel;
+	private MapViewLabel imgLabel = null;
 
 	public void update(Observable o, Object arg) {
 		// Call the method in GameWorld (Observable) that outputs the
@@ -22,7 +22,9 @@ public class MapView extends Container implements Observer {
 		gw.mCommand();
 
 		// DEBUG view only
-		repaint();
+		if (imgLabel != null) {
+			repaint();
+		}
 	}
 
 	// DEBUG view of objects only
@@ -37,8 +39,8 @@ public class MapView extends Container implements Observer {
 		@Override
 		public void paint(Graphics g) {
 			// Set a light gray background 
-			g.setColor(0xeeeeee);
-			g.fillRect(getX(), getY(), getWidth(), getHeight());
+			 g.setColor(ColorUtil.WHITE);
+			 g.fillRect(getX(), getY(), gwo.getWidth(), gwo.getHeight());
 			// Now paint all objects as rectangles on the image
 			IIterator it = gwo.getGameObjectsIterator();
 			while (it.hasNext() ) {
@@ -49,11 +51,15 @@ public class MapView extends Container implements Observer {
 		}
 	}
 
+	// Set up a debug view image that can be used to paint objects' location.
 	public void createDebugMapviewImage(GameWorld gw) {
-		Image img = Image.createImage(getHeight(), getWidth());
-		imgLabel = new MapViewLabel(gw);
-		imgLabel.setIcon(img);
-		add(imgLabel);
+		if (imgLabel == null) {
+			System.out.println("Create image of size: " + gw.getHeight() + ", " + gw.getWidth());
+			Image img = Image.createImage(gw.getHeight(), gw.getWidth());
+			imgLabel = new MapViewLabel(gw);
+			imgLabel.setIcon(img);
+			add(imgLabel);
+		}
 	}
 
 }

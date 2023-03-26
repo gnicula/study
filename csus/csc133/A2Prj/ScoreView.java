@@ -8,10 +8,11 @@ import com.codename1.ui.Container;
 import com.codename1.ui.Label;
 import com.codename1.ui.layouts.FlowLayout;
 
-public class ScoreView extends Container implements Observer {
-	// This class is the view class for displaying the game status.
+	//This class is the view class for displaying the game status.
 	// Time, lives left, player last base reached, player energy level, damage
 	// level, sound
+public class ScoreView extends Container implements Observer {
+	
 
 	private Label timeValue;
 	private Label lifeValue;
@@ -33,6 +34,7 @@ public class ScoreView extends Container implements Observer {
 		createUiElements(timeStep, livesLeft, lastBase, energyValue, damageValue, soundSetting);
 	}
 
+	// Updates passed Observable object with new values.
 	public void update(Observable o, Object arg) {
 		GameWorld gw = (GameWorld) o;
 		Robot playerRobot = gw.getPlayerRobot();
@@ -57,15 +59,15 @@ public class ScoreView extends Container implements Observer {
 		
 	}
 
+	// Creates the ScoreView UI to display related information.
 	public void createUiElements(int timeStep, int livesLeft, int lastBase, int energyValue, int damageValue, boolean soundSetting) {
 		FlowLayout myLayout = new FlowLayout(LEFT);
-		myLayout.setFillRows(true);
 		setLayout(myLayout);
 
 		Label timeText = new Label("Time:");
 		timeText.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(timeText);
-		timeValue = new Label(String.valueOf(timeStep));
+		timeValue = new Label("00" + String.valueOf(timeStep));
 		timeValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(timeValue);
 		
@@ -103,5 +105,8 @@ public class ScoreView extends Container implements Observer {
 		soundSettingValue = new Label(soundSetting ? "ON" : "OFF");
 		soundSettingValue.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 200));
 		this.add(soundSettingValue);
+
+		// Tell layout to use all space available?
+		myLayout.setFillRows(true);
 	}
 }

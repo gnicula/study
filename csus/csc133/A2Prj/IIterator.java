@@ -1,5 +1,6 @@
 package com.mycompany.a2;
 
+// Basic Iterator interface to implement a custom Iterator
 public interface IIterator {
 	public Boolean hasNext();
 		

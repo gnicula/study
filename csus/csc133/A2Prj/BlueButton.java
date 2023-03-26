@@ -7,7 +7,9 @@ import com.codename1.ui.geom.Dimension;
 import com.codename1.ui.plaf.Border;
 import com.codename1.ui.plaf.Style;
 
-
+// Custom Button class which defines how the 
+// buttons in the left, right, and bottom 
+// containers are styled
 public class BlueButton extends Button {
 
 	private void setBlueButtonUnselectedStyle() {

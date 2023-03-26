@@ -11,6 +11,8 @@ public class BrakeCommand extends Command {
 		gw = world;
 	}
 
+	// Brake button will trigger this action and we just dispatch
+	// it to the model.
 	public void actionPerformed(ActionEvent ev) {
 		System.out.println("Decreased Speed");
 		gw.brake();

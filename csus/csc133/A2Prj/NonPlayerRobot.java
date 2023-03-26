@@ -18,10 +18,12 @@ public class NonPlayerRobot extends Robot {
 		strategy = strat;
 	}
 	
+	// Applies the currently selected strategy to the NPR.
 	public void invokeStrategy() {
 		strategy.apply();
 	}
 	
+	// Changes between the two strategies currently implemented.
 	public void changeStrategy() {
 		if (strategy instanceof AttackStrategy) {
 			setStrategy(new NextBaseStrategy(this));
@@ -30,37 +32,27 @@ public class NonPlayerRobot extends Robot {
 		}
 	}
 
-	public void moveTowardNextBase() {
-		Base nextBase = getWorld().getNextBaseInSequence(getLastBaseReached());
-		System.out.println("Move toward next base " + nextBase);
+	// This strategy will look at the Player Robot's lastBaseReached + 1 and goes to guard that base.
+	public void steerTowardNextBase() {
+		Base nextBase = getWorld().getNextBaseInSequence(getWorld().getPlayerRobot().getLastBaseReached());
+		// System.out.println("Move toward next base " + nextBase);
 		double xBasePos = nextBase.getX();
 		double yBasePos = nextBase.getY();
 		
-		double a = xBasePos - this.getX();
-		double b = yBasePos - this.getY();
-		
-		double angleBRad = MathUtil.atan(a/b);
-		double angleBDegree = Math.toDegrees(angleBRad);
-		
-		setSteeringDirection((int)angleBDegree);
+		int newSteeringAngle = computeIdealSteeringAngle(xBasePos, yBasePos);
+		// System.out.println("NonPlayerRobot::steerTowardNextBase() " + newSteeringAngle + "\n");
+		setSteeringDirection(newSteeringAngle);
 	}
 
-	public void moveTowardPlayerRobot() {
-//		GameObject targetRobot = getWorld().getPlayerRobot();
-//		System.out.println("Move toward player robot " + targetRobot);
-//		double xTargetPos = targetRobot.getX();
-//		double yTargetPos = targetRobot.getY();
-		double xTargetPos = 1000;
-		double yTargetPos = 500;
-		
-		double a = xTargetPos - this.getX();
-		double b = yTargetPos - this.getY();
-		
-		double angleBRad = MathUtil.atan(a/b);
-		double angleBDegree = 180 - Math.toDegrees(angleBRad);
-		
-		System.out.println("NonPlayerRobot::setsteeringdir() " + angleBDegree + "\n");
-		setSteeringDirection((int)angleBDegree);
+	// This strategy will tell the NPR to go directly towards the Player Robot.
+	public void steerTowardPlayerRobot() {
+		GameObject targetRobot = getWorld().getPlayerRobot();
+		// System.out.println("Move toward player robot " + targetRobot);
+		double xTargetPos = targetRobot.getX();
+		double yTargetPos = targetRobot.getY();
+		int newSteeringAngle = computeIdealSteeringAngle(xTargetPos, yTargetPos);
+		// System.out.println("NonPlayerRobot::steerTowardPlayerRobot() " + newSteeringAngle + "\n");
+		setSteeringDirection(newSteeringAngle);
 	}
 	
 	@Override
@@ -68,11 +60,21 @@ public class NonPlayerRobot extends Robot {
 		this.damageLevel = damageLevel;
 	}
 	
+	// Overrides the move() from Player Robot because NPRs do not 
+	// run out of energy.
+	// They also use a strategy to automatically adjust their steering.
 	@Override
 	public void move() {
-		System.out.println("NonPlayerRobot::move()\n");
+		// System.out.println("NonPlayerRobot::move()\n");
+		
+		// The strategy will adjust the steering direction and set it. 
 		invokeStrategy();
 		if (damageLevel < NPR_MAX_POSSIBLE_DAMAGE) {
+			// Calculate the heading based on steeringDirection
+			int newHeading = (getHeading() + getSteeringDirection() + 360) % 360;
+			// Update the heading of the robot
+			setHeading(newHeading);
+
 			setEnergyLevel(Math.max(10, getEnergyLevel() - getEnergyConsumptionRate()));
 	        double theta = Math.toRadians(90 - getHeading());
 	        double deltaX = Math.cos(theta) * getSpeed();
@@ -81,10 +83,6 @@ public class NonPlayerRobot extends Robot {
 	        setY(getY() + deltaY);
 	        locationBoundAdjust();
 
-			// Calculate the heading based on steeringDirection
-			int newHeading = (getHeading() + getSteeringDirection() + 360) % 360;
-			// Update the heading of the robot
-			setHeading(newHeading);
 		}
 	}
 	
@@ -92,5 +90,29 @@ public class NonPlayerRobot extends Robot {
 		String parentDesc = super.toString();
 		String myDesc = "Non-Player  " + parentDesc + ", Strategy=" + strategy.toString();
 		return myDesc;
+	}
+	
+	// Computes the normalized difference between the ideal heading and the current heading.
+	// Then translates this difference into steering angles.
+	private int computeIdealSteeringAngle(double xTargetPos, double yTargetPos) {
+		double a = this.getX() - xTargetPos;
+		double b = this.getY() - yTargetPos;
+		
+		// First get the beta angle
+		double angleBDegree = Math.toDegrees(MathUtil.atan2(b, a));
+		// System.out.println("atan: " + angleBDegree);
+		// Find ideal heading (90 - beta)
+		int idealHeading = (int)(90.0 - angleBDegree);
+		// Compute and adjust steering
+		// IMPORTANT Do not pass values that have absolute value > 180
+		int steerAdjust = getHeading() - idealHeading;
+		if (steerAdjust > 180) {
+			steerAdjust %= 360;
+			steerAdjust -= 360;
+		} else if (steerAdjust < -180) {
+			steerAdjust %= 360;
+			steerAdjust += 360;
+		}
+		return steerAdjust;
 	}
 }

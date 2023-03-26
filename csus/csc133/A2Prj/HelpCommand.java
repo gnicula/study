@@ -4,6 +4,7 @@ import com.codename1.ui.Command;
 import com.codename1.ui.Dialog;
 import com.codename1.ui.events.ActionEvent;
 
+// This class opens up a dialog box with a list of key binds for commands.
 public class HelpCommand extends Command {
 	private GameWorld gw;
 

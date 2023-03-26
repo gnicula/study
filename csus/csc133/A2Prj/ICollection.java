@@ -1,7 +1,6 @@
 package com.mycompany.a2;
 
-import java.util.ArrayList;
-
+// Basic Iterable collection interface.
 public interface ICollection {
 	
 	public void add(GameObject go);
