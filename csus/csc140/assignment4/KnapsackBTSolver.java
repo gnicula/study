@@ -9,12 +9,13 @@ public class KnapsackBTSolver extends KnapsackBFSolver
 		super();
 	}
 
-	@Override
 	public void FindSolns(int itemNum)
 	{
-		// crntSoln.Print("BTSolver solution: \n");
-		// crntSoln.GetValue();
+		crntSoln.Print("BTSolver solution when itemNum is: " + String.valueOf(itemNum) + "\n");
+		int n = crntSoln.GetValue();
+		crntSoln.Print("BTSolver solution value is: " + String.valueOf(n) + "\n");
 		if (crntSoln.getWeight() > inst.GetCapacity()) {
+			crntSoln.Print("BTSolver solution weight is: " + String.valueOf(crntSoln.getWeight()) + "\n");
 			return;
 		}
 
@@ -25,11 +26,29 @@ public class KnapsackBTSolver extends KnapsackBFSolver
 			CheckCrntSoln();
 			return;
 		}
+
 		crntSoln.DontTakeItem(itemNum);
-		FindSolns(itemNum + 1);
+		this.FindSolns(itemNum + 1);
 		crntSoln.TakeItem(itemNum);
-		FindSolns(itemNum + 1);
+		this.FindSolns(itemNum + 1);
+		crntSoln.UndoTakeItem(itemNum);
 	}
+
+	// @Override
+	// public void FindSolns(int itemNum)
+	// {
+	// 	int itemCnt = inst.GetItemCnt();
+    
+	// 	if (itemNum == itemCnt + 1)
+	// 	{
+	// 		CheckCrntSoln();
+	// 		return;
+	// 	}
+	// 	crntSoln.DontTakeItem(itemNum);
+	// 	FindSolns(itemNum + 1);
+	// 	crntSoln.TakeItem(itemNum);
+	// 	FindSolns(itemNum + 1);
+	// }
 
 	// public void close()
 	// {

@@ -39,6 +39,30 @@ public class KnapsackInstance implements java.io.Closeable
 		cap = wghtSum/2;
 	}
 
+	// public void Generate()
+	// {
+	// 	int i;
+    //     int wghtSum;
+
+	// 	weights[0] = 0;
+	// 	values[0] = 0;
+
+	// 	weights[1] = 10;
+	// 	weights[2] = 10;
+	// 	// weights[3] = 10;
+
+	// 	values[1] = 30;
+	// 	values[2] = 20;
+	// 	// values[3] = 10;
+
+	// 	wghtSum = 0;
+	// 	for(i=1; i<= itemCnt; i++)
+	// 	{
+	// 		wghtSum += weights[i];
+	// 	}
+	// 	cap = 10;
+	// }
+
 	public int GetItemCnt()
 	{
 		return itemCnt;

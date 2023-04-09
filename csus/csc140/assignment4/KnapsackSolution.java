@@ -32,29 +32,29 @@ public class KnapsackSolution implements java.io.Closeable
 
 	public void TakeItem(int itemNum)
 	{
-		if (!isTaken[itemNum]) {
-			isTaken[itemNum] = true;
-			wght += inst.GetItemWeight(itemNum);
-			if (value == DefineConstants.INVALID_VALUE) {
-				value = inst.GetItemValue(itemNum);
-			} else {
-				value += inst.GetItemValue(itemNum);
-			}
+		isTaken[itemNum] = true;
+		wght += inst.GetItemWeight(itemNum);
+		if (value == DefineConstants.INVALID_VALUE) {
+			value = inst.GetItemValue(itemNum);
+		} else {
+			value += inst.GetItemValue(itemNum);
 		}
+	}
+
+	public void UndoTakeItem(int itemNum)
+	{
+		wght -= inst.GetItemWeight(itemNum);
+		value -= inst.GetItemValue(itemNum);
 	}
 
 	public void DontTakeItem(int itemNum)
 	{
-		if (isTaken[itemNum]) {
-			if (value == DefineConstants.INVALID_VALUE || wght == 0) {
-				throw new IllegalArgumentException("Invalid solution state.");
-			}
-
-			isTaken[itemNum] = false;
-			wght -= inst.GetItemWeight(itemNum);
+		isTaken[itemNum] = false;
+		if (value == DefineConstants.INVALID_VALUE) {
+			value = 0;
+		} else {
 			value -= inst.GetItemValue(itemNum);
 		}
-		untakenValue += inst.GetItemValue(itemNum);	
 	}
 
 	public int ComputeValue()
@@ -77,8 +77,11 @@ public class KnapsackSolution implements java.io.Closeable
 				value += inst.GetItemValue(i);
 			}
 		}
+
+		wght = weight;
 		return value;
 	}
+
 	public int GetValue()
 	{
 		return value;
