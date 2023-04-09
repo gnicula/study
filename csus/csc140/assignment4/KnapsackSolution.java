@@ -1,3 +1,4 @@
+import java.io.IOError;
 import java.util.*;
 
 public class KnapsackSolution implements java.io.Closeable
@@ -6,7 +7,8 @@ public class KnapsackSolution implements java.io.Closeable
 	private int value;
 	private int wght;
 	private KnapsackInstance inst;
-
+	private int untakenValue;
+	
 	public KnapsackSolution(KnapsackInstance inst_)
 	{
 		int i;
@@ -15,12 +17,14 @@ public class KnapsackSolution implements java.io.Closeable
 		inst = inst_;
 		isTaken = new boolean[itemCnt + 1];
 		value = DefineConstants.INVALID_VALUE;
+		wght = 0;
     
 		for (i = 1; i <= itemCnt; i++)
 		{
 			isTaken[i] = false;
 		}
 	}
+	
 	public void close()
 	{
 		isTaken = null;
@@ -28,12 +32,31 @@ public class KnapsackSolution implements java.io.Closeable
 
 	public void TakeItem(int itemNum)
 	{
-		isTaken[itemNum] = true;
+		if (!isTaken[itemNum]) {
+			isTaken[itemNum] = true;
+			wght += inst.GetItemWeight(itemNum);
+			if (value == DefineConstants.INVALID_VALUE) {
+				value = inst.GetItemValue(itemNum);
+			} else {
+				value += inst.GetItemValue(itemNum);
+			}
+		}
 	}
+
 	public void DontTakeItem(int itemNum)
 	{
-		isTaken[itemNum] = false;
+		if (isTaken[itemNum]) {
+			if (value == DefineConstants.INVALID_VALUE || wght == 0) {
+				throw new IllegalArgumentException("Invalid solution state.");
+			}
+
+			isTaken[itemNum] = false;
+			wght -= inst.GetItemWeight(itemNum);
+			value -= inst.GetItemValue(itemNum);
+		}
+		untakenValue += inst.GetItemValue(itemNum);	
 	}
+
 	public int ComputeValue()
 	{
 		int i;
@@ -60,6 +83,16 @@ public class KnapsackSolution implements java.io.Closeable
 	{
 		return value;
 	}
+
+	public int getWeight()
+	{
+		return wght;
+	}
+
+	public int getUntakenValue() {
+		return untakenValue;
+	}
+
 	public void Print(String title)
 	{
 		int i;
