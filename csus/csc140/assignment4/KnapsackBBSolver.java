@@ -16,28 +16,73 @@ public class KnapsackBBSolver extends KnapsackBFSolver
     
 	}
 
-	// public void FindSolns(int itemNum)
-	// {
-	// 	crntSoln.Print("BBSolver solution: \n");
+	public void FindSolnsUB1(int itemNum)
+	{
+		crntSoln.Print("BBSolver1 solution: \n");
 
-	// 	int itemCnt = inst.GetItemCnt();
+		int itemCnt = inst.GetItemCnt();
     
-	// 	if (itemNum == itemCnt + 1)
-	// 	{
-	// 		CheckCrntSoln();
-	// 		return;
-	// 	}
+		if (itemNum == itemCnt + 1)
+		{
+			CheckCrntSoln();
+			return;
+		}
 		
-	// 	if (totalSum - crntSoln.getUntakenValue() <= bestSoln.GetValue()) {
-	// 		return;
-	// 	}
-	// 	crntSoln.DontTakeItem(itemNum);
-	// 	FindSolns(itemNum + 1);
-	// 	crntSoln.TakeItem(itemNum);
-	// 	FindSolns(itemNum + 1);
-	// }
+		// If current best solution greater equal than the Upper Bound, stop.
+		if (totalSum - crntSoln.getUntakenValue() <= bestSoln.GetValue()) {
+			return;
+		}
+		crntSoln.DontTakeItem(itemNum);
+		FindSolnsUB1(itemNum + 1);
+		crntSoln.undoDontTakeItem(itemNum);
+		crntSoln.TakeItem(itemNum);
+		FindSolnsUB1(itemNum + 1);
+	}
 
-/* 
+	public void FindSolnsUB2(int itemNum) {
+		crntSoln.Print("BBSolver2 solution: \n");
+
+		int itemCnt = inst.GetItemCnt();
+    
+		if (itemNum == itemCnt + 1)
+		{
+			CheckCrntSoln();
+			return;
+		}
+		
+		if (crntSoln.GetValue() + crntSoln.sumOfUndecidedThatFit(itemNum) <= bestSoln.GetValue()) {
+			return;
+		}
+		crntSoln.DontTakeItem(itemNum);
+		FindSolnsUB2(itemNum + 1);
+		crntSoln.undoDontTakeItem(itemNum);
+		crntSoln.TakeItem(itemNum);
+		FindSolnsUB2(itemNum + 1);	
+		crntSoln.UndoTakeItem(itemNum);	
+	}
+
+	public void FindSolnsUB3(int itemNum) {
+		crntSoln.Print("BBSolver3 solution: \n");
+
+		int itemCnt = inst.GetItemCnt();
+    
+		if (itemNum == itemCnt + 1)
+		{
+			CheckCrntSoln();
+			return;
+		}
+		
+		if (crntSoln.GetValue() + inst.Fractional(itemNum, crntSoln.getRemainingCap()) <= bestSoln.GetValue()) {
+			return;
+		}
+		crntSoln.DontTakeItem(itemNum);
+		FindSolnsUB3(itemNum + 1);
+		crntSoln.undoDontTakeItem(itemNum);
+		crntSoln.TakeItem(itemNum);
+		FindSolnsUB3(itemNum + 1);
+		crntSoln.UndoTakeItem(itemNum);			
+	}
+
 	@Override
 	public void Solve(KnapsackInstance inst_, KnapsackSolution soln_)
 	{
@@ -50,7 +95,13 @@ public class KnapsackBBSolver extends KnapsackBFSolver
 		inst = inst_;
 		bestSoln = soln_;
 		crntSoln = new KnapsackSolution(inst);
-		FindSolns(1);
+		if (ub == UPPER_BOUND.UB1) {
+			FindSolnsUB1(1);
+		} else if (ub == UPPER_BOUND.UB2) {
+			FindSolnsUB2(1);
+		} else if (ub == UPPER_BOUND.UB3) {
+			FindSolnsUB3(1);
+		}
 	}
-*/
+
 }

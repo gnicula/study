@@ -6,6 +6,7 @@ public class KnapsackInstance implements java.io.Closeable
 	private int cap; //The capacity
 	private int[] weights; //An array of weights
 	private int[] values; //An array of values
+	private int[] sortedIndexesOfValuesPerWeight; 
 
 	public KnapsackInstance(int itemCnt_)
 	{
@@ -37,6 +38,8 @@ public class KnapsackInstance implements java.io.Closeable
 			wghtSum += weights[i];
 		}
 		cap = wghtSum/2;
+
+		setupSortedValuesPerWeight();
 	}
 
 	// public void Generate()
@@ -67,18 +70,62 @@ public class KnapsackInstance implements java.io.Closeable
 	{
 		return itemCnt;
 	}
+
 	public int GetItemWeight(int itemNum)
 	{
 		return weights[itemNum];
 	}
+
 	public int GetItemValue(int itemNum)
 	{
 		return values[itemNum];
 	}
+
+	public float GetItemValuePerWeight(int itemNum) {
+		return (float)(values[itemNum]) / weights[itemNum];
+	}
+
+	public int Fractional(int itemNum, int remainingCap) {
+		int bestSum = 0;
+		for (int i = 0; i < itemCnt; ++i) {
+			if (i > itemNum) {
+				if (weights[i] < remainingCap) {
+					bestSum += values[i];
+					remainingCap -= weights[i];
+				} else {
+					bestSum += (int)(Math.ceil(remainingCap * GetItemValuePerWeight(i)));
+					remainingCap = 0;
+				}
+				if (remainingCap == 0) {
+					break;
+				}
+			}
+		}
+		return bestSum;
+	}
+
 	public int GetCapacity()
 	{
 		return cap;
 	}
+
+	private void setupSortedValuesPerWeight() {
+		Map<Float, Integer> valuesToIndexes = new TreeMap<Float, Integer>();
+		for (int i = 1; i <= itemCnt; ++i) {
+			valuesToIndexes.put(GetItemValuePerWeight(i), i);
+		}
+	
+		int size = valuesToIndexes.size();
+		sortedIndexesOfValuesPerWeight = new int[size]; 
+		Collection<Integer> vT = valuesToIndexes.values();
+		int i = size - 1;
+		for (Integer ind: vT) {
+			sortedIndexesOfValuesPerWeight[i] = ind;
+			System.out.println("Sorted indexes: " + sortedIndexesOfValuesPerWeight[i]);
+			--i;
+		}
+	}
+ 
 	public void Print()
 	{
 		int i;

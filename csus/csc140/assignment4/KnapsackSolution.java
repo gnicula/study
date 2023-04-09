@@ -8,7 +8,8 @@ public class KnapsackSolution implements java.io.Closeable
 	private int wght;
 	private KnapsackInstance inst;
 	private int untakenValue;
-	
+	private int remainingCap;
+
 	public KnapsackSolution(KnapsackInstance inst_)
 	{
 		int i;
@@ -18,6 +19,9 @@ public class KnapsackSolution implements java.io.Closeable
 		isTaken = new boolean[itemCnt + 1];
 		value = DefineConstants.INVALID_VALUE;
 		wght = 0;
+		untakenValue = 0;
+		remainingCap = inst.GetCapacity();
+		System.out.println("Knapsack solution remaining cap: " + remainingCap);
     
 		for (i = 1; i <= itemCnt; i++)
 		{
@@ -39,22 +43,29 @@ public class KnapsackSolution implements java.io.Closeable
 		} else {
 			value += inst.GetItemValue(itemNum);
 		}
+		remainingCap -= inst.GetItemWeight(itemNum);
 	}
 
 	public void UndoTakeItem(int itemNum)
 	{
 		wght -= inst.GetItemWeight(itemNum);
 		value -= inst.GetItemValue(itemNum);
+		remainingCap += inst.GetItemWeight(itemNum);
 	}
 
 	public void DontTakeItem(int itemNum)
 	{
 		isTaken[itemNum] = false;
+		untakenValue += inst.GetItemValue(itemNum);
 		if (value == DefineConstants.INVALID_VALUE) {
 			value = 0;
 		} else {
-			value -= inst.GetItemValue(itemNum);
+			// value -= inst.GetItemValue(itemNum);
 		}
+	}
+
+	public void undoDontTakeItem(int itemNum) {
+		untakenValue -= inst.GetItemValue(itemNum);
 	}
 
 	public int ComputeValue()
@@ -94,6 +105,21 @@ public class KnapsackSolution implements java.io.Closeable
 
 	public int getUntakenValue() {
 		return untakenValue;
+	}
+
+	public int getRemainingCap() {
+		return remainingCap;
+	}
+
+	public int sumOfUndecidedThatFit(int itemNum) {
+		
+		int sum = 0;
+		for (int i = itemNum + 1; i <= inst.GetItemCnt(); ++i) {
+			if (inst.GetItemWeight(i) <= remainingCap) {
+				sum += inst.GetItemValue(i);
+			}
+		}
+		return sum;
 	}
 
 	public void Print(String title)
