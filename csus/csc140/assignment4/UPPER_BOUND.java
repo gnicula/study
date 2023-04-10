@@ -7,7 +7,8 @@ public enum UPPER_BOUND
 {
 	UB1,
 	UB2,
-	UB3;
+	UB3,
+	UBEXTRA;
 
 	public static final int SIZE = java.lang.Integer.SIZE;
 

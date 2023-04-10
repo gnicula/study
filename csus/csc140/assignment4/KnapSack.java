@@ -11,6 +11,7 @@ public class KnapSack
 		long BBTime1;
 		long BBTime2;
 		long BBTime3;
+		long BBTimeExtra;
 		float speedup;
 		int itemCnt;
 		KnapsackInstance inst; //a Knapsack instance object
@@ -20,6 +21,7 @@ public class KnapSack
 		KnapsackBBSolver BBSolver1 = new KnapsackBBSolver(UPPER_BOUND.UB1); //branch-and-bound solver with UB1
 		KnapsackBBSolver BBSolver2 = new KnapsackBBSolver(UPPER_BOUND.UB2); //branch-and-bound solver with UB2
 	    KnapsackBBSolver BBSolver3 = new KnapsackBBSolver(UPPER_BOUND.UB3); //branch-and-bound solver with UB3
+	    KnapsackBBSolver BBSolverExtra = new KnapsackBBSolver(UPPER_BOUND.UBEXTRA); //branch-and-bound solver with UB fast Fractional
 
 	    KnapsackSolution DPSoln;
 		KnapsackSolution BFSoln;
@@ -27,6 +29,7 @@ public class KnapSack
 		KnapsackSolution BBSoln1;
 		KnapsackSolution BBSoln2;
 		KnapsackSolution BBSoln3;
+		KnapsackSolution BBSolnExtra;
 
 		if (args.length != 1)
 		{
@@ -47,8 +50,12 @@ public class KnapSack
 		BBSoln1 = new KnapsackSolution(inst);
 		BBSoln2 = new KnapsackSolution(inst);
 		BBSoln3 = new KnapsackSolution(inst);
+		BBSolnExtra = new KnapsackSolution(inst);
 
 		inst.Generate();
+		// For debugging a specific testcase, uncomment below line and define
+		// the testcase in KnapsackInstance::GenerateDebug()
+		// inst.GenerateDebug();
 		inst.Print();
 
 		long  startTime = System.nanoTime();
@@ -122,12 +129,13 @@ public class KnapSack
 		}
 		speedup = (float)(BBTime1 == 0? 0 : 100.0 * (BFTime - BBTime1) / (float)BFTime);
 		System.out.printf("\nSpeedup of BB-UB1 relative to BF is"+speedup+"percent");
+		
 		startTime = System.nanoTime();
 		BBSolver2.Solve(inst,BBSoln2);
 		elapsed = System.nanoTime()-startTime;
 		BBTime2 = (Long)(elapsed/1000000);
 
-		System.out.printf("\n\nSolved using Branch and Bound enumeration in "+BBTime2 +"ms Optimal value = "+ BBSoln1.GetValue());
+		System.out.printf("\n\nSolved using Branch and Bound enumeration in "+BBTime2 +"ms Optimal value = "+ BBSoln2.GetValue());
 		if (itemCnt <= DefineConstants.MAX_SIZE_TO_PRINT)
 		{
 			BBSoln2.Print("BB-UB2 Solution");
@@ -148,7 +156,7 @@ public class KnapSack
 		elapsed = System.nanoTime()-startTime;
 		BBTime3 = (Long)(elapsed/1000000);
 
-		System.out.printf("\n\nSolved using Branch and Bound enumeration in "+BBTime3 +"ms Optimal value = "+ BBSoln1.GetValue());
+		System.out.printf("\n\nSolved using Branch and Bound enumeration in "+BBTime3 +"ms Optimal value = "+ BBSoln3.GetValue());
 		if (itemCnt <= DefineConstants.MAX_SIZE_TO_PRINT)
 		{
 			BBSoln3.Print("BB-UB3 Solution");
@@ -160,9 +168,35 @@ public class KnapSack
 		else
 		{
 			System.out.print("\nERROR: BF and BB-UB3 solutions mismatch");
+			BBSoln3.Print("BB-UB3 Solution");
+			BFSoln.Print("BF Solution");
 		}
 		speedup = (float)(BBTime3 == 0? 0 : 100.0 * (BFTime - BBTime3) / (float)BFTime);
 		System.out.printf("\nSpeedup of BB-UB3 relative to BF is"+speedup+"percent");
+
+		// Extra work - optimized version of UB3
+		startTime = System.nanoTime();
+		BBSolverExtra.Solve(inst,BBSolnExtra);
+		elapsed = System.nanoTime()-startTime;
+		BBTimeExtra = (Long)(elapsed/1000000);
+
+		System.out.printf("\n\nSolved using (EXTRA WORK) Branch and Bound enumeration in "+BBTimeExtra +"ms Optimal value = "+ BBSolnExtra.GetValue());
+		if (itemCnt <= DefineConstants.MAX_SIZE_TO_PRINT)
+		{
+			BBSolnExtra.Print("BB-UBEXTRA Solution");
+		}
+		if (BFSoln.equalsTo(BBSolnExtra))
+		{
+			System.out.print("\nSUCCESS: BF and BB-UBEXTRA solutions match");
+		}
+		else
+		{
+			System.out.print("\nERROR: BF and BB-UBEXTRA solutions mismatch");
+			BBSolnExtra.Print("BB-UBEXTRA Solution");
+			BFSoln.Print("BF Solution");
+		}
+		speedup = (float)(BBTimeExtra == 0? 0 : 100.0 * (BFTime - BBTimeExtra) / (float)BFTime);
+		System.out.printf("\nSpeedup of BB-UBEXTRA relative to BF is"+speedup+"percent");
 
 		inst = null;
 		DPSoln = null;
@@ -171,6 +205,7 @@ public class KnapSack
 		BBSoln1 = null;
 		BBSoln2 = null;
 		BBSoln3 = null;
+		BBSolnExtra = null;
 
 		System.out.print("\n\nProgram Completed Successfully\n");
 

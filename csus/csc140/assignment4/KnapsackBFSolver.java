@@ -21,24 +21,32 @@ public class KnapsackBFSolver implements java.io.Closeable
 			CheckCrntSoln();
 			return;
 		}
-		crntSoln.DontTakeItem(itemNum);
-		FindSolns(itemNum + 1);
+		
+		// crntSoln.DontTakeItem(itemNum);
+		// FindSolns(itemNum + 1);
+		// crntSoln.TakeItem(itemNum);
+		// FindSolns(itemNum + 1);
+
 		crntSoln.TakeItem(itemNum);
 		FindSolns(itemNum + 1);
+		crntSoln.DontTakeItem(itemNum);
+		FindSolns(itemNum + 1);
+
 	}
 
 	public void CheckCrntSoln()
 	{
 		int crntVal = crntSoln.ComputeValue();
-		System.out.print("\nChecking solution ");
-		crntSoln.Print(" ");
+		// System.out.print("\nChecking solution ");
+		// crntSoln.Print(" ");
 
 		if (crntVal == DefineConstants.INVALID_VALUE)
 		{
+			crntSoln.FixValue();
 			return;
 		}
-    
-		if (bestSoln.GetValue() == DefineConstants.INVALID_VALUE) //The first solution is initially the best solution
+     	//The first solution is initially the best solution
+		if (bestSoln.GetValue() == DefineConstants.INVALID_VALUE)
 		{
 			bestSoln.Copy(crntSoln);
 		}
@@ -58,6 +66,7 @@ public class KnapsackBFSolver implements java.io.Closeable
 			crntSoln = null;
 		}
 	}
+
 	public void Solve(KnapsackInstance inst_, KnapsackSolution soln_)
 	{
 		inst = inst_;

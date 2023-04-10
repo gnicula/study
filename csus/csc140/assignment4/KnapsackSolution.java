@@ -37,23 +37,25 @@ public class KnapsackSolution implements java.io.Closeable
 
 	public void TakeItem(int itemNum)
 	{
+		// System.out.print("Take " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
 		isTaken[itemNum] = true;
 		wght += inst.GetItemWeight(itemNum);
+		remainingCap -= inst.GetItemWeight(itemNum);
 		if (value == DefineConstants.INVALID_VALUE) {
 			value = inst.GetItemValue(itemNum);
 		} else {
 			value += inst.GetItemValue(itemNum);
 		}
-		remainingCap -= inst.GetItemWeight(itemNum);
+		// System.out.print("Take " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
 	}
 
 	public void UndoTakeItem(int itemNum)
 	{
-		System.out.print("UndoTake " + itemNum + " value " + value + "\n");
+		// System.out.print("UndoTake " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
 		wght -= inst.GetItemWeight(itemNum);
-		value -= inst.GetItemValue(itemNum);
 		remainingCap += inst.GetItemWeight(itemNum);
-		System.out.print("UndoTake " + itemNum + " value " + value + "\n");
+		value -= inst.GetItemValue(itemNum);
+		// System.out.print("UndoTake " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
 	}
 
 	public void DontTakeItem(int itemNum)
@@ -83,17 +85,31 @@ public class KnapsackSolution implements java.io.Closeable
 			if (isTaken[i] == true)
 			{
 				weight += inst.GetItemWeight(i);
-				if (weight > inst.GetCapacity())
-				{
-					value = DefineConstants.INVALID_VALUE;
-					break;
-				}
 				value += inst.GetItemValue(i);
 			}
 		}
+		if (weight > inst.GetCapacity())
+		{
+			value = DefineConstants.INVALID_VALUE;
+		}
 
 		wght = weight;
+		remainingCap = inst.GetCapacity() - weight;
 		return value;
+	}
+
+	public void FixValue()
+	{
+		int i;
+		int itemCnt = inst.GetItemCnt();
+		value = 0;
+		for (i = 1; i <= itemCnt; i++)
+		{
+			if (isTaken[i] == true)
+			{
+				value += inst.GetItemValue(i);
+			}
+		}
 	}
 
 	public int GetValue()
@@ -141,6 +157,7 @@ public class KnapsackSolution implements java.io.Closeable
 		System.out.printf("\nValue = %d\n",value);
     
 	}
+	
 	public void Copy(KnapsackSolution otherSoln)
 	{
 		int i;
@@ -152,6 +169,7 @@ public class KnapsackSolution implements java.io.Closeable
 		}
 		value = otherSoln.value;
 	}
+	
 	public boolean equalsTo (KnapsackSolution otherSoln)
 	{
 		return value == otherSoln.value;

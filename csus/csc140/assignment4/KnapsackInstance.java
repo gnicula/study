@@ -6,7 +6,9 @@ public class KnapsackInstance implements java.io.Closeable
 	private int cap; //The capacity
 	private int[] weights; //An array of weights
 	private int[] values; //An array of values
-	private int[] sortedIndexesOfValuesPerWeight; 
+	private int[] sortedIndexesOfValuesPerWeight;
+	// Extra work - add a table for FractionalFast computation
+	private int[][] fractionals;
 
 	public KnapsackInstance(int itemCnt_)
 	{
@@ -40,31 +42,27 @@ public class KnapsackInstance implements java.io.Closeable
 		cap = wghtSum/2;
 
 		setupSortedValuesPerWeight();
+		cacheFractionals();
 	}
 
-	// public void Generate()
-	// {
-	// 	int i;
-    //     int wghtSum;
+	// This method can be used to set up a specific input
+	// NOTE: there must be itemCnt weights and values and 0 at 0 index
+	public void GenerateDebug()
+	{
+		int[] debugWeights = new int[] {3, 45, 61, 77, 77};
+		int[] debugValues = new int[] {13, 55, 71, 87, 87};
+		weights[0] = 0;
+		values[0] = 0;
 
-	// 	weights[0] = 0;
-	// 	values[0] = 0;
+		for(int i=1; i<= itemCnt; ++i)
+		{
+			weights[i] = debugWeights[i-1];
+			values[i] = debugValues[i-1];
+		}
 
-	// 	weights[1] = 10;
-	// 	weights[2] = 10;
-	// 	// weights[3] = 10;
-
-	// 	values[1] = 30;
-	// 	values[2] = 20;
-	// 	// values[3] = 10;
-
-	// 	wghtSum = 0;
-	// 	for(i=1; i<= itemCnt; i++)
-	// 	{
-	// 		wghtSum += weights[i];
-	// 	}
-	// 	cap = 10;
-	// }
+		cap = 131;
+		setupSortedValuesPerWeight();
+	}
 
 	public int GetItemCnt()
 	{
@@ -82,13 +80,20 @@ public class KnapsackInstance implements java.io.Closeable
 	}
 
 	public float GetItemValuePerWeight(int itemNum) {
-		return (float)(values[itemNum]) / weights[itemNum];
+		if (weights[itemNum] > 0) {
+			return (float)(values[itemNum]) / weights[itemNum];	
+		}
+		return Float.MAX_VALUE;
 	}
 
+	// Uses sortedIndexesOfValuesPerWeight to get through the most
+	// 'valuable' items first when computing the Fractional value of
+	// the rest of the items starting at itemNum inclusive.
 	public int Fractional(int itemNum, int remainingCap) {
 		int bestSum = 0;
 		int rCap = remainingCap;
-		for (int j = 0; j < itemCnt; ++j) {
+		// System.out.print("Fractional rCap: " + rCap + "\n");
+		for (int j = 0; j < itemCnt && rCap >= 0; ++j) {
 			int i = sortedIndexesOfValuesPerWeight[j];
 			if (i >= itemNum) {
 				if (weights[i] <= rCap) {
@@ -97,13 +102,23 @@ public class KnapsackInstance implements java.io.Closeable
 				} else if (rCap > 0) {
 					bestSum += (int)(Math.ceil(rCap * GetItemValuePerWeight(i)));
 					rCap = 0;
-				}
-				if (rCap == 0) {
 					break;
 				}
+				// if (rCap == 0) {
+				// 	break;
+				// }
 			}
 		}
 		return bestSum;
+	}
+
+	public int FractionalFast(int itemNum, int remainingCap) {
+		int rCap = remainingCap;
+		if (rCap < 0) {
+			return 0;
+		}
+		// System.out.print("Fractional rCap: " + rCap + "\n");
+		return fractionals[itemNum][remainingCap];
 	}
 
 	public int GetCapacity()
@@ -111,23 +126,42 @@ public class KnapsackInstance implements java.io.Closeable
 		return cap;
 	}
 
+	// Basically an argsort - creates and stores and array of item ids sorted
+	// in the order of their corresponding value per weight from high to low.
 	private void setupSortedValuesPerWeight() {
-		Map<Float, Integer> valuesToIndexes = new TreeMap<Float, Integer>();
-		for (int i = 1; i <= itemCnt; ++i) {
-			valuesToIndexes.put(GetItemValuePerWeight(i), i);
+		sortedIndexesOfValuesPerWeight = new int[itemCnt];
+		
+		final Integer[] sorted_idx = new Integer[itemCnt];
+		final float[] value_per_weight = new float[itemCnt];
+		
+		for (int i=0; i<itemCnt; ++i) {
+			sorted_idx[i] = i+1;
+			value_per_weight[i] = GetItemValuePerWeight(i+1);
 		}
+
+		Arrays.sort(sorted_idx, new Comparator<Integer>() {
+			@Override public int compare(final Integer left, final Integer right) {
+				return Float.compare(value_per_weight[right-1], value_per_weight[left-1]);
+			}
+		});
 	
-		int size = valuesToIndexes.size();
-		sortedIndexesOfValuesPerWeight = new int[size]; 
-		Collection<Integer> vT = valuesToIndexes.values();
-		int i = size - 1;
-		for (Integer ind: vT) {
-			sortedIndexesOfValuesPerWeight[i] = ind;
-			System.out.println("Sorted indexes: " + sortedIndexesOfValuesPerWeight[i]);
-			--i;
+		System.out.print("Sorted items by value per weight: ");
+		for (int i=0; i<itemCnt; ++i) {
+			sortedIndexesOfValuesPerWeight[i] = sorted_idx[i];
+			System.out.print(sortedIndexesOfValuesPerWeight[i] + " ");
+		}
+		System.out.print("\n");
+	}
+
+	private void cacheFractionals() {
+		fractionals = new int[itemCnt+1][cap+1];
+		for (int i=1; i<=itemCnt; ++i) {
+			for (int j=0; j<=cap; ++j) {
+				fractionals[i][j] = Fractional(i, j);
+			}
 		}
 	}
- 
+
 	public void Print()
 	{
 		int i;
