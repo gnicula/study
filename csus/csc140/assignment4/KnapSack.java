@@ -21,7 +21,8 @@ public class KnapSack
 		KnapsackBBSolver BBSolver1 = new KnapsackBBSolver(UPPER_BOUND.UB1); //branch-and-bound solver with UB1
 		KnapsackBBSolver BBSolver2 = new KnapsackBBSolver(UPPER_BOUND.UB2); //branch-and-bound solver with UB2
 	    KnapsackBBSolver BBSolver3 = new KnapsackBBSolver(UPPER_BOUND.UB3); //branch-and-bound solver with UB3
-	    KnapsackBBSolver BBSolverExtra = new KnapsackBBSolver(UPPER_BOUND.UBEXTRA); //branch-and-bound solver with UB fast Fractional
+		 //branch-and-bound solver with UB3 fast Fractional and back tracking.
+	    KnapsackBBSolver BBSolverExtra = new KnapsackBBSolver(UPPER_BOUND.UBEXTRA);
 
 	    KnapsackSolution DPSoln;
 		KnapsackSolution BFSoln;
@@ -174,6 +175,12 @@ public class KnapSack
 		speedup = (float)(BBTime3 == 0? 0 : 100.0 * (BFTime - BBTime3) / (float)BFTime);
 		System.out.printf("\nSpeedup of BB-UB3 relative to BF is"+speedup+"percent");
 
+		DPSoln = null;
+		BTSoln = null;
+		BBSoln1 = null;
+		BBSoln2 = null;
+		BBSoln3 = null;
+
 		// Extra work - optimized version of UB3
 		startTime = System.nanoTime();
 		BBSolverExtra.Solve(inst,BBSolnExtra);
@@ -199,12 +206,7 @@ public class KnapSack
 		System.out.printf("\nSpeedup of BB-UBEXTRA relative to BF is"+speedup+"percent");
 
 		inst = null;
-		DPSoln = null;
 		BFSoln = null;
-		BTSoln = null;
-		BBSoln1 = null;
-		BBSoln2 = null;
-		BBSoln3 = null;
 		BBSolnExtra = null;
 
 		System.out.print("\n\nProgram Completed Successfully\n");

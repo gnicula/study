@@ -28,18 +28,19 @@ public class KnapsackBTSolver extends KnapsackBFSolver
 			return;
 		}
 
-		// crntSoln.DontTakeItem(itemNum);
-		// this.FindSolns(itemNum + 1);
-		// crntSoln.TakeItem(itemNum);
-		// this.FindSolns(itemNum + 1);
-		// crntSoln.UndoTakeItem(itemNum);
-
-		crntSoln.TakeItem(itemNum);
-		this.FindSolns(itemNum + 1);
-		crntSoln.UndoTakeItem(itemNum);
-		crntSoln.DontTakeItem(itemNum);
-		this.FindSolns(itemNum + 1);
-		
+		if (USE_DONT_TAKE_FIRST) {
+			crntSoln.DontTakeItem(itemNum);
+			this.FindSolns(itemNum + 1);
+			crntSoln.TakeItem(itemNum);
+			this.FindSolns(itemNum + 1);
+			crntSoln.UndoTakeItem(itemNum);
+		} else {
+			crntSoln.TakeItem(itemNum);
+			this.FindSolns(itemNum + 1);
+			crntSoln.UndoTakeItem(itemNum);
+			crntSoln.DontTakeItem(itemNum);
+			this.FindSolns(itemNum + 1);
+		}
 	}
 
 }

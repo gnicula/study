@@ -6,9 +6,11 @@ public class KnapsackInstance implements java.io.Closeable
 	private int cap; //The capacity
 	private int[] weights; //An array of weights
 	private int[] values; //An array of values
-	private int[] sortedIndexesOfValuesPerWeight;
+	// Fractional needs to pick most 'valuable' items.
+	// Keep sorted items by value per weight.
+	private final int[] sortedIndexesOfValuesPerWeight;
 	// Extra work - add a table for FractionalFast computation
-	private int[][] fractionals;
+	public int[][] fractionals;
 
 	public KnapsackInstance(int itemCnt_)
 	{
@@ -16,6 +18,8 @@ public class KnapsackInstance implements java.io.Closeable
 
 		weights = new int[itemCnt + 1];
 		values = new int[itemCnt + 1];
+
+		sortedIndexesOfValuesPerWeight = new int[itemCnt];
 		cap = 0;
 	}
 	public void close()
@@ -42,7 +46,7 @@ public class KnapsackInstance implements java.io.Closeable
 		cap = wghtSum/2;
 
 		setupSortedValuesPerWeight();
-		cacheFractionals();
+		precomputeFractionals();
 	}
 
 	// This method can be used to set up a specific input
@@ -79,6 +83,15 @@ public class KnapsackInstance implements java.io.Closeable
 		return values[itemNum];
 	}
 
+	public int GetAllItemsValue()
+	{
+		int totalValue = 0;
+		for (int i = 1; i <= GetItemCnt(); ++i) {
+			totalValue += GetItemValue(i);
+		}
+		return totalValue;
+	}
+
 	public float GetItemValuePerWeight(int itemNum) {
 		if (weights[itemNum] > 0) {
 			return (float)(values[itemNum]) / weights[itemNum];	
@@ -100,24 +113,27 @@ public class KnapsackInstance implements java.io.Closeable
 					bestSum += values[i];
 					rCap -= weights[i];
 				} else if (rCap > 0) {
-					bestSum += (int)(Math.ceil(rCap * GetItemValuePerWeight(i)));
+					// Floating point arithmetic: computes exact solution
+					// bestSum += (int)(Math.floor(rCap * GetItemValuePerWeight(i)));
+
+					// EXTRA WORK
+					// Avoid floating-point arithmetic and use integer arithmetic
+					// only in the Fractional Knapsack algorithm.
+					// First multiply remaining capacity with value of item and
+					// then do integer division.
+					bestSum += ((rCap * values[i]) / weights[i]);
 					rCap = 0;
 					break;
 				}
-				// if (rCap == 0) {
-				// 	break;
-				// }
 			}
 		}
 		return bestSum;
 	}
 
 	public int FractionalFast(int itemNum, int remainingCap) {
-		int rCap = remainingCap;
-		if (rCap < 0) {
+		if (remainingCap < 0) {
 			return 0;
 		}
-		// System.out.print("Fractional rCap: " + rCap + "\n");
 		return fractionals[itemNum][remainingCap];
 	}
 
@@ -129,8 +145,6 @@ public class KnapsackInstance implements java.io.Closeable
 	// Basically an argsort - creates and stores and array of item ids sorted
 	// in the order of their corresponding value per weight from high to low.
 	private void setupSortedValuesPerWeight() {
-		sortedIndexesOfValuesPerWeight = new int[itemCnt];
-		
 		final Integer[] sorted_idx = new Integer[itemCnt];
 		final float[] value_per_weight = new float[itemCnt];
 		
@@ -144,16 +158,13 @@ public class KnapsackInstance implements java.io.Closeable
 				return Float.compare(value_per_weight[right-1], value_per_weight[left-1]);
 			}
 		});
-	
-		System.out.print("Sorted items by value per weight: ");
+		// Store the sorted items by value/weight to use with Fractional.
 		for (int i=0; i<itemCnt; ++i) {
 			sortedIndexesOfValuesPerWeight[i] = sorted_idx[i];
-			System.out.print(sortedIndexesOfValuesPerWeight[i] + " ");
 		}
-		System.out.print("\n");
 	}
 
-	private void cacheFractionals() {
+	private void precomputeFractionals() {
 		fractionals = new int[itemCnt+1][cap+1];
 		for (int i=1; i<=itemCnt; ++i) {
 			for (int j=0; j<=cap; ++j) {
@@ -177,6 +188,11 @@ public class KnapsackInstance implements java.io.Closeable
 		{
 			System.out.printf("%d ",values[i]);
 		}
+		System.out.print("\nSorted by v/w: ");
+		for (i=0; i<itemCnt; ++i) {
+			System.out.print(sortedIndexesOfValuesPerWeight[i] + " ");
+		}
+		System.out.print("\nUsing USE_DONT_TAKE_FIRST: " + KnapsackBFSolver.USE_DONT_TAKE_FIRST);
 		System.out.print("\n");
 	}
 }

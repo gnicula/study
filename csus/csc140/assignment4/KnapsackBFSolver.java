@@ -3,9 +3,17 @@ import java.util.*;
 // Brute-force solver
 public class KnapsackBFSolver implements java.io.Closeable
 {
+	/**
+	 *
+	 */
 	protected KnapsackInstance inst;
 	protected KnapsackSolution crntSoln;
 	protected KnapsackSolution bestSoln;
+
+	// Constant to switch between TakeItem and DontTakeItem first
+	// If true, DontTakeItem will be used first in the recursion.
+	// Note: Used by all Solvers extending KnapsackBFSolver.
+	public static final boolean USE_DONT_TAKE_FIRST = false;
 
 	public KnapsackBFSolver()
 	{
@@ -22,15 +30,20 @@ public class KnapsackBFSolver implements java.io.Closeable
 			return;
 		}
 		
-		// crntSoln.DontTakeItem(itemNum);
-		// FindSolns(itemNum + 1);
-		// crntSoln.TakeItem(itemNum);
-		// FindSolns(itemNum + 1);
-
-		crntSoln.TakeItem(itemNum);
-		FindSolns(itemNum + 1);
-		crntSoln.DontTakeItem(itemNum);
-		FindSolns(itemNum + 1);
+		if (USE_DONT_TAKE_FIRST)
+		{
+			crntSoln.DontTakeItem(itemNum);
+			FindSolns(itemNum + 1);
+			crntSoln.TakeItem(itemNum);
+			FindSolns(itemNum + 1);
+		}
+		else
+		{
+			crntSoln.TakeItem(itemNum);
+			FindSolns(itemNum + 1);
+			crntSoln.DontTakeItem(itemNum);
+			FindSolns(itemNum + 1);
+		}
 
 	}
 

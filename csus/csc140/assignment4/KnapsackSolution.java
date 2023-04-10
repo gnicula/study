@@ -35,6 +35,7 @@ public class KnapsackSolution implements java.io.Closeable
 		isTaken = null;
 	}
 
+	// Update the current load 'wght', remaining capacity and value in θ(1) time at each node.
 	public void TakeItem(int itemNum)
 	{
 		// System.out.print("Take " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
@@ -49,6 +50,7 @@ public class KnapsackSolution implements java.io.Closeable
 		// System.out.print("Take " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
 	}
 
+	// Update the current load 'wght', remaining capacity and value in θ(1) time at each node.
 	public void UndoTakeItem(int itemNum)
 	{
 		// System.out.print("UndoTake " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
@@ -58,6 +60,7 @@ public class KnapsackSolution implements java.io.Closeable
 		// System.out.print("UndoTake " + itemNum + " value " + value + " rcap " + remainingCap + "\n");
 	}
 
+	// Update the current untaken value in θ(1) time for UB1.
 	public void DontTakeItem(int itemNum)
 	{
 		isTaken[itemNum] = false;
@@ -68,7 +71,8 @@ public class KnapsackSolution implements java.io.Closeable
 			// value -= inst.GetItemValue(itemNum);
 		}
 	}
-
+	
+	// Update the current untaken value in θ(1) time for UB1.
 	public void undoDontTakeItem(int itemNum) {
 		untakenValue -= inst.GetItemValue(itemNum);
 	}
@@ -130,6 +134,8 @@ public class KnapsackSolution implements java.io.Closeable
 		return remainingCap;
 	}
 
+	// Straightforward O(n) time per node implementation.
+	// Check all left undecided items that individually fit and compute sum.
 	public int sumOfUndecidedThatFit(int itemNum) {
 		
 		int sum = 0;
