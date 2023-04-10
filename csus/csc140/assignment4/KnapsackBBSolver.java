@@ -51,14 +51,23 @@ public class KnapsackBBSolver extends KnapsackBFSolver
 		}
 		
 		if (crntSoln.GetValue() + crntSoln.sumOfUndecidedThatFit(itemNum) <= bestSoln.GetValue()) {
+			System.out.print("Left side: " + crntSoln.GetValue() + " " + crntSoln.sumOfUndecidedThatFit(itemNum));
+			System.out.print("Right side: " + bestSoln.GetValue());
+			if (crntSoln.GetValue() == DefineConstants.INVALID_VALUE) {
+				CheckCrntSoln();
+			}
 			return;
 		}
 		crntSoln.DontTakeItem(itemNum);
 		FindSolnsUB2(itemNum + 1);
-		crntSoln.undoDontTakeItem(itemNum);
+		if (crntSoln.GetValue() != DefineConstants.INVALID_VALUE) {
+			crntSoln.undoDontTakeItem(itemNum);
+		}
 		crntSoln.TakeItem(itemNum);
 		FindSolnsUB2(itemNum + 1);	
-		crntSoln.UndoTakeItem(itemNum);	
+		if (crntSoln.GetValue() != DefineConstants.INVALID_VALUE) {
+			crntSoln.UndoTakeItem(itemNum);	
+		}
 	}
 
 	public void FindSolnsUB3(int itemNum) {
@@ -73,14 +82,20 @@ public class KnapsackBBSolver extends KnapsackBFSolver
 		}
 		
 		if (crntSoln.GetValue() + inst.Fractional(itemNum, crntSoln.getRemainingCap()) <= bestSoln.GetValue()) {
+			System.out.print("Left side: " + crntSoln.GetValue() + " " + inst.Fractional(itemNum, crntSoln.getRemainingCap()));
+			System.out.print("Right side: " + bestSoln.GetValue());
 			return;
 		}
 		crntSoln.DontTakeItem(itemNum);
 		FindSolnsUB3(itemNum + 1);
-		crntSoln.undoDontTakeItem(itemNum);
+		if (crntSoln.GetValue() != DefineConstants.INVALID_VALUE) {
+			crntSoln.undoDontTakeItem(itemNum);
+		}
 		crntSoln.TakeItem(itemNum);
 		FindSolnsUB3(itemNum + 1);
-		crntSoln.UndoTakeItem(itemNum);			
+		if (crntSoln.GetValue() != DefineConstants.INVALID_VALUE) {
+			crntSoln.UndoTakeItem(itemNum);
+		}
 	}
 
 	@Override

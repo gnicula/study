@@ -87,16 +87,18 @@ public class KnapsackInstance implements java.io.Closeable
 
 	public int Fractional(int itemNum, int remainingCap) {
 		int bestSum = 0;
-		for (int i = 0; i < itemCnt; ++i) {
-			if (i > itemNum) {
-				if (weights[i] < remainingCap) {
+		int rCap = remainingCap;
+		for (int j = 0; j < itemCnt; ++j) {
+			int i = sortedIndexesOfValuesPerWeight[j];
+			if (i >= itemNum) {
+				if (weights[i] <= rCap) {
 					bestSum += values[i];
-					remainingCap -= weights[i];
-				} else {
-					bestSum += (int)(Math.ceil(remainingCap * GetItemValuePerWeight(i)));
-					remainingCap = 0;
+					rCap -= weights[i];
+				} else if (rCap > 0) {
+					bestSum += (int)(Math.ceil(rCap * GetItemValuePerWeight(i)));
+					rCap = 0;
 				}
-				if (remainingCap == 0) {
+				if (rCap == 0) {
 					break;
 				}
 			}

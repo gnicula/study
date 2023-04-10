@@ -20,8 +20,9 @@ public class KnapsackSolution implements java.io.Closeable
 		value = DefineConstants.INVALID_VALUE;
 		wght = 0;
 		untakenValue = 0;
+		// NOTE: the KnapsackInstances passed to solutions constructors have 0 capacity
 		remainingCap = inst.GetCapacity();
-		System.out.println("Knapsack solution remaining cap: " + remainingCap);
+		// System.out.println("Knapsack solution remaining cap: " + remainingCap);
     
 		for (i = 1; i <= itemCnt; i++)
 		{
@@ -48,9 +49,11 @@ public class KnapsackSolution implements java.io.Closeable
 
 	public void UndoTakeItem(int itemNum)
 	{
+		System.out.print("UndoTake " + itemNum + " value " + value + "\n");
 		wght -= inst.GetItemWeight(itemNum);
 		value -= inst.GetItemValue(itemNum);
 		remainingCap += inst.GetItemWeight(itemNum);
+		System.out.print("UndoTake " + itemNum + " value " + value + "\n");
 	}
 
 	public void DontTakeItem(int itemNum)
@@ -114,7 +117,7 @@ public class KnapsackSolution implements java.io.Closeable
 	public int sumOfUndecidedThatFit(int itemNum) {
 		
 		int sum = 0;
-		for (int i = itemNum + 1; i <= inst.GetItemCnt(); ++i) {
+		for (int i = itemNum; i <= inst.GetItemCnt(); ++i) {
 			if (inst.GetItemWeight(i) <= remainingCap) {
 				sum += inst.GetItemValue(i);
 			}
