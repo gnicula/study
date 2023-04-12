@@ -37,7 +37,7 @@ public class CPUAssignment {
         private int heapSize, capacity;
 
         public ProcPriorityQueue_WithHeap(int cap, Comparator<ProcInfo> cmp) {
-            // For simplic
+            // For simplicity of parent <-> child index mapping head is at index 1.
             capacity = cap + 1;
             comp = cmp;
             heapSize = 0;
