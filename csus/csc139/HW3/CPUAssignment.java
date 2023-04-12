@@ -1,11 +1,12 @@
 import java.io.*;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.PriorityQueue;
 
 public class CPUAssignment {
 
-    public class ProcessInfo {
+    public class ProcInfo {
 
         protected int pid;
         protected int arrivalTime;
@@ -15,7 +16,7 @@ public class CPUAssignment {
         protected int waitTime;
         protected boolean isRunning;
 
-        public ProcessInfo(int pid, int arrivalTime, int burstTime, int priority) {
+        public ProcInfo(int pid, int arrivalTime, int burstTime, int priority) {
             this.pid = pid;
             this.arrivalTime = arrivalTime;
             this.burstTime = burstTime;
@@ -26,11 +27,13 @@ public class CPUAssignment {
         }
     }
 
-    class RRProcessComparator implements Comparator<ProcessInfo> {
+    class RRProcessComparator implements Comparator<ProcInfo> {
         @Override
-        public int compare(ProcessInfo p1, ProcessInfo p2) {
+        public int compare(ProcInfo p1, ProcInfo p2) {
             int diffArrival = p1.arrivalTime - p2.arrivalTime;
             if (diffArrival == 0) {
+                // Insert the new arrival at the end of the queue
+                // before inserting the process whose time quantum expired.
                 int diffRun = p1.runTime - p2.runTime;
                 if (diffRun == 0) {
                     return p1.pid - p2.pid;
@@ -41,44 +44,58 @@ public class CPUAssignment {
         }
     }
 
-    class ProcessShortestJobComparator implements Comparator<ProcessInfo> {
+    class SJFProcessComparator implements Comparator<ProcInfo> {
         @Override
-        public int compare(ProcessInfo o1, ProcessInfo o2) {
-            return (o1.burstTime - o1.runTime) - (o2.burstTime - o2.runTime);
+        public int compare(ProcInfo p1, ProcInfo p2) {
+            int diffBurst = p1.burstTime - p2.burstTime;
+            if (diffBurst == 0) {
+                int diffArrival = p1.arrivalTime - p2.arrivalTime;
+                if (diffArrival == 0) {
+                    return p1.pid - p2.pid;
+                }
+                return diffArrival;
+            }
+            return diffBurst;
         }
     }
 
-    private void roundRobin(PrintWriter output, LinkedList<ProcessInfo> pList,
-            int timeQuantum) {
-        LinkedList<ProcessInfo> finishedList = new LinkedList<ProcessInfo>();
-        PriorityQueue<ProcessInfo> processList = new PriorityQueue<ProcessInfo>(pList.size(), new RRProcessComparator());
+    private void roundRobin(PrintWriter output, LinkedList<ProcInfo> pList,
+            int timeQuant) {
+        LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
+        PriorityQueue<ProcInfo> processList = new PriorityQueue<ProcInfo>(pList.size(),
+                new RRProcessComparator());
         processList.addAll(pList);
 
-        output.println("RR " + timeQuantum);
+        // NOTE: Not sure if it's " " or "\t" between these in the testcases.
+        output.println("RR " + timeQuant);
         int cpuTime = 0;
+
         while (processList.size() > 0) {
             if (cpuTime < processList.element().arrivalTime) {
-                // CPU idling
+                // Simulate CPU idling with CPU fixed tick.
                 ++cpuTime;
                 continue;
             }
-            ProcessInfo currentProcess = processList.remove();
+            ProcInfo currentProcess = processList.remove();
             currentProcess.isRunning = true;
             output.printf("%d\t%d\n", cpuTime, currentProcess.pid);
 
             // Compute the cpuTime increase to next event.
-            int deltaTime = timeQuantum;
-            if (currentProcess.runTime + timeQuantum > currentProcess.burstTime) {
+            int deltaTime = timeQuant;
+            if (currentProcess.runTime + timeQuant > currentProcess.burstTime) {
                 deltaTime = currentProcess.burstTime - currentProcess.runTime;
             }
             // Update cpuTime and current process running time
             cpuTime += deltaTime;
             currentProcess.runTime += deltaTime;
             // Update waiting times.
-            for (ProcessInfo pi: processList) {
-                pi.waitTime += deltaTime;
+            for (ProcInfo pi : processList) {
+                if (pi.arrivalTime < cpuTime) {
+                    // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime -
+                    // pi.arrivalTime) + "\n");
+                    pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
+                }
             }
-
             // Process changes needed for event, ex. switch or finish processes.
             if (currentProcess.runTime < currentProcess.burstTime) {
                 // Interrupt current process and move to back of queue.
@@ -95,45 +112,80 @@ public class CPUAssignment {
         output.close();
     }
 
-    private void shortestJobFirst(PrintWriter outputwriter,
-            LinkedList<ProcessInfo> processList) {
-        int cpuTime = 0;
-        int processDoneCounter = 0;
-        System.out.println("SJF");
-        processList.sort(new RRProcessComparator());
-        LinkedList<ProcessInfo> activeProcesses = new LinkedList<ProcessInfo>();
+    private void shortestJobFirst(PrintWriter output,
+            LinkedList<ProcInfo> pList) {
+        LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
+        PriorityQueue<ProcInfo> processList = new PriorityQueue<ProcInfo>(pList.size(),
+                new SJFProcessComparator());
 
-        while (processDoneCounter < processList.size()) {
-            if (cpuTime == processList.getFirst().arrivalTime) {
-                activeProcesses.add(processList.getFirst());
-                processList.removeFirst();
-                activeProcesses.sort(new ProcessShortestJobComparator());
-            } else {
-                cpuTime++;
-                processList.getFirst();
+        output.println("SJF");
+        int cpuTime = 0;
+        while (pList.size() > 0 || processList.size() > 0) {
+            // First add all eligible processes to the current queue.
+            ListIterator<ProcInfo> iter = pList.listIterator();
+            while (iter.hasNext()) {
+                ProcInfo pi = iter.next();
+                if (pi.arrivalTime <= cpuTime) {
+                    pi.waitTime = cpuTime - pi.arrivalTime;
+                    processList.offer(pi);
+                    iter.remove();
+                }
             }
+            if (processList.size() == 0) {
+                // Simulate CPU idling.
+                ++cpuTime;
+                continue;
+            }
+            ProcInfo currentProcess = processList.remove();
+            currentProcess.isRunning = true;
+            output.printf("%d\t%d\n", cpuTime, currentProcess.pid);
+
+            // Compute the cpuTime increase to next event.
+            int deltaTime = currentProcess.burstTime;
+            // Update cpuTime and current process running time
+            cpuTime += deltaTime;
+            currentProcess.runTime += deltaTime;
+            // Update waiting times.
+            for (ProcInfo pi : processList) {
+                if (pi.arrivalTime < cpuTime) {
+                    // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime -
+                    // pi.arrivalTime) + "\n");
+                    // Note: For SJC this is always deltaTime because
+                    // cpuTime - pi.arrivalTime = deltaTime + eligibilityTime(>=0)
+                    pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
+                }
+            }
+            // Process changes needed for event, ex. switch or finish processes.
+            // SJC runs processes to completion so there's no switch.
+
+            // Current process always finished, remove from process list.
+            finishedList.addLast(currentProcess);
         }
+        float avgWait = CalcAvgWaitingTime(finishedList);
+        output.printf("AVG Waiting Time: %.2f\n", avgWait);
+        output.close();
+    }
+
+    // This can also be done based only on the input and output.
+    private float CalcAvgWaitingTime(LinkedList<ProcInfo> pInfoList) {
+        int sumTime = 0;
+        for (ProcInfo pi : pInfoList) {
+            sumTime += pi.waitTime;
+            // System.out.print("wait " + pi.pid + " " + pi.waitTime + "\n");
+        }
+        return (float) sumTime / pInfoList.size();
     }
 
     // One line per process with the following information:
     // Process number, Arrival Time, CPU burst time, Priority
-    private ProcessInfo parseToProcessInfo(String line) {
-        String[] splitLine = line.split(" ");
-        return new ProcessInfo(Integer.parseInt(splitLine[0]), Integer.parseInt(splitLine[1]),
-                Integer.parseInt(splitLine[2]), Integer.parseInt(splitLine[3]));
+    private ProcInfo parseToProcessInfo(String line) {
+        String[] spltLine = line.split(" ");
+        return new ProcInfo(Integer.parseInt(spltLine[0]), Integer.parseInt(spltLine[1]),
+                Integer.parseInt(spltLine[2]), Integer.parseInt(spltLine[3]));
     }
 
-    private float CalcAvgWaitingTime(LinkedList<ProcessInfo> pInfoList) {
-        int sumTime=0;
-        for(ProcessInfo pi: pInfoList) {
-            sumTime += pi.waitTime;
-            System.out.print("wait " + pi.pid + " " + pi.waitTime + "\n");
-        }
-        return (float)sumTime / pInfoList.size();
-    }
-
-    public void run(BufferedReader inputReader, PrintWriter outputWriter, String schedAlgo,
-            LinkedList<ProcessInfo> processList) {
+    public void run(PrintWriter outputWriter, String schedAlgo,
+            LinkedList<ProcInfo> processList) {
         if (schedAlgo.contains("RR")) {
             String[] splitAlgo = schedAlgo.split(" ");
             roundRobin(outputWriter, processList, Integer.valueOf(splitAlgo[1]));
@@ -150,21 +202,24 @@ public class CPUAssignment {
         try {
             // Program should read an input file named “input.txt” and write
             // the results into an output file named “output.txt”
-            File inputFile = new File("test_cases/input10.txt");
-            BufferedReader inputReader = new BufferedReader(new FileReader(inputFile));
+            BufferedReader inputReader = new BufferedReader(new FileReader("input.txt"));
             PrintWriter outputWriter = new PrintWriter("output.txt");
 
-            // Read the name of the scheduling algo
+            // Read the name of the scheduling algo and number of processes.
+            // Assume each comes on a new line.
             String schedAlgo = inputReader.readLine();
             int numOfProcesses = Integer.parseInt(inputReader.readLine());
-            LinkedList<ProcessInfo> processList = new LinkedList<CPUAssignment.ProcessInfo>();
+            LinkedList<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
 
-            CPUAssignment programm = new CPUAssignment();
+            CPUAssignment SingleCPU = new CPUAssignment();
 
             for (int i = 0; i < numOfProcesses; i++) {
-                processList.add(programm.parseToProcessInfo(inputReader.readLine()));
+                processList.add(SingleCPU.parseToProcessInfo(inputReader.readLine()));
             }
-            programm.run(inputReader, outputWriter, schedAlgo, processList);
+            inputReader.close();
+
+            SingleCPU.run(outputWriter, schedAlgo, processList);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
