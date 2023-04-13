@@ -1,10 +1,15 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
-// For extra work benchmarking
+// For extra work extra benchmarking
 import java.util.PriorityQueue;
+import java.util.Random;
 
+// BEGIN public class ProcInfo
 public class CPUAssignment {
 
     public class ProcInfo {
@@ -26,10 +31,12 @@ public class CPUAssignment {
             waitTime = 0;
             isRunning = false;
         }
-    }
+    
+    } // END public class ProcInfo
 
-    // This is a PQ implemented with heap structure maintained in an array
-    // parent -> [2 * parent, 2* parent +1]
+    // This is a PriorityQueue implemented with heap structure 
+    // maintained in an array so that children indexes are
+    // [2 * parent, 2* parent +1]
     class ProcPriorityQueue_WithHeap {
         private ProcInfo[] heap;
         // Needed for different scheduling comparison rules.
@@ -57,6 +64,7 @@ public class CPUAssignment {
             heapSize = 0;
         }
 
+        // O(1) - returns head
         public ProcInfo element() {
             if (isEmpty()) {
                 System.out.println("No elements, heap empty.");
@@ -75,6 +83,7 @@ public class CPUAssignment {
             return heap[index + 1];
         }
 
+        // Insertion: O(log(size))
         public void offer(ProcInfo pi) {
             heap[++heapSize] = pi;
             // Start from last element (the inserted one)
@@ -86,11 +95,11 @@ public class CPUAssignment {
             heap[pos] = pi;
         }
 
+        // Removal: O(log(size))
         public ProcInfo remove() {
-            int parent, child;
             ProcInfo item, temp;
             if (isEmpty()) {
-                System.out.println("Heap is empty");
+                System.out.println("No elements, heap empty.");
                 return null;
             }
             // Store the head and last element
@@ -99,8 +108,8 @@ public class CPUAssignment {
             --heapSize;
 
             // start from child of head
-            parent = 1;
-            child = 2;
+            int parent = 1;
+            int child = 2;
             while (child <= heapSize) {
                 if (child < heapSize && comp.compare(heap[child], heap[child + 1]) > 0) {
                     child++;
@@ -117,8 +126,62 @@ public class CPUAssignment {
 
             return item;
         }
-    }
+    } // END class ProcPriorityQueue_WithHeap
 
+    // Naive PriorityQueue implemented with unsorted array
+    // For extra work benchmark
+    class ProcPriorityQueue_UnsortedArray {
+        private ArrayList<ProcInfo> array;
+        // Needed for different scheduling comparison rules.
+        private Comparator<ProcInfo> comp;
+        private int capacity;
+
+        public ProcPriorityQueue_UnsortedArray(int cap, Comparator<ProcInfo> cmp) {
+            capacity = cap;
+            comp = cmp;
+            array = new ArrayList<ProcInfo>(capacity);
+        }
+
+        public boolean isEmpty() {
+            return array.isEmpty();
+        }
+
+        public int size() {
+            return array.size();
+        }
+
+        // O(size), linear
+        public ProcInfo element() {
+            if (isEmpty()) {
+                System.out.println("No elements, heap empty.");
+                return null;
+            }
+            return Collections.min(array, comp);
+        }
+
+        // Elements are not iterated in the comparing order.
+        public ProcInfo elementAt(int index) {
+            if (isEmpty()) {
+                System.out.println("No elements, heap empty.");
+                return null;
+            }
+            return array.get(index);
+        }
+
+        // O(1)
+        public void offer(ProcInfo pi) {
+            array.add(pi);
+        }
+
+        // O(size)
+        public ProcInfo remove() {
+            ProcInfo pi = element();
+            array.remove(pi);
+            return pi;
+        }
+    } // END class ProcPriorityQueue_UnsortedArray
+
+    //  Comparator for RR
     class RRProcessComparator implements Comparator<ProcInfo> {
         @Override
         public int compare(ProcInfo p1, ProcInfo p2) {
@@ -136,6 +199,7 @@ public class CPUAssignment {
         }
     }
 
+    // Comparator for SJF
     class SJFProcessComparator implements Comparator<ProcInfo> {
         @Override
         public int compare(ProcInfo p1, ProcInfo p2) {
@@ -151,7 +215,8 @@ public class CPUAssignment {
         }
     }
 
-    class PR_noPREMPProcessComparator implements Comparator<ProcInfo> {
+    // Comparator for PR, works for both versions
+    class PRProcessComparator implements Comparator<ProcInfo> {
         @Override
         public int compare(ProcInfo p1, ProcInfo p2) {
             int diffPriority = p1.priority - p2.priority;
@@ -162,7 +227,7 @@ public class CPUAssignment {
         }
     }
 
-    private void roundRobin(PrintWriter output, LinkedList<ProcInfo> pList,
+    private void roundRobin(PrintWriter output, List<ProcInfo> pList,
             int timeQuant) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
         // PriorityQueue<ProcInfo> processList = new
@@ -170,15 +235,22 @@ public class CPUAssignment {
         // new RRProcessComparator());
         ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
                 new RRProcessComparator());
-        for (ProcInfo pi : pList) {
-            processList.offer(pi);
-        }
 
         // NOTE: Not sure if it's " " or "\t" between these in the testcases.
         output.println("RR " + timeQuant);
         int cpuTime = 0;
 
-        while (processList.size() > 0) {
+        while (pList.size() > 0 || processList.size() > 0) {
+            // First add all eligible processes to the current queue.
+            ListIterator<ProcInfo> iter = pList.listIterator();
+            while (iter.hasNext()) {
+                ProcInfo pi = iter.next();
+                if (pi.arrivalTime <= cpuTime) {
+                    pi.waitTime = cpuTime - pi.arrivalTime;
+                    processList.offer(pi);
+                    iter.remove();
+                }
+            }
             if (cpuTime < processList.element().arrivalTime) {
                 // Simulate CPU idling with CPU fixed tick.
                 ++cpuTime;
@@ -222,7 +294,7 @@ public class CPUAssignment {
     }
 
     private void shortestJobFirst(PrintWriter output,
-            LinkedList<ProcInfo> pList) {
+            List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
         // PriorityQueue<ProcInfo> processList = new
         // PriorityQueue<ProcInfo>(pList.size(),
@@ -280,13 +352,13 @@ public class CPUAssignment {
     }
 
     private void PrioritySchedulingWithoutPreemption(PrintWriter output,
-            LinkedList<ProcInfo> pList) {
+            List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
         // PriorityQueue<ProcInfo> processList = new
         // PriorityQueue<ProcInfo>(pList.size(),
-        // new PR_noPREMPProcessComparator());
+        // new PRProcessComparator());
         ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
-                new PR_noPREMPProcessComparator());
+                new PRProcessComparator());
 
         output.println("PR_noPREMP");
         int cpuTime = 0;
@@ -336,11 +408,11 @@ public class CPUAssignment {
         output.close();
     }
 
-    private void PrioritySchedulingWithPreemption(PrintWriter output, LinkedList<ProcInfo> pList) {
+    private void PrioritySchedulingWithPreemption(PrintWriter output, List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
-        // PriorityQueue<ProcInfo> processList = new PriorityQueue<ProcInfo>(pList.size(), new PR_noPREMPProcessComparator());
+        // PriorityQueue<ProcInfo> processList = new PriorityQueue<ProcInfo>(pList.size(), new PRProcessComparator());
         ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
-                new PR_noPREMPProcessComparator());
+                new PRProcessComparator());
 
         output.println("PR_withPREMP");
         int cpuTime = 0;
@@ -399,7 +471,7 @@ public class CPUAssignment {
     }
 
     // This can also be done based only on the input and output.
-    private float CalcAvgWaitingTime(LinkedList<ProcInfo> pInfoList) {
+    private float CalcAvgWaitingTime(List<ProcInfo> pInfoList) {
         int sumTime = 0;
         for (ProcInfo pi : pInfoList) {
             sumTime += pi.waitTime;
@@ -417,7 +489,7 @@ public class CPUAssignment {
     }
 
     public void run(PrintWriter outputWriter, String schedAlgo,
-            LinkedList<ProcInfo> processList) {
+            List<ProcInfo> processList) {
         if (schedAlgo.contains("RR")) {
             String[] splitAlgo = schedAlgo.split(" ");
             roundRobin(outputWriter, processList, Integer.valueOf(splitAlgo[1]));
@@ -434,27 +506,57 @@ public class CPUAssignment {
         }
     }
 
+    // This method is used to generate input for extra work.
+    // It directly generates the process list for simplicity.
+    private List<ProcInfo> GenerateLargePR_withPREMPInput(int numProcs) {
+        List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
+        Random r = new Random(42);
+        for (int i=1; i<=numProcs; ++i) {
+            int pid = i;
+            int arrivalTime = r.nextInt(100);
+            int burstTime = r.nextInt(20);
+            int priority = r.nextInt(10);
+            processList.add(new ProcInfo(pid, arrivalTime, burstTime, priority));
+        }
+        return processList;
+    }
+    
     public static void main(String[] args) {
         try {
-            // Program should read an input file named “input.txt” and write
-            // the results into an output file named “output.txt”
-            BufferedReader inputReader = new BufferedReader(new FileReader("input.txt"));
+            List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
             PrintWriter outputWriter = new PrintWriter("output.txt");
-
-            // Read the name of the scheduling algo and number of processes.
-            // Assume each comes on a new line.
-            String schedAlgo = inputReader.readLine();
-            int numOfProcesses = Integer.parseInt(inputReader.readLine());
-            LinkedList<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
-
             CPUAssignment SingleCPU = new CPUAssignment();
+            String schedAlgo = new String();
+            boolean isExtraWork = false;
+            int numProcs = 20000;
 
-            for (int i = 0; i < numOfProcesses; i++) {
-                processList.add(SingleCPU.parseToProcessInfo(inputReader.readLine()));
+            // Check if we're doing Extra Work benchmarking
+            if (args.length > 0 && args[0].equals("-extra")) {
+                processList = SingleCPU.GenerateLargePR_withPREMPInput(numProcs);
+                schedAlgo = "PR_withPREMP";
+                isExtraWork = true;
+            } else {// Normal run on "./input.txt"
+                // Program should read an input file named “input.txt” and write
+                // the results into an output file named “output.txt”
+                BufferedReader inputReader = new BufferedReader(new FileReader("input.txt"));
+
+                // Read the name of the scheduling algo and number of processes.
+                // Assume each comes on a new line.
+                schedAlgo = inputReader.readLine();
+                int numOfProcesses = Integer.parseInt(inputReader.readLine());
+
+                for (int i = 0; i < numOfProcesses; i++) {
+                    processList.add(SingleCPU.parseToProcessInfo(inputReader.readLine()));
+                }
+                inputReader.close();
             }
-            inputReader.close();
 
+            long startTime = System.nanoTime();  
             SingleCPU.run(outputWriter, schedAlgo, processList);
+            long elapsed = (Long)((System.nanoTime()-startTime)/1000000);
+            if (isExtraWork) {
+                System.out.println("Run time: " + elapsed + "ms");
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

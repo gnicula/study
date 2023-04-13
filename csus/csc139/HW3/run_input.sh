@@ -1,5 +1,7 @@
 #!/bin/sh
 
+javac -Xlint CPUAssignment.java
+
 for i in `seq 1 15`
 do
     rm input.txt
