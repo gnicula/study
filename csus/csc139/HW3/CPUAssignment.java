@@ -526,10 +526,10 @@ public class CPUAssignment {
             CPUAssignment SingleCPU = new CPUAssignment();
             String schedAlgo = new String();
             boolean isExtraWork = false;
-            int numProcs = 20000;
+            int numProcs = 10000;
 
             // Check if we're doing Extra Work benchmarking
-            if (args.length > 0 && args[0].equals("-extra")) {
+            if (args != null && args.length > 0 && args[0].equals("-extra")) {
                 // Generate benchmark testcase and set algo to PR_withPREMP.
                 processList = SingleCPU.generateTestProcessList(numProcs);
                 schedAlgo = "PR_withPREMP";
@@ -557,7 +557,7 @@ public class CPUAssignment {
                 SingleCPU.run(outputWriter, schedAlgo, clonedProcessList, true);
                 // Nano to miliseconds
                 elapsed = (Long) ((System.nanoTime() - startTime) / 1000000);
-                System.out.println("Priority Queue with unsorted array: " + elapsed + "ms");
+                System.out.println("Priority Queue " + numProcs + " processes using unsorted array: " + elapsed + "ms");
             }
 
             // Run and benchmark the algorithm. Always runs with Priority Queue with heap.
@@ -567,7 +567,7 @@ public class CPUAssignment {
             elapsed = (Long) ((System.nanoTime() - startTime) / 1000000);
             
             if (isExtraWork) {
-                System.out.println("Priority Queue with heap time: " + elapsed + "ms");
+                System.out.println("Priority Queue " + numProcs + " processes using heap: " + elapsed + "ms");
             }
 
         } catch (IOException e) {
