@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-// For extra work extra benchmarking
-import java.util.PriorityQueue;
 import java.util.Random;
 
 // BEGIN public class ProcInfo
@@ -31,13 +29,38 @@ public class CPUAssignment {
             waitTime = 0;
             isRunning = false;
         }
-    
+
     } // END public class ProcInfo
 
-    // This is a PriorityQueue implemented with heap structure 
+    // Constructs a ProcInfo object from a line of text.
+    // One line per process with the following information:
+    // Process number, Arrival Time, CPU burst time, Priority
+    private ProcInfo parseToProcessInfo(String line) {
+        String[] spltLine = line.split(" ");
+        return new ProcInfo(Integer.parseInt(spltLine[0]), Integer.parseInt(spltLine[1]),
+                Integer.parseInt(spltLine[2]), Integer.parseInt(spltLine[3]));
+    }
+
+    // Common interface for Process Priority Queues.
+    // Used for simplyfying benchmarking code.
+    private interface ProcPriorityQueue {
+        public boolean isEmpty();
+
+        public int size();
+
+        public ProcInfo element();
+
+        public ProcInfo elementAt(int index);
+
+        public void offer(ProcInfo pi);
+
+        public ProcInfo remove();
+    }
+
+    // This is a PriorityQueue implemented with heap structure
     // maintained in an array so that children indexes are
     // [2 * parent, 2* parent +1]
-    class ProcPriorityQueue_WithHeap {
+    class ProcPriorityQueue_WithHeap implements ProcPriorityQueue {
         private ProcInfo[] heap;
         // Needed for different scheduling comparison rules.
         private Comparator<ProcInfo> comp;
@@ -57,11 +80,6 @@ public class CPUAssignment {
 
         public int size() {
             return heapSize;
-        }
-
-        public void clear() {
-            heap = new ProcInfo[capacity];
-            heapSize = 0;
         }
 
         // O(1) - returns head
@@ -130,7 +148,7 @@ public class CPUAssignment {
 
     // Naive PriorityQueue implemented with unsorted array
     // For extra work benchmark
-    class ProcPriorityQueue_UnsortedArray {
+    class ProcPriorityQueue_UnsortedArray implements ProcPriorityQueue {
         private ArrayList<ProcInfo> array;
         // Needed for different scheduling comparison rules.
         private Comparator<ProcInfo> comp;
@@ -181,8 +199,8 @@ public class CPUAssignment {
         }
     } // END class ProcPriorityQueue_UnsortedArray
 
-    //  Comparator for RR
-    class RRProcessComparator implements Comparator<ProcInfo> {
+    // Comparator for RR
+    class RRComparator implements Comparator<ProcInfo> {
         @Override
         public int compare(ProcInfo p1, ProcInfo p2) {
             int diffArrival = p1.arrivalTime - p2.arrivalTime;
@@ -200,7 +218,7 @@ public class CPUAssignment {
     }
 
     // Comparator for SJF
-    class SJFProcessComparator implements Comparator<ProcInfo> {
+    class SJFComparator implements Comparator<ProcInfo> {
         @Override
         public int compare(ProcInfo p1, ProcInfo p2) {
             int diffBurst = p1.burstTime - p2.burstTime;
@@ -216,7 +234,7 @@ public class CPUAssignment {
     }
 
     // Comparator for PR, works for both versions
-    class PRProcessComparator implements Comparator<ProcInfo> {
+    class PRComparator implements Comparator<ProcInfo> {
         @Override
         public int compare(ProcInfo p1, ProcInfo p2) {
             int diffPriority = p1.priority - p2.priority;
@@ -227,36 +245,69 @@ public class CPUAssignment {
         }
     }
 
+    // Helper method to simplify common code between scheduling algorithms
+    // Updates queued processes waiting time.
+    private void updateWaitingTime(int cpuTime, int deltaTime, ProcPriorityQueue processList) {
+        // Update waiting times.
+        for (int i = 0; i < processList.size(); ++i) {
+            ProcInfo pi = processList.elementAt(i);
+            if (pi.arrivalTime < cpuTime) {
+                // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime -
+                // pi.arrivalTime) + "\n");
+
+                // Note: For non preemptive algos this is always deltaTime because
+                // cpuTime - pi.arrivalTime = deltaTime + eligibilityTime(>=0)
+                pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
+            }
+        }
+    }
+
+    // Helper method that checks arrival times and updates
+    // the elligible, ready to run processes queue.
+    private void addArrivedProcesses(int cpuTime, List<ProcInfo> allProcesses, ProcPriorityQueue pQueue) {
+        ListIterator<ProcInfo> iter = allProcesses.listIterator();
+        while (iter.hasNext()) {
+            ProcInfo pi = iter.next();
+            if (pi.arrivalTime <= cpuTime) {
+                pi.waitTime = cpuTime - pi.arrivalTime;
+                pQueue.offer(pi);
+                iter.remove();
+            }
+        }
+    }
+
+    // Helper method to compute avg waiting time of a list of finished processes.
+    // This can also be done based only on the input and output.
+    private float CalcAvgWaitingTime(List<ProcInfo> pInfoList) {
+        int sumTime = 0;
+        for (ProcInfo pi : pInfoList) {
+            sumTime += pi.waitTime;
+            // System.out.print("wait " + pi.pid + " " + pi.waitTime + "\n");
+        }
+        return (float) sumTime / pInfoList.size();
+    }
+
+    // Scheduling Algorithm Round Robin
     private void roundRobin(PrintWriter output, List<ProcInfo> pList,
             int timeQuant) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
-        // PriorityQueue<ProcInfo> processList = new
-        // PriorityQueue<ProcInfo>(pList.size(),
-        // new RRProcessComparator());
-        ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
-                new RRProcessComparator());
+        ProcPriorityQueue processQueue = new ProcPriorityQueue_WithHeap(pList.size(),
+                new RRComparator());
 
         // NOTE: Not sure if it's " " or "\t" between these in the testcases.
         output.println("RR " + timeQuant);
         int cpuTime = 0;
 
-        while (pList.size() > 0 || processList.size() > 0) {
+        while (pList.size() > 0 || processQueue.size() > 0) {
             // First add all eligible processes to the current queue.
-            ListIterator<ProcInfo> iter = pList.listIterator();
-            while (iter.hasNext()) {
-                ProcInfo pi = iter.next();
-                if (pi.arrivalTime <= cpuTime) {
-                    pi.waitTime = cpuTime - pi.arrivalTime;
-                    processList.offer(pi);
-                    iter.remove();
-                }
-            }
-            if (cpuTime < processList.element().arrivalTime) {
+            addArrivedProcesses(cpuTime, pList, processQueue);
+            // Check if there's some process to execute.
+            if (processQueue.isEmpty()) {
                 // Simulate CPU idling with CPU fixed tick.
                 ++cpuTime;
                 continue;
             }
-            ProcInfo currentProcess = processList.remove();
+            ProcInfo currentProcess = processQueue.remove();
             currentProcess.isRunning = true;
             output.printf("%d\t%d\n", cpuTime, currentProcess.pid);
 
@@ -269,20 +320,13 @@ public class CPUAssignment {
             cpuTime += deltaTime;
             currentProcess.runTime += deltaTime;
             // Update waiting times.
-            for (int i = 0; i < processList.size(); ++i) {
-                ProcInfo pi = processList.elementAt(i);
-                if (pi.arrivalTime < cpuTime) {
-                    // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime -
-                    // pi.arrivalTime) + "\n");
-                    pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
-                }
-            }
+            updateWaitingTime(cpuTime, deltaTime, processQueue);
             // Process changes needed for event, ex. switch or finish processes.
             if (currentProcess.runTime < currentProcess.burstTime) {
                 // Interrupt current process and move to back of queue.
                 currentProcess.isRunning = false;
                 currentProcess.arrivalTime = cpuTime;
-                processList.offer(currentProcess);
+                processQueue.offer(currentProcess);
             } else {
                 // Current process finished, remove from process list.
                 finishedList.addLast(currentProcess);
@@ -291,31 +335,21 @@ public class CPUAssignment {
         float avgWait = CalcAvgWaitingTime(finishedList);
         output.printf("AVG Waiting Time: %.2f\n", avgWait);
         output.close();
-    }
+    } // END Scheduling Algorithm Round Robin
 
+    // Scheduling Shortest Job First
     private void shortestJobFirst(PrintWriter output,
             List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
-        // PriorityQueue<ProcInfo> processList = new
-        // PriorityQueue<ProcInfo>(pList.size(),
-        // new SJFProcessComparator());
-        ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
-                new SJFProcessComparator());
+        ProcPriorityQueue processList = new ProcPriorityQueue_WithHeap(pList.size(),
+                new SJFComparator());
 
         output.println("SJF");
         int cpuTime = 0;
         while (pList.size() > 0 || processList.size() > 0) {
             // First add all eligible processes to the current queue.
-            ListIterator<ProcInfo> iter = pList.listIterator();
-            while (iter.hasNext()) {
-                ProcInfo pi = iter.next();
-                if (pi.arrivalTime <= cpuTime) {
-                    pi.waitTime = cpuTime - pi.arrivalTime;
-                    processList.offer(pi);
-                    iter.remove();
-                }
-            }
-            if (processList.size() == 0) {
+            addArrivedProcesses(cpuTime, pList, processList);
+            if (processList.isEmpty()) {
                 // Simulate CPU idling.
                 ++cpuTime;
                 continue;
@@ -330,16 +364,7 @@ public class CPUAssignment {
             cpuTime += deltaTime;
             currentProcess.runTime += deltaTime;
             // Update waiting times.
-            for (int i = 0; i < processList.size(); ++i) {
-                ProcInfo pi = processList.elementAt(i);
-                if (pi.arrivalTime < cpuTime) {
-                    // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime -
-                    // pi.arrivalTime) + "\n");
-                    // Note: For SJC this is always deltaTime because
-                    // cpuTime - pi.arrivalTime = deltaTime + eligibilityTime(>=0)
-                    pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
-                }
-            }
+            updateWaitingTime(cpuTime, deltaTime, processList);
             // Process changes needed for event, ex. switch or finish processes.
             // SJC runs processes to completion so there's no switch.
 
@@ -349,31 +374,21 @@ public class CPUAssignment {
         float avgWait = CalcAvgWaitingTime(finishedList);
         output.printf("AVG Waiting Time: %.2f\n", avgWait);
         output.close();
-    }
+    } // END Scheduling Shortest Job First
 
+    // Scheduling algorithm Priority Scheduling No Preemption
     private void PrioritySchedulingWithoutPreemption(PrintWriter output,
             List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
-        // PriorityQueue<ProcInfo> processList = new
-        // PriorityQueue<ProcInfo>(pList.size(),
-        // new PRProcessComparator());
-        ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
-                new PRProcessComparator());
+        ProcPriorityQueue processList = new ProcPriorityQueue_WithHeap(pList.size(),
+                new PRComparator());
 
         output.println("PR_noPREMP");
         int cpuTime = 0;
         while (pList.size() > 0 || processList.size() > 0) {
             // First add all eligible processes to the current queue.
-            ListIterator<ProcInfo> iter = pList.listIterator();
-            while (iter.hasNext()) {
-                ProcInfo pi = iter.next();
-                if (pi.arrivalTime <= cpuTime) {
-                    pi.waitTime = cpuTime - pi.arrivalTime;
-                    processList.offer(pi);
-                    iter.remove();
-                }
-            }
-            if (processList.size() == 0) {
+            addArrivedProcesses(cpuTime, pList, processList);
+            if (processList.isEmpty()) {
                 // Simulate CPU idling.
                 ++cpuTime;
                 continue;
@@ -388,15 +403,7 @@ public class CPUAssignment {
             cpuTime += deltaTime;
             currentProcess.runTime += deltaTime;
             // Update waiting times.
-            for (int i = 0; i < processList.size(); ++i) {
-                ProcInfo pi = processList.elementAt(i);
-                if (pi.arrivalTime < cpuTime) {
-                    // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime - pi.arrivalTime) + "\n");
-                    // Note: For non preemptive algos this is always deltaTime because
-                    // cpuTime - pi.arrivalTime = deltaTime + eligibilityTime(>=0)
-                    pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
-                }
-            }
+            updateWaitingTime(cpuTime, deltaTime, processList);
             // Process changes needed for event, ex. switch or finish processes.
             // SJC runs processes to completion so there's no switch.
 
@@ -406,29 +413,21 @@ public class CPUAssignment {
         float avgWait = CalcAvgWaitingTime(finishedList);
         output.printf("AVG Waiting Time: %.2f\n", avgWait);
         output.close();
-    }
+    } // END Scheduling algorithm Priority Scheduling No Preemption
 
+    // Scheduling algorithm Priority Scheduling With Preemption
     private void PrioritySchedulingWithPreemption(PrintWriter output, List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
-        // PriorityQueue<ProcInfo> processList = new PriorityQueue<ProcInfo>(pList.size(), new PRProcessComparator());
-        ProcPriorityQueue_WithHeap processList = new ProcPriorityQueue_WithHeap(pList.size(),
-                new PRProcessComparator());
+        ProcPriorityQueue processList = new ProcPriorityQueue_WithHeap(pList.size(),
+                new PRComparator());
 
         output.println("PR_withPREMP");
         int cpuTime = 0;
         int lastPid = -1;
         while (pList.size() > 0 || processList.size() > 0) {
             // First add all eligible processes to the current queue.
-            ListIterator<ProcInfo> iter = pList.listIterator();
-            while (iter.hasNext()) {
-                ProcInfo pi = iter.next();
-                if (pi.arrivalTime <= cpuTime) {
-                    pi.waitTime = cpuTime - pi.arrivalTime;
-                    processList.offer(pi);
-                    iter.remove();
-                }
-            }
-            if (processList.size() == 0) {
+            addArrivedProcesses(cpuTime, pList, processList);
+            if (processList.isEmpty()) {
                 // Simulate CPU idling.
                 ++cpuTime;
                 continue;
@@ -446,14 +445,8 @@ public class CPUAssignment {
             cpuTime += deltaTime;
             currentProcess.runTime += deltaTime;
             // Update waiting times.
-            for (int i = 0; i < processList.size(); ++i) {
-                ProcInfo pi = processList.elementAt(i);
-                if (pi.arrivalTime < cpuTime) {
-                    // System.out.print(cpuTime + " add wait " + pi.pid + " " + (cpuTime -
-                    // pi.arrivalTime) + "\n");
-                    pi.waitTime += Math.min(cpuTime - pi.arrivalTime, deltaTime);
-                }
-            }
+            updateWaitingTime(cpuTime, deltaTime, processList);
+
             // Process changes needed for event, ex. switch or finish processes.
             if (currentProcess.runTime < currentProcess.burstTime) {
                 // Interrupt current process and move to back of queue.
@@ -468,24 +461,21 @@ public class CPUAssignment {
         float avgWait = CalcAvgWaitingTime(finishedList);
         output.printf("AVG Waiting Time: %.2f\n", avgWait);
         output.close();
-    }
+    } // END Scheduling algorithm Priority Scheduling With Preemption
 
-    // This can also be done based only on the input and output.
-    private float CalcAvgWaitingTime(List<ProcInfo> pInfoList) {
-        int sumTime = 0;
-        for (ProcInfo pi : pInfoList) {
-            sumTime += pi.waitTime;
-            // System.out.print("wait " + pi.pid + " " + pi.waitTime + "\n");
+    // This method is used to generate input for extra work.
+    // It directly generates the process list for simplicity.
+    private List<ProcInfo> GenerateTestProcessList(int numProcs) {
+        List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
+        Random r = new Random(42);
+        for (int i = 1; i <= numProcs; ++i) {
+            int pid = i;
+            int arrivalTime = r.nextInt(100);
+            int burstTime = r.nextInt(30);
+            int priority = r.nextInt(10);
+            processList.add(new ProcInfo(pid, arrivalTime, burstTime, priority));
         }
-        return (float) sumTime / pInfoList.size();
-    }
-
-    // One line per process with the following information:
-    // Process number, Arrival Time, CPU burst time, Priority
-    private ProcInfo parseToProcessInfo(String line) {
-        String[] spltLine = line.split(" ");
-        return new ProcInfo(Integer.parseInt(spltLine[0]), Integer.parseInt(spltLine[1]),
-                Integer.parseInt(spltLine[2]), Integer.parseInt(spltLine[3]));
+        return processList;
     }
 
     public void run(PrintWriter outputWriter, String schedAlgo,
@@ -497,8 +487,8 @@ public class CPUAssignment {
             shortestJobFirst(outputWriter, processList);
         } else if (schedAlgo.contains("PR_noPREMP")) {
             PrioritySchedulingWithoutPreemption(outputWriter, processList);
-        // NOTE: test_cases/input8.txt contains space(s) after PR_withPREMP
-        // Initially I used equalsWithCase and that failed.
+            // NOTE: test_cases/input8.txt contains space(s) after PR_withPREMP
+            // Initially I used equalsWithCase and that failed.
         } else if (schedAlgo.contains("PR_withPREMP")) {
             PrioritySchedulingWithPreemption(outputWriter, processList);
         } else {
@@ -506,21 +496,6 @@ public class CPUAssignment {
         }
     }
 
-    // This method is used to generate input for extra work.
-    // It directly generates the process list for simplicity.
-    private List<ProcInfo> GenerateLargePR_withPREMPInput(int numProcs) {
-        List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
-        Random r = new Random(42);
-        for (int i=1; i<=numProcs; ++i) {
-            int pid = i;
-            int arrivalTime = r.nextInt(100);
-            int burstTime = r.nextInt(20);
-            int priority = r.nextInt(10);
-            processList.add(new ProcInfo(pid, arrivalTime, burstTime, priority));
-        }
-        return processList;
-    }
-    
     public static void main(String[] args) {
         try {
             List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
@@ -532,28 +507,31 @@ public class CPUAssignment {
 
             // Check if we're doing Extra Work benchmarking
             if (args.length > 0 && args[0].equals("-extra")) {
-                processList = SingleCPU.GenerateLargePR_withPREMPInput(numProcs);
+                // Generate benchmark testcase and set algo to PR_withPREMP.
+                processList = SingleCPU.GenerateTestProcessList(numProcs);
                 schedAlgo = "PR_withPREMP";
                 isExtraWork = true;
             } else {// Normal run on "./input.txt"
                 // Program should read an input file named “input.txt” and write
                 // the results into an output file named “output.txt”
                 BufferedReader inputReader = new BufferedReader(new FileReader("input.txt"));
-
                 // Read the name of the scheduling algo and number of processes.
                 // Assume each comes on a new line.
                 schedAlgo = inputReader.readLine();
                 int numOfProcesses = Integer.parseInt(inputReader.readLine());
-
+                // Populate process list from each line in the file.
                 for (int i = 0; i < numOfProcesses; i++) {
                     processList.add(SingleCPU.parseToProcessInfo(inputReader.readLine()));
                 }
                 inputReader.close();
             }
 
-            long startTime = System.nanoTime();  
+            // Run and benchmark the algorithm.
+            long startTime = System.nanoTime();
             SingleCPU.run(outputWriter, schedAlgo, processList);
-            long elapsed = (Long)((System.nanoTime()-startTime)/1000000);
+            // Nano to miliseconds
+            long elapsed = (Long) ((System.nanoTime() - startTime) / 1000000);
+
             if (isExtraWork) {
                 System.out.println("Run time: " + elapsed + "ms");
             }
