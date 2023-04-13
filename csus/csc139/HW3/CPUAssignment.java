@@ -30,6 +30,16 @@ public class CPUAssignment {
             isRunning = false;
         }
 
+        public ProcInfo(ProcInfo other) {
+            this.pid = other.pid;
+            this.arrivalTime = other.arrivalTime;
+            this.burstTime = other.burstTime;
+            this.priority = other.priority;
+            runTime = other.runTime;
+            waitTime = other.waitTime;
+            isRunning = other.isRunning;
+        }
+
     } // END public class ProcInfo
 
     // Constructs a ProcInfo object from a line of text.
@@ -41,6 +51,15 @@ public class CPUAssignment {
                 Integer.parseInt(spltLine[2]), Integer.parseInt(spltLine[3]));
     }
 
+    // Deep copies a list of processes.
+    // Needed for extra work so it can run twice on the same input.
+    private List<ProcInfo> cloneList(List<ProcInfo> originalList) {
+        List<ProcInfo> clonedList = new ArrayList<ProcInfo>(originalList.size());
+        for (ProcInfo pi : originalList) {
+            clonedList.add(new ProcInfo(pi));
+        }
+        return clonedList;
+    }
     // Common interface for Process Priority Queues.
     // Used for simplyfying benchmarking code.
     private interface ProcPriorityQueue {
@@ -416,10 +435,14 @@ public class CPUAssignment {
     } // END Scheduling algorithm Priority Scheduling No Preemption
 
     // Scheduling algorithm Priority Scheduling With Preemption
-    private void PrioritySchedulingWithPreemption(PrintWriter output, List<ProcInfo> pList) {
+    private void PrioritySchedulingWithPreemption(PrintWriter output, List<ProcInfo> pList, boolean isExtraWork) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
         ProcPriorityQueue processList = new ProcPriorityQueue_WithHeap(pList.size(),
                 new PRComparator());
+        // For extra work add functionality to change the PriorityQueue type.
+        if (isExtraWork) {
+            processList = new ProcPriorityQueue_UnsortedArray(pList.size(), new PRComparator());
+        }
 
         output.println("PR_withPREMP");
         int cpuTime = 0;
@@ -479,7 +502,7 @@ public class CPUAssignment {
     }
 
     public void run(PrintWriter outputWriter, String schedAlgo,
-            List<ProcInfo> processList) {
+            List<ProcInfo> processList, boolean isExtraWork) {
         if (schedAlgo.contains("RR")) {
             String[] splitAlgo = schedAlgo.split(" ");
             roundRobin(outputWriter, processList, Integer.valueOf(splitAlgo[1]));
@@ -487,10 +510,10 @@ public class CPUAssignment {
             shortestJobFirst(outputWriter, processList);
         } else if (schedAlgo.contains("PR_noPREMP")) {
             PrioritySchedulingWithoutPreemption(outputWriter, processList);
-            // NOTE: test_cases/input8.txt contains space(s) after PR_withPREMP
-            // Initially I used equalsWithCase and that failed.
+        // NOTE: test_cases/input8.txt contains space(s) after PR_withPREMP
+        // Initially I used equalsWithCase and that failed.
         } else if (schedAlgo.contains("PR_withPREMP")) {
-            PrioritySchedulingWithPreemption(outputWriter, processList);
+            PrioritySchedulingWithPreemption(outputWriter, processList, isExtraWork);
         } else {
             throw new IllegalArgumentException("Invalid scheduling algorithm name: '" + schedAlgo + "'");
         }
@@ -526,14 +549,25 @@ public class CPUAssignment {
                 inputReader.close();
             }
 
-            // Run and benchmark the algorithm.
-            long startTime = System.nanoTime();
-            SingleCPU.run(outputWriter, schedAlgo, processList);
-            // Nano to miliseconds
-            long elapsed = (Long) ((System.nanoTime() - startTime) / 1000000);
-
+            long startTime, elapsed;
             if (isExtraWork) {
-                System.out.println("Run time: " + elapsed + "ms");
+                // Clone the process list so it can run a second time.
+                List<ProcInfo> clonedProcessList = SingleCPU.cloneList(processList);
+                startTime = System.nanoTime();
+                SingleCPU.run(outputWriter, schedAlgo, clonedProcessList, true);
+                // Nano to miliseconds
+                elapsed = (Long) ((System.nanoTime() - startTime) / 1000000);
+                System.out.println("Priority Queue with unsorted array: " + elapsed + "ms");
+            }
+
+            // Run and benchmark the algorithm. Always runs with Priority Queue with heap.
+            startTime = System.nanoTime();
+            SingleCPU.run(outputWriter, schedAlgo, processList, false);
+            // Nano to miliseconds
+            elapsed = (Long) ((System.nanoTime() - startTime) / 1000000);
+            
+            if (isExtraWork) {
+                System.out.println("Priority Queue with heap time: " + elapsed + "ms");
             }
 
         } catch (IOException e) {
