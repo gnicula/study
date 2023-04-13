@@ -2,7 +2,7 @@
 
 javac -Xlint CPUAssignment.java
 
-for i in `seq 1 15`
+for i in `seq 1 16`
 do
     rm input.txt
     cp "test_cases/input$i.txt" input.txt

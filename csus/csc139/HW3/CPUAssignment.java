@@ -396,7 +396,7 @@ public class CPUAssignment {
     } // END Scheduling Shortest Job First
 
     // Scheduling algorithm Priority Scheduling No Preemption
-    private void PrioritySchedulingWithoutPreemption(PrintWriter output,
+    private void prioritySchedulingWithoutPreemption(PrintWriter output,
             List<ProcInfo> pList) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
         ProcPriorityQueue processList = new ProcPriorityQueue_WithHeap(pList.size(),
@@ -435,7 +435,7 @@ public class CPUAssignment {
     } // END Scheduling algorithm Priority Scheduling No Preemption
 
     // Scheduling algorithm Priority Scheduling With Preemption
-    private void PrioritySchedulingWithPreemption(PrintWriter output, List<ProcInfo> pList, boolean isExtraWork) {
+    private void prioritySchedulingWithPreemption(PrintWriter output, List<ProcInfo> pList, boolean isExtraWork) {
         LinkedList<ProcInfo> finishedList = new LinkedList<ProcInfo>();
         ProcPriorityQueue processList = new ProcPriorityQueue_WithHeap(pList.size(),
                 new PRComparator());
@@ -488,7 +488,7 @@ public class CPUAssignment {
 
     // This method is used to generate input for extra work.
     // It directly generates the process list for simplicity.
-    private List<ProcInfo> GenerateTestProcessList(int numProcs) {
+    private List<ProcInfo> generateTestProcessList(int numProcs) {
         List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
         Random r = new Random(42);
         for (int i = 1; i <= numProcs; ++i) {
@@ -509,11 +509,11 @@ public class CPUAssignment {
         } else if (schedAlgo.contains("SJF")) {
             shortestJobFirst(outputWriter, processList);
         } else if (schedAlgo.contains("PR_noPREMP")) {
-            PrioritySchedulingWithoutPreemption(outputWriter, processList);
+            prioritySchedulingWithoutPreemption(outputWriter, processList);
         // NOTE: test_cases/input8.txt contains space(s) after PR_withPREMP
         // Initially I used equalsWithCase and that failed.
         } else if (schedAlgo.contains("PR_withPREMP")) {
-            PrioritySchedulingWithPreemption(outputWriter, processList, isExtraWork);
+            prioritySchedulingWithPreemption(outputWriter, processList, isExtraWork);
         } else {
             throw new IllegalArgumentException("Invalid scheduling algorithm name: '" + schedAlgo + "'");
         }
@@ -531,7 +531,7 @@ public class CPUAssignment {
             // Check if we're doing Extra Work benchmarking
             if (args.length > 0 && args[0].equals("-extra")) {
                 // Generate benchmark testcase and set algo to PR_withPREMP.
-                processList = SingleCPU.GenerateTestProcessList(numProcs);
+                processList = SingleCPU.generateTestProcessList(numProcs);
                 schedAlgo = "PR_withPREMP";
                 isExtraWork = true;
             } else {// Normal run on "./input.txt"
