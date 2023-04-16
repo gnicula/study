@@ -45,7 +45,14 @@ public class Fiscas {
 
         @Override
         public String toString() {
-            return name + " R" + rd + " R" + rm + " R" + rn;
+            return name + " r" + rd + " r" + rn + " r" + rm;
+        }
+
+        public static boolean checkInstructionLength(String[] line) {
+            if (line.length != 4) {
+                return false;
+            }
+            return true;
         }
 
         // public static ADDInstruction fromAssembly(String line) {
@@ -63,7 +70,7 @@ public class Fiscas {
     public class ADD_Instruction extends ThreeOpInstruction {
     
         public ADD_Instruction(int rd, int rn, int rm) {
-            super("ADD", 0x0, rd, rn, rm);
+            super("add", 0x0, rd, rn, rm);
         }
             
     }
@@ -71,24 +78,90 @@ public class Fiscas {
     public class AND_Instruction extends ThreeOpInstruction {
     
         public AND_Instruction(int rd, int rn, int rm) {
-            super("AND", 0x1, rd, rn, rm);
+            super("and", 0x1, rd, rn, rm);
         }
             
+    }
+
+    public class NOT_Instruction implements Instruction {
+       
+        private final int opcode;
+        private final int rd;
+        private final int rn;
+
+        public NOT_Instruction(int rd, int rn) {
+            this.rd = rd;
+            this.rn = rn;
+            opcode = 0x02;
+        }
+
+        @Override
+        public byte toMachineCode() {
+            int opBits = opcode << 6;
+            int rnBits = rn << 4;
+            int machineCode = opBits | rnBits | rd;
+            return (byte) machineCode;
+        }
+
+        @Override
+        public String toString() {
+            return "not r" + rd + " r" + rn;
+        }
+
+        public static boolean checkInstructionLength(String[] line) {
+            if (line.length != 3) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    public class BNZ_Instruction implements Instruction {
+        private final int opcode;
+        private final int address;
+        private final String label;
+
+        public BNZ_Instruction(int address, String label) {
+            this.address = address;
+            this.label = label;
+            opcode = 0x03;
+        }
+
+        @Override
+        public byte toMachineCode() {
+            int opBits = opcode << 6;
+            int machineCode = opBits | address;
+            return (byte) machineCode;
+         }
+
+        @Override 
+        public String toString() {
+            return "bnz " + label;
+        }
+
+        public static boolean checkInstructionLength(String[] line) {
+            if (line.length != 2) {
+                return false;
+            }
+            return true;
+        }
     }
 
     private class AssemblyParser {
         private final String filename;
         private final Map<String, Integer> symbolTable;
-        private final ArrayList<String> instructionStatements;
+        private final SortedMap<Integer, String> instructionStatements;
         private final ArrayList<Instruction> instructions;
+        private int numParseErrors;
     
 
         
         public AssemblyParser(String filename) {
             this.filename = filename;
             this.symbolTable = new HashMap<>();
-            this.instructionStatements = new ArrayList<String>();
+            this.instructionStatements = new TreeMap<Integer, String>();
             this.instructions = new ArrayList<Instruction>();
+            numParseErrors = 0;
         }
     
         public ArrayList<Instruction> getInstructions() {
@@ -104,12 +177,17 @@ public class Fiscas {
                 while ((line = br.readLine()) != null) {
                     ++lineNo;
                     line = line.trim();
+                    // System.out.println("While Line " + line);
                     if (!line.isEmpty()) {
                         // Check for label definition
                         int colonIndex = line.indexOf(':');
                         if (colonIndex != -1) {
                             String label = line.substring(0, colonIndex).trim();
-                            symbolTable.put(label, address);
+                            if (!symbolTable.containsKey(label)) {
+                                symbolTable.put(label, address);
+                            } else {
+                              System.err.println("Label <" + label + "> on line <" + lineNo + "> is already defined.");  
+                            }
                             // Remove label from line
                             line = line.substring(colonIndex + 1).trim();
                         }
@@ -121,67 +199,170 @@ public class Fiscas {
                         }
     
                         // Parse instruction
+                        boolean isCorrectInstruction = true;
                         if (!line.isEmpty()) {
                             String[] tokens = line.split("\\s+");
-                            String opcode = tokens[0].toUpperCase();
-                            if (opcode.equals("ADD") || opcode.equals("AND") || opcode.equals("NOT") || opcode.equals("BNZ")) {
-                                // TODO: switch and check syntax
-                                instructionStatements.add(line);
-                                address++;
+                            String opcode = tokens[0].toLowerCase();
+                            if (opcode.equals("add") || opcode.equals("and") || opcode.equals("not") || opcode.equals("bnz")) {
+                                boolean checkRegCount = true;
+                                boolean checkRegNames = true;
+                                switch (opcode) {
+                                    case "add" :
+                                    case "and" :
+                                        checkRegCount = ThreeOpInstruction.checkInstructionLength(tokens);
+                                        if (!checkRegCount) {
+                                            System.err.println("Invalid number of registers for instruction <" + tokens[0] + "> on line <" + lineNo + ">");
+                                            ++numParseErrors;
+                                            isCorrectInstruction = false;
+                                        } else {
+                                            checkRegNames = checkRegisterNames(tokens, 3);
+                                            if (!checkRegNames) {
+                                                System.err.println(" on line <" + lineNo + ">");
+                                                ++numParseErrors;
+                                                isCorrectInstruction = false;
+                                            }
+                                        }
+                                        break;
+                                    case "not" :
+                                        checkRegCount = NOT_Instruction.checkInstructionLength(tokens);
+                                        if (!checkRegCount) { 
+                                            System.err.println("Invalid number of registers for instruction <" + tokens[0] + "> on line <" + lineNo + ">");
+                                            ++numParseErrors;
+                                            isCorrectInstruction = false;
+                                        } else {
+                                            checkRegNames = checkRegisterNames(tokens, 2);
+                                            if (!checkRegNames) {
+                                                System.err.println(" on line <" + lineNo + ">");
+                                                ++numParseErrors;
+                                                isCorrectInstruction = false;
+                                            }
+                                        }
+                                        break;
+                                    case "bnz" : 
+                                        boolean checkLength = BNZ_Instruction.checkInstructionLength(tokens);
+                                        if (!checkLength) {
+                                            System.err.println("Invalid argument count for bnz instruction on line <" + lineNo + ">");
+                                            ++numParseErrors;
+                                            isCorrectInstruction = false;
+                                        }
+                                        break;
+                                }
+                                if (isCorrectInstruction) {
+                                    instructionStatements.put(lineNo, line);
+                                    address++;
+                                }
                             } else {
-                                throw new IllegalArgumentException("Invalid opcode: " + opcode + " on line " + lineNo); 
+                                System.err.println("Invalid opcode: <" + opcode + "> on line <" + lineNo + ">");
+                                ++numParseErrors;
                             }
                         }
                     }
                 }
             }
-    
+            // System.out.println("Instruction statements size " + instructionStatements.size());
             // Second pass: generate machine code
-            for (String line: instructionStatements) {
-                System.out.println(line);
+            for (Integer lineNo : instructionStatements.keySet()) {
+                String line = instructionStatements.get(lineNo);
+                // System.out.println(line);
                 line = line.trim();
                 // Parse instruction
                 String[] tokens = line.split("\\s+");
-                String opcode = tokens[0].toUpperCase();
+                String opcode = tokens[0].toLowerCase();
                 switch (opcode) {
-                    case "ADD":
+                    case "add":
                         instructions.add(new ADD_Instruction(
                             parseRegister(tokens[1]),
                             parseRegister(tokens[2]),
                             parseRegister(tokens[3])));
                         break;
-                    case "AND":
+                    case "and":
                         instructions.add(new AND_Instruction(
                             parseRegister(tokens[1]),
                             parseRegister(tokens[2]),
                             parseRegister(tokens[3])));
                     break;
-                    case "NOT":
-                        // ...
+                    case "not":
+                        instructions.add(new NOT_Instruction(
+                            parseRegister(tokens[1]),
+                            parseRegister(tokens[2])));
                         break;
-                    case "BNZ":
-                        // ...
+                    case "bnz":
+                        String label = tokens[1];
+                        // System.out.println("debug label " + label);
+                        if (symbolTable.containsKey(label)) {
+                            instructions.add(new BNZ_Instruction(
+                                symbolTable.get(label), label));
+                        } else {
+                            System.err.println("Label <" + label + "> on line <" + lineNo + "> is undefined");
+                            ++numParseErrors;
+                        }
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid opcode: " + opcode);
                 }
             }
+
+            if (numParseErrors > 0) {
+                System.err.println("There were " + numParseErrors + " parsing errors.");
+            }
+            boolean outOfBoundsError = false;
+            if (instructions.size() > 64) {
+                System.err.println("Too many instructions: object file is larger than 64 byte system memory.");
+                outOfBoundsError = true;
+            }
+            for (String lbl : symbolTable.keySet()) {
+                // System.out.println("byte value " + symbolTable.get(lbl).byteValue());
+                if (symbolTable.get(lbl) > 63) {
+                    System.err.println("Invalid address <" + String.format("%02X", symbolTable.get(lbl))
+                            + "> for label <" + lbl + ">.");
+                    outOfBoundsError = true;
+                }
+            }
+            // If any errors were detected, exit!
+            if (numParseErrors>0 || outOfBoundsError) {
+                System.exit(1);
+            }
         }
     
+        private void writeMachineOutput(String outputFileName) {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
+                writer.write("v2.0 raw");
+                writer.newLine();
+                for (Instruction instruction : instructions) {
+                    writer.write(String.format("%02X", instruction.toMachineCode()));
+                    writer.newLine();
+                }
+                writer.close();
+            } catch (IOException e) {
+                System.err.println("Error writing to file: " + e.getMessage());
+            }
+        }
+
         private int parseRegister(String regName) {
-            switch (regName.toUpperCase()) {
-                case "R0":
+            switch (regName.toLowerCase()) {
+                case "r0":
                     return 0;
-                case "R1":
+                case "r1":
                     return 1;
-                case "R2":
+                case "r2":
                     return 2;
-                case "R3":
+                case "r3":
                     return 3;
                 default:
-                    throw new IllegalArgumentException("Invalid register name: " +
-                    regName);
+                    return -1;
             }
+        }
+
+        private boolean checkRegisterNames(String[] instructionTokens, int numReg) {
+            for (int i = 1; i < numReg + 1; ++i) {
+                int regValue = parseRegister(instructionTokens[i]);
+                if (regValue == -1) {
+                    System.err.print("Invalid register name <" + instructionTokens[i] + ">");
+                    return false;
+                }
+            }
+            return true;
         }
     
         public Map<String, Integer> getSymbolTable() {
@@ -203,7 +384,7 @@ public class Fiscas {
     }
 
     public static void printMachineCode(ArrayList<Instruction> instructions) {
-        System.out.println("*** MACHINE PROGRAM ***");
+        System.err.println("*** MACHINE PROGRAM ***");
         for (int i = 0; i < instructions.size(); i++) {
             Instruction instruction = instructions.get(i);
             String address = String.format("%02X", i);
@@ -233,12 +414,15 @@ public class Fiscas {
         }
         
         // Create the Fiscas object
-        Fiscas fiscas = new Fiscas();
-        AssemblyParser assembler = fiscas.createParser(sourceFile);
+        Fiscas as = new Fiscas();
+        AssemblyParser assembler = as.createParser(sourceFile);
         
         // Assemble the source file
         assembler.parse();
         
+        // Now write the object file
+        assembler.writeMachineOutput(objectFile);
+
         // Print the symbol table if requested
         if (printSymbolTable) {
             Map<String, Integer> symbolTable = assembler.getSymbolTable();
