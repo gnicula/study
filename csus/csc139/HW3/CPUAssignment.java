@@ -535,8 +535,8 @@ public class CPUAssignment {
                 schedAlgo = "PR_withPREMP";
                 isExtraWork = true;
             } else {// Normal run on "./input.txt"
-                // Program should read an input file named “input.txt” and write
-                // the results into an output file named “output.txt”
+                // Program should read an input file named input.txt and write
+                // the results into an output file named output.txt
                 BufferedReader inputReader = new BufferedReader(new FileReader("input.txt"));
                 // Read the name of the scheduling algo and number of processes.
                 // Assume each comes on a new line.
