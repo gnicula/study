@@ -110,9 +110,14 @@ public class Fiscsim {
             ++pc;
           }
           // NOTE: It is not clear from the assignment if the address printed
-          // in the disassembly is in hex format or decimal.
-          // disassembledInstruction += "bnz " + String.format("%02X", address);
-          disassembledInstruction += "bnz " + address;
+          // in the disassembly must be in hex format or decimal.
+          // Leaving it on two character hex, switch by uncommenting the decimal
+          // version if so desired.
+          // Hex
+          disassembledInstruction += "bnz " + String.format("%X", address);
+          // disassembledInstruction += "bnz " + String.format("0x%02X", address);
+          // Decimal
+          // disassembledInstruction += "bnz " + address;
           break;
         default:
           System.err.printf("Unknown instruction code: %d\n", instr);
