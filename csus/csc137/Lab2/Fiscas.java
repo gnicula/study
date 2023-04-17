@@ -52,12 +52,6 @@ public class Fiscas {
       return name + " r" + rd + " r" + rn + " r" + rm;
     }
 
-    public static boolean checkInstructionLength(String[] line) {
-      if (line.length != 4) {
-        return false;
-      }
-      return true;
-    }
   }
 
   public class ADD_Instruction extends ThreeOpInstruction {
@@ -100,13 +94,6 @@ public class Fiscas {
     public String toString() {
       return "not r" + rd + " r" + rn;
     }
-
-    public static boolean checkInstructionLength(String[] line) {
-      if (line.length != 3) {
-        return false;
-      }
-      return true;
-    }
   }
 
   public class BNZ_Instruction implements Instruction {
@@ -130,13 +117,6 @@ public class Fiscas {
     @Override
     public String toString() {
       return "bnz " + label;
-    }
-
-    public static boolean checkInstructionLength(String[] line) {
-      if (line.length != 2) {
-        return false;
-      }
-      return true;
     }
   }
 
@@ -201,8 +181,7 @@ public class Fiscas {
                 switch (opcode) {
                 case "add":
                 case "and":
-                  checkRegCount = ThreeOpInstruction
-                      .checkInstructionLength(tokens);
+                  checkRegCount = tokens.length == 4;
                   if (!checkRegCount) {
                     System.err
                         .println("Invalid number of registers for instruction <"
@@ -219,8 +198,7 @@ public class Fiscas {
                   }
                   break;
                 case "not":
-                  checkRegCount = NOT_Instruction
-                      .checkInstructionLength(tokens);
+                  checkRegCount = tokens.length == 3;
                   if (!checkRegCount) {
                     System.err
                         .println("Invalid number of registers for instruction <"
@@ -237,8 +215,7 @@ public class Fiscas {
                   }
                   break;
                 case "bnz":
-                  boolean checkLength = BNZ_Instruction
-                      .checkInstructionLength(tokens);
+                  boolean checkLength = tokens.length == 2;
                   if (!checkLength) {
                     System.err.println(
                         "Invalid argument count for bnz instruction on line <"
