@@ -1,3 +1,7 @@
+// Student Name: Gabriele Nicula
+// Student ID: 219969192
+// CPU Lab 1
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
