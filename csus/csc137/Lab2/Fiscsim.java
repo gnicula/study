@@ -74,10 +74,10 @@ public class Fiscsim {
         // Decode opcode
         int instr = (opcode & 0xC0) >> 6; // Extract instruction code from the
                                           // two most significant bits
-        int rn = (opcode & 0x30) >> 4; // Extract register 1 from bits 5-4
-        int rm = (opcode & 0x0C) >> 2; // Extract register 2 from bits 3-2
-        int rd = opcode & 0x03; // Extract register 3 from bits 1-0
-        int address = opcode & 0x3F; // Mask for BNZ address
+        int rn = (opcode & 0x30) >> 4; // Extract register rn from bits 5-4
+        int rm = (opcode & 0x0C) >> 2; // Extract register rm from bits 3-2
+        int rd = opcode & 0x03; // Extract register rd from bits 1-0
+        int address = opcode & 0x3F; // Mask for 6 bit BNZ address (5-0)
 
         int result = 0;
         // Execute instruction
