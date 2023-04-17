@@ -8,9 +8,9 @@ import java.io.IOException;
 
 public class Fiscsim {
 
-  private static String versionline;
-  private static int maxCycles;
-  private static boolean showDisassembly;
+  private static String versionline = "";
+  private static int maxCycles = 20;
+  private static boolean showDisassembly = false;
   public static final int MAX_ROM_CAPACITY = 64;
 
   private static class CPU {
