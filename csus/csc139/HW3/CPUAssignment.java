@@ -522,7 +522,7 @@ public class CPUAssignment {
     public static void main(String[] args) {
         try {
             List<ProcInfo> processList = new LinkedList<CPUAssignment.ProcInfo>();
-            PrintWriter outputWriter = new PrintWriter("output.txt");
+            PrintWriter outputWriter = new PrintWriter(new FileWriter("output.txt", false));
             CPUAssignment SingleCPU = new CPUAssignment();
             String schedAlgo = new String();
             boolean isExtraWork = false;
