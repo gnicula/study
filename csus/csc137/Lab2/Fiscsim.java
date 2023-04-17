@@ -110,9 +110,9 @@ public class Fiscsim {
             ++pc;
           }
           // NOTE: It is not clear from the assignment if the address printed
-          // in the disassembly must be in hex format or decimal.
-          // Leaving it on two character hex, switch by uncommenting the decimal
-          // version if so desired.
+          // in the disassembly must be in hex format or decimal. Ex. <bnz 7>.
+          // Leaving it on not formated hex, switch by uncommenting the decimal
+          // version or the formatted version if so desired.
           // Hex
           disassembledInstruction += "bnz " + String.format("%X", address);
           // disassembledInstruction += "bnz " + String.format("0x%02X", address);
