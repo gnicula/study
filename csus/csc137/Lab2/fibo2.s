@@ -9,7 +9,7 @@ start:  not r0 r1
         add r2 r0 r0
         not r2 r2     ; obtained 1 in r2
 
-; obtain 5 in r0 because our loop computes two fibonacci
+; obtain 5 then 250 in r0 because our loop computes two fibonacci
 ; numbers per loop execution
         add r0 r2 r2  ; r0 = 2
         add r0 r0 r0  ; r0 = 4
