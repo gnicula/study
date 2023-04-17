@@ -164,6 +164,11 @@ public class Fiscas {
         while ((line = br.readLine()) != null) {
           ++lineNo;
           line = line.trim();
+          // Ignore comments
+          int semicolonIndex = line.indexOf(';');
+          if (semicolonIndex != -1) {
+            line = line.substring(0, semicolonIndex).trim();
+          }
           // System.out.println("While Line " + line);
           if (!line.isEmpty()) {
             // Check for label definition
@@ -178,12 +183,6 @@ public class Fiscas {
               }
               // Remove label from line
               line = line.substring(colonIndex + 1).trim();
-            }
-
-            // Ignore comments
-            int semicolonIndex = line.indexOf(';');
-            if (semicolonIndex != -1) {
-              line = line.substring(0, semicolonIndex).trim();
             }
 
             // Parse instruction
