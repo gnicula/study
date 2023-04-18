@@ -37,7 +37,7 @@ public class GameWorld extends Observable {
 
 		goc.add(new EnergyStation(50, 200, 200, ColorUtil.argb(255, 0, 164, 0), this));
 		goc.add(new EnergyStation(80, 600, 300, ColorUtil.argb(255, 0, 164, 0), this));
-		goc.add(new EnergyStation(40, 200, 200, ColorUtil.argb(255, 0, 164, 0), this));
+		goc.add(new EnergyStation(40, 700, 400, ColorUtil.argb(255, 0, 164, 0), this));
 		goc.add(new EnergyStation(70, 300, 700, ColorUtil.argb(255, 0, 164, 0), this));
 
 		goc.add(new Drone(40, 375, 375, ColorUtil.BLACK, 20, 0, this));
@@ -313,7 +313,7 @@ public class GameWorld extends Observable {
 	// Halves the current alpha of an object to fade out the color.
 	private void fadeColor(GameObject obj) {
 		int currentColor = obj.getColor();
-		int alpha = ColorUtil.alpha(currentColor) / 2;
+		int alpha = ColorUtil.alpha(currentColor) / 3;
 		obj.setColor(ColorUtil.argb(alpha, ColorUtil.red(currentColor), ColorUtil.green(currentColor),
 				ColorUtil.blue(currentColor)));
 	}

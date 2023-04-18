@@ -13,6 +13,7 @@ public class Fixed extends GameObject{
 	}
 	
 	public void drawNumber(Graphics g, Point pCmpRelPrnt, int number) {
+		// TODO: set small font
 		g.setColor(ColorUtil.BLACK);
 		g.drawString(Integer.toString(number), 
 				pCmpRelPrnt.getX() + (int)getX() - STRING_OFFSET, 
