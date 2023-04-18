@@ -10,6 +10,13 @@ import com.codename1.charts.util.ColorUtil;
 // It works without the GUI and dispatches information as necessary to game 
 public class GameWorld extends Observable {
 
+	// Light Blue 0x99CCFF
+	private final int LIGHTBLUE = ColorUtil.argb(255, 153, 204, 255);
+	// Faded Green 0x009B00
+	private final int FADEDGREEN = ColorUtil.argb(255, 0, 155, 0);
+	// Energy Station Green 0x009B00
+	private final int ENERGYGREEN = ColorUtil.argb(255, 0, 122, 0);
+	
 	private final int NPR_COLLISION_DAMAGE = 10;
 
 	private int height = 0;
@@ -17,6 +24,7 @@ public class GameWorld extends Observable {
 	private int count = 0;
 	// New in A2 a flag indicating whether sound is on or off.
 	private boolean sound = false;
+	private boolean paused = false;
 	private int numBases = 0;
 
 	private GameObjectCollection goc = null;
@@ -26,8 +34,7 @@ public class GameWorld extends Observable {
 	public void init() {
 
 		goc = new GameObjectCollection();
-		// Light Blue 0x99CCFF
-		final int LIGHTBLUE = ColorUtil.argb(255, 153, 204, 255);
+
 		goc.add(new Base(60, 100, 60, LIGHTBLUE, this, 1));
 		goc.add(new Base(60, 250, 80, LIGHTBLUE, this, 2));
 		goc.add(new Base(60, 150, 450, LIGHTBLUE, this, 3));
@@ -35,10 +42,10 @@ public class GameWorld extends Observable {
 		// goc.add(new Base(60, 50, 450, LIGHTBLUE, this, 5));
 		// goc.add(new Base(60, 800, 800, LIGHTBLUE, this, 6));
 
-		goc.add(new EnergyStation(50, 200, 200, ColorUtil.argb(255, 0, 164, 0), this));
-		goc.add(new EnergyStation(80, 600, 300, ColorUtil.argb(255, 0, 164, 0), this));
-		goc.add(new EnergyStation(40, 700, 400, ColorUtil.argb(255, 0, 164, 0), this));
-		goc.add(new EnergyStation(70, 300, 700, ColorUtil.argb(255, 0, 164, 0), this));
+		goc.add(new EnergyStation(50, 200, 200, ENERGYGREEN, this));
+		goc.add(new EnergyStation(80, 600, 300, ENERGYGREEN, this));
+		goc.add(new EnergyStation(40, 700, 400, ENERGYGREEN, this));
+		goc.add(new EnergyStation(70, 300, 700, ENERGYGREEN, this));
 
 		goc.add(new Drone(40, 375, 375, ColorUtil.BLACK, 20, 0, this));
 		goc.add(new Drone(40, 495, 95, ColorUtil.BLACK, 20, 0, this));
@@ -109,31 +116,39 @@ public class GameWorld extends Observable {
 	}
 
 	public void accelerate() {
-		getPlayerRobot().accelerate();
+		if (!paused) {
+			getPlayerRobot().accelerate();
+		}
 	}
 
 	public void brake() {
-		getPlayerRobot().brake();
+		if (!paused) {
+			getPlayerRobot().brake();
+		}
 	}
 
 	// Each tick we update all movable objects, and notify 
 	// the registered observers: MapView and ScoreView.
 	public void tick() {
-		count++;
-		updateMoveableObjects();
-		setChanged();
-		notifyObservers(this);
+		if (!paused) {
+			count++;
+			updateMoveableObjects();
+			setChanged();
+			notifyObservers(this);
+		}
 	}
 
 	// Iterate through GameObjectCollection, 
 	// identify the nonplayer robots,
 	// and flip their strategy.
 	public void changeStrategy() {
-		IIterator it = goc.getIterator();
-		while (it.hasNext()) {
-			GameObject go = it.getNext();
-			if (go instanceof NonPlayerRobot) {
-				((NonPlayerRobot) go).changeStrategy();
+		if (!paused) {
+			IIterator it = goc.getIterator();
+			while (it.hasNext()) {
+				GameObject go = it.getNext();
+				if (go instanceof NonPlayerRobot) {
+					((NonPlayerRobot) go).changeStrategy();
+				}
 			}
 		}
 	}
@@ -202,15 +217,17 @@ public class GameWorld extends Observable {
 	}
 
 	public void turnLeft() {
-		Robot myRobot = getPlayerRobot();
-
-		myRobot.steerLeft();
+		if (!paused) {
+			Robot myRobot = getPlayerRobot();
+			myRobot.steerLeft();
+		}
 	}
 
 	public void turnRight() {
-		Robot myRobot = getPlayerRobot();
-
-		myRobot.steerRight();
+		if (!paused) {
+			Robot myRobot = getPlayerRobot();
+			myRobot.steerRight();
+		}
 	}
 	
 	// The Drone object does not need any updates on collision.
@@ -295,27 +312,37 @@ public class GameWorld extends Observable {
 	public IIterator getGameObjectsIterator() {
 		return goc.getIterator();
 	}
+	
+	void pause() {
+		paused = !paused;
+	}
+	
+	boolean getPaused() {
+		return paused;
+	}
 
 	// Adds a new Energy Station in a random location with a random size around 10.
 	private void addRandomEnergyStation() {
 		Random rand = new Random();
-		double randXloc = (double) rand.nextInt(500);
-		double randYloc = (double) rand.nextInt(500);
-		int randSize = rand.nextInt(30) + 30;
+		double randXloc = (double) rand.nextInt(600);
+		double randYloc = (double) rand.nextInt(600);
+		int randSize = rand.nextInt(40) + 30;
 		int index = goc.size() - 1;
 		if (index < 0) {
 			index = 0;
 		}
-		goc.add(index, new EnergyStation(randSize, randXloc, randYloc, ColorUtil.GREEN, this));
+		goc.add(index, new EnergyStation(randSize, randXloc, randYloc, ENERGYGREEN, this));
 
 	}
 
 	// Halves the current alpha of an object to fade out the color.
+	// Alternatively set a lighter version of the color.
 	private void fadeColor(GameObject obj) {
-		int currentColor = obj.getColor();
-		int alpha = ColorUtil.alpha(currentColor) / 3;
-		obj.setColor(ColorUtil.argb(alpha, ColorUtil.red(currentColor), ColorUtil.green(currentColor),
-				ColorUtil.blue(currentColor)));
+//		int currentColor = obj.getColor();
+//		int alpha = ColorUtil.alpha(currentColor) / 3;
+//		obj.setColor(ColorUtil.argb(alpha, ColorUtil.red(currentColor), ColorUtil.green(currentColor),
+//				ColorUtil.blue(currentColor)));
+		obj.setColor(FADEDGREEN);
 	}
 
 	// Iterates through the collection and calls every movable object's move() method.

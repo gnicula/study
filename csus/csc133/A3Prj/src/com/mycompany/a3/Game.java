@@ -27,6 +27,7 @@ public class Game extends Form {
 	private GameWorld gw;
 	private MapView mv;
 	private ScoreView sv;
+	private BlueButton pauseGameButton;
 
 	// Constructor of Game creates and initializes the model and
 	// the views (MapView and ScoreView) and attaches them as
@@ -45,6 +46,13 @@ public class Game extends Form {
 		gw.addObserver(mv);
 		
 		this.show();
+	}
+
+	public void handlePause() {
+		gw.pause();
+		boolean isPaused = gw.getPaused();
+		String buttonText = isPaused ? "Play" : "Pause";
+		pauseGameButton.setText(buttonText);
 	}
 
 	// Creates all the GUI elements.
@@ -144,6 +152,10 @@ public class Game extends Form {
 	// I used FlowLayout and custom buttons trying to fit the text of all the buttons.
 	private void createBottomContainer() {
 		Container bottomContainer = new Container(new FlowLayout(Component.CENTER));
+
+		pauseGameButton = new BlueButton("Pause");
+		pauseGameButton.setCommand(new PauseCommand("Pause command", this));
+		bottomContainer.add(pauseGameButton);
 		
 		BlueButton collideWithNPR = new BlueButton("Collide With NPR");
 		collideWithNPR.setCommand(new CollideWithNPRCommand("Collided with NPR", gw));

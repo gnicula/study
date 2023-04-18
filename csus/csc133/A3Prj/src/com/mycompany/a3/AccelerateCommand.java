@@ -15,7 +15,7 @@ public class AccelerateCommand extends Command {
 	// This method is called by the accelerate button on the left panel
 	// and dispatches to the model to perform the accelerate
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Accelerate");
+		// System.out.println("Accelerate");
 		gw.accelerate();
 	}
 }

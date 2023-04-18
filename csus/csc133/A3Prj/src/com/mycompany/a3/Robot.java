@@ -92,12 +92,12 @@ public class Robot extends Movable implements ISteerable {
 
 	// Methods for ISteerable interface
 	public void steerLeft() {
-		this.steeringDirection -= 5;
+		this.steeringDirection += 5;
 		clampSteering();
 	}
 
 	public void steerRight() {
-		this.steeringDirection += 5;
+		this.steeringDirection -= 5;
 		clampSteering();
 	}
 
