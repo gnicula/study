@@ -154,7 +154,7 @@ public class Game extends Form {
 		Container bottomContainer = new Container(new FlowLayout(Component.CENTER));
 
 		pauseGameButton = new BlueButton("Pause");
-		pauseGameButton.setCommand(new PauseCommand("Pause command", this));
+		pauseGameButton.setCommand(new PauseCommand("Pause", this));
 		bottomContainer.add(pauseGameButton);
 		
 		BlueButton collideWithNPR = new BlueButton("Collide With NPR");
