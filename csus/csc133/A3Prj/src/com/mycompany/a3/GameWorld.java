@@ -7,27 +7,31 @@ import com.codename1.charts.util.ColorUtil;
 
 // GameWorld acts as the model and handles all the initializations
 // necessary for the game. 
-// It works without the GUI and dispatches information as necessary to game 
+// Dispatches information as necessary to game objects and views. 
 public class GameWorld extends Observable {
 
-	// Light Blue 0x99CCFF
+	// Light Blue
 	private final int LIGHTBLUE = ColorUtil.argb(255, 153, 204, 255);
-	// Faded Green 0x009B00
+	// Faded Green
 	private final int FADEDGREEN = ColorUtil.argb(255, 0, 155, 0);
-	// Energy Station Green 0x009B00
+	// Energy Station Green
 	private final int ENERGYGREEN = ColorUtil.argb(255, 0, 122, 0);
 	
 	private final int NPR_COLLISION_DAMAGE = 10;
+	// Delta in pixels from selection pointer to center of object
+	// to be considered selected.
+	private final int SELECT_DELTA = 15;
 
 	private int height = 0;
 	private int width = 0;
 	private int count = 0;
-	// New in A2 a flag indicating whether sound is on or off.
+	// Flag indicating whether sound is on or off.
 	private boolean sound = false;
 	private boolean paused = false;
 	private int numBases = 0;
 
 	private GameObjectCollection goc = null;
+	private Fixed currentSelectedObject = null;
 
 	// Creates the initial game setup or when the
 	// player loses a life. 
@@ -84,7 +88,6 @@ public class GameWorld extends Observable {
 
 	// A1, not used in A2 because the information is in the ScoreView.
 	public void dCommand() {
-
 		System.out.println(getPlayerRobot());
 	}
 
@@ -130,12 +133,16 @@ public class GameWorld extends Observable {
 	// Each tick we update all movable objects, and notify 
 	// the registered observers: MapView and ScoreView.
 	public void tick() {
+		// If the game is 'Paused' nothing is moving.
+		// Counter is also stopped.
 		if (!paused) {
 			count++;
 			updateMoveableObjects();
-			setChanged();
-			notifyObservers(this);
 		}
+		// Views may update ex. for displaying selections
+		// even if the game is paused.
+		setChanged();
+		notifyObservers(this);
 	}
 
 	// Iterate through GameObjectCollection, 
@@ -315,12 +322,57 @@ public class GameWorld extends Observable {
 	
 	void pause() {
 		paused = !paused;
+		if (!paused && currentSelectedObject != null) {
+			currentSelectedObject.setSelected(false);
+			currentSelectedObject = null;
+		}
 	}
 	
 	boolean getPaused() {
 		return paused;
 	}
+	
+	Fixed getSelected() {
+		return currentSelectedObject;
+	}
 
+	public void selectObjectAt(int xPos, int yPos) {
+		System.out.println("selectObjectAt: " + xPos + ", " + yPos);
+		boolean foundObjectToSelect = false;
+		IIterator it = goc.getIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof Fixed) {
+				int objX = (int) go.getX();
+				int objY = (int) go.getY();
+				System.out.println("selectObjectAt with object: " + objX + ", " + objY);
+				if (Math.abs(objX - xPos) < SELECT_DELTA && Math.abs(objY - yPos) < SELECT_DELTA) {
+					if (currentSelectedObject != null) {
+						currentSelectedObject.setSelected(false);
+					}
+					currentSelectedObject = (Fixed)go;
+					selectObject((Fixed)go);
+					foundObjectToSelect = true;
+					break;
+				}
+			}
+		}
+		if (!foundObjectToSelect) {
+			unselectAllObjects();
+		}
+	}
+	
+	public void selectObject(Fixed obj) {
+		obj.setSelected(true);
+	}
+	
+	public void unselectAllObjects() {
+		if (currentSelectedObject != null) {
+			currentSelectedObject.setSelected(false);
+		}
+		currentSelectedObject = null;
+	}
+	
 	// Adds a new Energy Station in a random location with a random size around 10.
 	private void addRandomEnergyStation() {
 		Random rand = new Random();
@@ -355,4 +407,5 @@ public class GameWorld extends Observable {
 			}
 		}
 	}
+
 }

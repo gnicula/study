@@ -23,9 +23,15 @@ public class EnergyStation extends Fixed {
 	@Override
 	public void draw(Graphics g, Point pCmpRelPrnt) {
 		g.setColor(getColor());
-		g.fillArc(pCmpRelPrnt.getX() + (int)getX() - getSize()/2,
-				pCmpRelPrnt.getY() + (int)getY() - getSize()/2,
-				getSize(), getSize(), 0, 360);
+		if (!isSelected) {
+			g.fillArc(pCmpRelPrnt.getX() + (int)getX() - getSize()/2,
+					pCmpRelPrnt.getY() + (int)getY() - getSize()/2,
+					getSize(), getSize(), 0, 360);
+		} else {
+			g.drawArc(pCmpRelPrnt.getX() + (int)getX() - getSize()/2,
+					pCmpRelPrnt.getY() + (int)getY() - getSize()/2,
+					getSize(), getSize(), 0, 360);			
+		}
 		drawNumber(g,  pCmpRelPrnt, getCapacity());
 	}
 

@@ -40,7 +40,11 @@ public class Base extends Fixed {
 		x[2] = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
 		y[2] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
 		g.setColor(getColor());
-		g.fillPolygon(x, y, 3);
+		if (!isSelected) {
+			g.fillPolygon(x, y, 3);
+		} else {
+			g.drawPolygon(x, y, 3);			
+		}
 		drawNumber(g,  pCmpRelPrnt, sequenceNumber);
 	}
 

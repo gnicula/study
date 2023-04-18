@@ -46,6 +46,15 @@ public class MapView extends Container implements Observer {
 		}
 	}
 
+	@Override 
+	public void pointerPressed(int x, int y) {
+		if (gw.getPaused()) {
+			int xPos = x - getParent().getAbsoluteX() - getX();
+			int	yPos = y - getParent().getAbsoluteY() - getY();
+			gw.selectObjectAt(xPos, yPos);
+		}
+	}
+	
 // DEBUG view of objects only
 	private class MapViewLabel extends Label {
 		private GameWorld gwo;
