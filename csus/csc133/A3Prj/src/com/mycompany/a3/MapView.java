@@ -9,25 +9,44 @@ import com.codename1.ui.Container;
 import com.codename1.ui.Graphics;
 import com.codename1.ui.Image;
 import com.codename1.ui.Label;
+import com.codename1.ui.geom.Point;
 
 public class MapView extends Container implements Observer {
 
+	private GameWorld gw = null;
 	// DEBUG view of objects only
 	private MapViewLabel imgLabel = null;
 
+	public MapView( GameWorld gw) {
+		super();
+		this.gw = gw;
+	}
+	
 	public void update(Observable o, Object arg) {
+//		gw = (GameWorld) o;
 		// Call the method in GameWorld (Observable) that outputs the
 		// game object information to the console.
-		GameWorld gw = (GameWorld) o;
 		gw.mCommand();
+		// Repaint all objects.
+		repaint();
+	}
 
-		// DEBUG view only
-		if (imgLabel != null) {
-			repaint();
+	@Override
+	public void paint(Graphics g) {
+		// Set a light gray background 
+		 g.setColor(ColorUtil.WHITE);
+		 g.fillRect(getX(), getY(), gw.getWidth(), gw.getHeight());
+		// Now paint all objects as rectangles on the image
+		IIterator it = gw.getGameObjectsIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			go.draw(g, new Point(getX(), getY()));
+//			g.setColor(go.getColor());
+//			g.fillRect((int)go.getX(), (int)go.getY(), go.getSize(), go.getSize());	
 		}
 	}
 
-	// DEBUG view of objects only
+// DEBUG view of objects only
 	private class MapViewLabel extends Label {
 		private GameWorld gwo;
 		
@@ -43,10 +62,11 @@ public class MapView extends Container implements Observer {
 			 g.fillRect(getX(), getY(), gwo.getWidth(), gwo.getHeight());
 			// Now paint all objects as rectangles on the image
 			IIterator it = gwo.getGameObjectsIterator();
-			while (it.hasNext() ) {
+			while (it.hasNext()) {
 				GameObject go = it.getNext();
-				g.setColor(go.getColor());
-				g.fillRect((int)go.getX(), (int)go.getY(), go.getSize(), go.getSize());	
+				go.draw(g, new Point(getX(), getY()));
+//				g.setColor(go.getColor());
+//				g.fillRect((int)go.getX(), (int)go.getY(), go.getSize(), go.getSize());	
 			}
 		}
 	}

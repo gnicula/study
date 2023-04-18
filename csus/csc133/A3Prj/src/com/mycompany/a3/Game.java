@@ -34,7 +34,7 @@ public class Game extends Form {
 	public Game() {
 		gw = new GameWorld();
 		gw.init();
-		mv = new MapView();
+		mv = new MapView(gw);
 		// Sending model for the initial values.
 		sv = new ScoreView(gw);
 

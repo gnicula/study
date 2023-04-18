@@ -2,6 +2,9 @@ package com.mycompany.a3;
 
 import java.util.Random;
 
+import com.codename1.ui.Graphics;
+import com.codename1.ui.geom.Point;
+
 public class Drone extends Movable {
 	
 	public Drone(int size, double x, double y, int color, int speed, int heading, GameWorld world) {
@@ -44,7 +47,21 @@ public class Drone extends Movable {
 		this.setY(newY);
 		locationBoundAdjust();
 	}
-	
+
+	@Override
+	public void draw(Graphics g, Point pCmpRelPrnt) {
+		int x[] = new int[3];
+		int y[] = new int[3];
+		x[0] = pCmpRelPrnt.getX() + (int)getX();
+		y[0] = pCmpRelPrnt.getY() + (int)getY() + getSize()/2;
+		x[1] = pCmpRelPrnt.getX() + (int)getX() + getSize()/2;
+		y[1] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
+		x[2] = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
+		y[2] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
+		g.setColor(getColor());
+		g.drawPolygon(x, y, 3);
+	}
+
 	@Override
 	public String toString() {
 		String parentDesc = super.toString();

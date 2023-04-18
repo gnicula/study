@@ -26,38 +26,41 @@ public class GameWorld extends Observable {
 	public void init() {
 
 		goc = new GameObjectCollection();
+		// Light Blue 0x99CCFF
+		final int LIGHTBLUE = ColorUtil.argb(255, 153, 204, 255);
+		goc.add(new Base(60, 100, 60, LIGHTBLUE, this, 1));
+		goc.add(new Base(60, 250, 80, LIGHTBLUE, this, 2));
+		goc.add(new Base(60, 150, 450, LIGHTBLUE, this, 3));
+		goc.add(new Base(60, 550, 650, LIGHTBLUE, this, 4));
+		// goc.add(new Base(60, 50, 450, LIGHTBLUE, this, 5));
+		// goc.add(new Base(60, 800, 800, LIGHTBLUE, this, 6));
 
-		goc.add(new Base(20, 50, 50, ColorUtil.BLACK, this, 1));
-		goc.add(new Base(20, 250, 50, ColorUtil.BLACK, this, 2));
-		goc.add(new Base(20, 450, 50, ColorUtil.BLACK, this, 3));
-		goc.add(new Base(20, 50, 250, ColorUtil.BLACK, this, 4));
-		goc.add(new Base(20, 50, 450, ColorUtil.BLACK, this, 5));
-		goc.add(new Base(20, 800, 800, ColorUtil.BLACK, this, 6));
+		goc.add(new EnergyStation(50, 200, 200, ColorUtil.argb(255, 0, 164, 0), this));
+		goc.add(new EnergyStation(80, 600, 300, ColorUtil.argb(255, 0, 164, 0), this));
+		goc.add(new EnergyStation(40, 200, 200, ColorUtil.argb(255, 0, 164, 0), this));
+		goc.add(new EnergyStation(70, 300, 700, ColorUtil.argb(255, 0, 164, 0), this));
 
-		goc.add(new EnergyStation(10, 200, 200, ColorUtil.GREEN, this));
-		goc.add(new EnergyStation(10, 600, 300, ColorUtil.GREEN, this));
-
-		goc.add(new Drone(10, 75, 75, ColorUtil.BLUE, 20, 0, this));
-		goc.add(new Drone(10, 95, 95, ColorUtil.BLUE, 20, 0, this));
+		goc.add(new Drone(40, 375, 375, ColorUtil.BLACK, 20, 0, this));
+		goc.add(new Drone(40, 495, 95, ColorUtil.BLACK, 20, 0, this));
 
 		// Get the first base to initialize Robot locations.
 		IIterator it = goc.getIterator();
 		GameObject first = it.getNext();
 
 		// Initialize 3 enemy non player robots with different strategies.
-		NonPlayerRobot npr = new NonPlayerRobot(10, first.getX() + 250, first.getY() + 25, ColorUtil.MAGENTA, 15, 25, 100, 1,
+		NonPlayerRobot npr = new NonPlayerRobot(50, first.getX() + 250, first.getY() + 25, ColorUtil.MAGENTA, 15, 25, 100, 1,
 				this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(10, first.getX() + 35, first.getY() + 145, ColorUtil.MAGENTA, 20, 25, 100, 1, this);
+		npr = new NonPlayerRobot(50, first.getX() + 65, first.getY() + 150, ColorUtil.MAGENTA, 20, 25, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(10, first.getX() + 160, first.getY() + 140, ColorUtil.MAGENTA, 25, 25, 100, 1, this);
+		npr = new NonPlayerRobot(50, first.getX() + 160, first.getY() + 140, ColorUtil.MAGENTA, 25, 25, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 
 		// Player Robot will always be the last element in the collection.
-		goc.add(Robot.getInstance(20, first.getX(), first.getY(), ColorUtil.argb(255, 200, 100, 255), 5, 50, 50, 2, this));
+		goc.add(Robot.getInstance(60, first.getX(), first.getY(), ColorUtil.argb(255, 255, 1, 1), 5, 50, 50, 2, this));
 
 		numBases = getNumBases();
 	}
@@ -296,9 +299,9 @@ public class GameWorld extends Observable {
 	// Adds a new Energy Station in a random location with a random size around 10.
 	private void addRandomEnergyStation() {
 		Random rand = new Random();
-		double randXloc = (double) rand.nextInt(400);
-		double randYloc = (double) rand.nextInt(400);
-		int randSize = rand.nextInt(10) + 5;
+		double randXloc = (double) rand.nextInt(500);
+		double randYloc = (double) rand.nextInt(500);
+		int randSize = rand.nextInt(30) + 30;
 		int index = goc.size() - 1;
 		if (index < 0) {
 			index = 0;

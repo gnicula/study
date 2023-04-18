@@ -1,14 +1,17 @@
 package com.mycompany.a3;
 
 import com.codename1.charts.util.ColorUtil;
+import com.codename1.ui.Graphics;
+import com.codename1.ui.geom.Point;
 
 // Base class for all the game objects. 
-public class GameObject {
+public class GameObject implements IDrawable {
 	private int size;
 	private double xPos;
 	private double yPos;
 	private int color;
 	private GameWorld world;
+	public static final int STRING_OFFSET = 6;
 
 	// Common to all game objects is size, location, color, and a handle to the model.
 	public GameObject(int size, double x, double y, int color, GameWorld w) {
@@ -51,6 +54,11 @@ public class GameObject {
 		return world;
 	}
 
+	@Override
+	public void draw(Graphics g, Point pCmpRelPrnt) {
+		// Override in derived classes to draw the object.
+	}
+	
 	// This method is overridden by the base classes 
 	// so they can add their specific attributes.
 	public String toString() {

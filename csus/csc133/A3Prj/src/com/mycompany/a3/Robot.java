@@ -1,7 +1,10 @@
 package com.mycompany.a3;
 
+import com.codename1.ui.Graphics;
+import com.codename1.ui.geom.Point;
+
 // This is the player controlled Robot class.
-// It is moveable and steerable, and it is a singleton
+// It is moveable, drawable and steerable, and it is a singleton
 // which means there is going to be only one Robot object
 // throughout the program. 
 public class Robot extends Movable implements ISteerable {
@@ -192,7 +195,6 @@ public class Robot extends Movable implements ISteerable {
 
 	}
 
-
 	@Override
 	public void move() {
 		// System.out.println("Robot::move()\n");
@@ -213,6 +215,14 @@ public class Robot extends Movable implements ISteerable {
 		// Check if the robot has reached a new base
 //        int currentBase = GameWorld.getInstance().getCurrentBase(this);
 //        if (currentBase > this.lastBaseReached)
+	}
+
+	@Override
+	public void draw(Graphics g, Point pCmpRelPrnt) {
+		int upperLeftX = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
+		int upperLeftY = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
+		g.setColor(getColor());
+		g.fillRect(upperLeftX, upperLeftY, getSize(), getSize());	
 	}
 	
 	private void clampSteering() {

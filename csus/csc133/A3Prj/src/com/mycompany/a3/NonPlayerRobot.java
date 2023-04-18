@@ -1,5 +1,7 @@
 package com.mycompany.a3;
 
+import com.codename1.ui.Graphics;
+import com.codename1.ui.geom.Point;
 import com.codename1.util.MathUtil;
 import java.lang.Math;
 
@@ -86,6 +88,14 @@ public class NonPlayerRobot extends Robot {
 		}
 	}
 	
+	@Override
+	public void draw(Graphics g, Point pCmpRelPrnt) {
+		int upperLeftX = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
+		int upperLeftY = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
+		g.setColor(getColor());
+		g.drawRect(upperLeftX, upperLeftY, getSize(), getSize());	
+	}
+
 	public String toString() {
 		String parentDesc = super.toString();
 		String myDesc = "Non-Player  " + parentDesc + ", Strategy=" + strategy.toString();
