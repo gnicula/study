@@ -28,10 +28,7 @@ public class Game extends Form {
 	private MapView mv;
 	private ScoreView sv;
 
-	// New A3 Button for pausing the game.
 	private BlueButton pauseGameButton;
-	// New A3 Button for editing the position.
-	// Enabled only when the game is paused.
 	private BlueButton positionButton;
 
 	// Constructor of Game creates and initializes the model and
@@ -45,8 +42,8 @@ public class Game extends Form {
 		sv = new ScoreView(gw);
 
 		createGUI();
-//		gw.setDimensions(mv.getLayoutHeight(), mv.getLayoutWidth());
-		gw.setDimensions(1000, 1000);
+		gw.setDimensions(mv.getWidth(), mv.getHeight());
+//		gw.setDimensions(1000, 1000);
 		gw.addObserver(sv);
 		gw.addObserver(mv);
 		
@@ -76,8 +73,9 @@ public class Game extends Form {
 		createRightContainer();
 		Container centerContainer = mv;
 		centerContainer.getAllStyles().setBgTransparency(255);
-		centerContainer.getAllStyles().setBgColor(ColorUtil.LTGRAY);
-		centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255, 0, 0)));
+		// centerContainer.getAllStyles().setBgColor(ColorUtil.LTGRAY);
+		centerContainer.getAllStyles().setBorder(
+				Border.createLineBorder(2, ColorUtil.rgb(255, 0, 0)));
 		add(BorderLayout.CENTER, centerContainer);
 		createToolbar();
 	}

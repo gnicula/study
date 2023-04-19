@@ -47,7 +47,7 @@ public class GameWorld extends Observable {
 	public void init() {
 
 		goc = new GameObjectCollection();
-
+		// TODO: add these in set dimensions based on w, h
 		goc.add(new Base(60, 100, 60, LIGHTBLUE, this, 1));
 		goc.add(new Base(60, 250, 80, LIGHTBLUE, this, 2));
 		goc.add(new Base(60, 150, 450, LIGHTBLUE, this, 3));
@@ -72,10 +72,10 @@ public class GameWorld extends Observable {
 				this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(50, first.getX() + 65, first.getY() + 150, ColorUtil.MAGENTA, 20, 25, 100, 1, this);
+		npr = new NonPlayerRobot(50, first.getX() + 100, first.getY() + 150, ColorUtil.MAGENTA, 20, 25, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(50, first.getX() + 160, first.getY() + 140, ColorUtil.MAGENTA, 25, 25, 100, 1, this);
+		npr = new NonPlayerRobot(50, first.getX() + 200, first.getY() + 140, ColorUtil.MAGENTA, 25, 25, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 
@@ -116,15 +116,16 @@ public class GameWorld extends Observable {
 
 	public void setSoundSetting(boolean on) {
 		sound = on;
-		if (sound && !paused) {
-			bgs.play();
+		if (!paused) {
+			if (sound) {
+				bgs.play();
+			} else {
+				bgs.pause();
+			}
 		}
 	}
 	
 	// Set the dimensions of the map from MapView.
-	// For some reason, these are larger than the actual size of the
-	// MapView visible on the screen.
-	// TODO Find a way to obtain the exact pixel values of the MapView container.
 	public void setDimensions(int height, int width) {
 		this.setHeight(height);
 		this.setWidth(width);
@@ -334,7 +335,7 @@ public class GameWorld extends Observable {
 	
 	void pause() {
 		paused = !paused;
-		if (!paused ) {
+		if (!paused) {
 			if (currentSelectedObject != null) {
 				currentSelectedObject.setSelected(false);
 				currentSelectedObject = null;
