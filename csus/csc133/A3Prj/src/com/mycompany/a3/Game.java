@@ -27,7 +27,9 @@ public class Game extends Form {
 	private GameWorld gw;
 	private MapView mv;
 	private ScoreView sv;
+
 	private BlueButton pauseGameButton;
+	private BlueButton positionButton;
 
 	// Constructor of Game creates and initializes the model and
 	// the views (MapView and ScoreView) and attaches them as
@@ -46,6 +48,10 @@ public class Game extends Form {
 		gw.addObserver(mv);
 		
 		this.show();
+		
+		// create the sound objects for the game
+		gw.createSounds();
+		revalidate();
 	}
 
 	public void handlePause() {
@@ -53,6 +59,7 @@ public class Game extends Form {
 		boolean isPaused = gw.getPaused();
 		String buttonText = isPaused ? "Play" : "Pause";
 		pauseGameButton.setText(buttonText);
+		positionButton.getCommand().setEnabled(isPaused);
 	}
 
 	// Creates all the GUI elements.
@@ -153,10 +160,16 @@ public class Game extends Form {
 	private void createBottomContainer() {
 		Container bottomContainer = new Container(new FlowLayout(Component.CENTER));
 
+		positionButton = new BlueButton("Position");
+		positionButton.setCommand(new PositionCommand("Position", gw));
+		positionButton.getCommand().setEnabled(false);
+		bottomContainer.add(positionButton);
+
 		pauseGameButton = new BlueButton("Pause");
 		pauseGameButton.setCommand(new PauseCommand("Pause", this));
 		bottomContainer.add(pauseGameButton);
 		
+		/*
 		BlueButton collideWithNPR = new BlueButton("Collide With NPR");
 		collideWithNPR.setCommand(new CollideWithNPRCommand("Collided with NPR", gw));
 		bottomContainer.add(collideWithNPR);
@@ -176,7 +189,8 @@ public class Game extends Form {
 		collideWithDrone.setCommand(collideWithDroneCommand);
 		this.addKeyListener('g', collideWithDroneCommand);
 		bottomContainer.add(collideWithDrone);		
-		
+		*/
+
 		BlueButton tick = new BlueButton("Tick");
 		Command tickCommand = new TickCommand("Tick", gw);
 		tick.setCommand(tickCommand);

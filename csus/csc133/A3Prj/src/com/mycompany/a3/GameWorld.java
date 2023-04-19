@@ -22,6 +22,14 @@ public class GameWorld extends Observable {
 	// to be considered selected.
 	private final int SELECT_DELTA = 15;
 
+	// Sounds
+	private BGSound bgs;
+	private Sound energy1;
+	private Sound energy2;
+	private Sound collision1;
+	private Sound collision2;
+	private Sound destroyed;
+	
 	private int height = 0;
 	private int width = 0;
 	private int count = 0;
@@ -32,6 +40,7 @@ public class GameWorld extends Observable {
 
 	private GameObjectCollection goc = null;
 	private Fixed currentSelectedObject = null;
+	private boolean userEdit = false;
 
 	// Creates the initial game setup or when the
 	// player loses a life. 
@@ -107,6 +116,9 @@ public class GameWorld extends Observable {
 
 	public void setSoundSetting(boolean on) {
 		sound = on;
+		if (sound && !paused) {
+			bgs.play();
+		}
 	}
 	
 	// Set the dimensions of the map from MapView.
@@ -322,22 +334,39 @@ public class GameWorld extends Observable {
 	
 	void pause() {
 		paused = !paused;
-		if (!paused && currentSelectedObject != null) {
-			currentSelectedObject.setSelected(false);
-			currentSelectedObject = null;
+		if (!paused ) {
+			if (currentSelectedObject != null) {
+				currentSelectedObject.setSelected(false);
+				currentSelectedObject = null;
+			}
+			if (sound) {
+				bgs.play();
+			}
+		} else {
+			if (sound) {
+				bgs.pause();
+			}
 		}
 	}
 	
-	boolean getPaused() {
+	public boolean getPaused() {
 		return paused;
 	}
+
+	public void enablePosition(boolean b) {
+		userEdit = b;
+	}
 	
-	Fixed getSelected() {
+	public boolean isUserEdit() {
+		return userEdit;
+	}
+
+	public Fixed getSelected() {
 		return currentSelectedObject;
 	}
 
 	public void selectObjectAt(int xPos, int yPos) {
-		System.out.println("selectObjectAt: " + xPos + ", " + yPos);
+		// System.out.println("selectObjectAt: " + xPos + ", " + yPos);
 		boolean foundObjectToSelect = false;
 		IIterator it = goc.getIterator();
 		while (it.hasNext()) {
@@ -345,7 +374,7 @@ public class GameWorld extends Observable {
 			if (go instanceof Fixed) {
 				int objX = (int) go.getX();
 				int objY = (int) go.getY();
-				System.out.println("selectObjectAt with object: " + objX + ", " + objY);
+				// System.out.println("selectObjectAt with object: " + objX + ", " + objY);
 				if (Math.abs(objX - xPos) < SELECT_DELTA && Math.abs(objY - yPos) < SELECT_DELTA) {
 					if (currentSelectedObject != null) {
 						currentSelectedObject.setSelected(false);
@@ -373,6 +402,29 @@ public class GameWorld extends Observable {
 		currentSelectedObject = null;
 	}
 	
+	public void moveSelectedObjectTo(int xPos, int yPos) {
+		// Check if there is a selected object and move it to
+		// its new location.
+		if (currentSelectedObject != null) {
+			currentSelectedObject.setX(xPos);
+			currentSelectedObject.setY(yPos);
+			// unselect moved item
+			currentSelectedObject.setSelected(false);
+			currentSelectedObject = null;
+			// clear userEdit flag
+			userEdit = false;
+		}
+	}
+	
+	public void createSounds() {
+		bgs = new BGSound("back_lady80s_16khz.wav");
+		energy1 = new Sound("energy1.wav");
+		energy2 = new Sound("energy2.wav");
+		collision1 = new Sound("collision1.wav");
+		collision2 = new Sound("collision2.wav");
+		destroyed = new Sound("destroyed.wav");
+	}
+
 	// Adds a new Energy Station in a random location with a random size around 10.
 	private void addRandomEnergyStation() {
 		Random rand = new Random();

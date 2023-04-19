@@ -6,7 +6,7 @@ import com.codename1.ui.geom.Point;
 
 // Fixed is a type of GameObject that is used to define a
 // common base type for the immovable game objects.
-public class Fixed extends GameObject{
+public class Fixed extends GameObject implements ISelectable {
 	protected boolean isSelected = false;
 	
 	public Fixed(int size, double x, double y, int color, GameWorld w) {
@@ -24,5 +24,18 @@ public class Fixed extends GameObject{
 	public void setSelected(boolean b) {
 		this.isSelected = b;
 	}
+	
+	public boolean isSelected() {
+		return isSelected;
+	};
 
+	public boolean contains(Point pPtrRel, Point pCmpRel) {
+		int objX = (int) getX();
+		int objY = (int) getY();
+		if (Math.abs(objX - pPtrRel.getX()) < pCmpRel.getX() 
+				&& Math.abs(objY - pPtrRel.getX()) < pCmpRel.getY()) {
+			return true;
+		}
+		return false;
+	}
 }

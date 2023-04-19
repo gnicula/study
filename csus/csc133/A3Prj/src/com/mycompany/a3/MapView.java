@@ -51,7 +51,11 @@ public class MapView extends Container implements Observer {
 		if (gw.getPaused()) {
 			int xPos = x - getParent().getAbsoluteX() - getX();
 			int	yPos = y - getParent().getAbsoluteY() - getY();
-			gw.selectObjectAt(xPos, yPos);
+			if (gw.isUserEdit()) {
+				gw.moveSelectedObjectTo(xPos, yPos);
+			} else {
+				gw.selectObjectAt(xPos, yPos);
+			}
 		}
 	}
 	
