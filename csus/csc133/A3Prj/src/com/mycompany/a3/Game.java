@@ -28,7 +28,10 @@ public class Game extends Form {
 	private MapView mv;
 	private ScoreView sv;
 
+	// New A3 Button for pausing the game.
 	private BlueButton pauseGameButton;
+	// New A3 Button for editing the position.
+	// Enabled only when the game is paused.
 	private BlueButton positionButton;
 
 	// Constructor of Game creates and initializes the model and
