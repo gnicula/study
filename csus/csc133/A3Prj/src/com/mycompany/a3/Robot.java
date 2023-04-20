@@ -63,7 +63,7 @@ public class Robot extends Movable implements ISteerable {
 		this.steeringDirection = 0;
 		this.damageLevel = 0;
 		this.lastBaseReached = 1;
-		this.setSpeed(0);
+		this.setSpeed(20);
 		this.setEnergyLevel(initialEnergyValue);
 		this.setX(initialXLocation);
 		this.setY(initialYLocation);
@@ -146,6 +146,7 @@ public class Robot extends Movable implements ISteerable {
 		if (damageLevel >= MAX_POSSIBLE_DAMAGE) {
 			if (lives > 0) {
 				--lives;
+				getWorld().playSoundFor("destroyed");
 				System.out.println("lives left = " + lives);
 				getWorld().reInitialize();
 			} else {
@@ -196,7 +197,7 @@ public class Robot extends Movable implements ISteerable {
 	}
 
 	@Override
-	public void move() {
+	public void move(int tickTime) {
 		// System.out.println("Robot::move()\n");
 		// Reduce the energy level based on energyConsumptionRate
 		setEnergyLevel(Math.max(0, energyLevel - energyConsumptionRate));
@@ -205,16 +206,42 @@ public class Robot extends Movable implements ISteerable {
 			int newHeading = (getHeading() + steeringDirection + 360) % 360;
 			// Update the heading of the robot
 			setHeading(newHeading);			
-			super.move();
+			super.move(tickTime);
 		} else {
+			getWorld().playSoundFor("destroyed");
 			System.out.println("Out of Energy, you lose a life.");
 			--lives;
 			getWorld().reInitialize();
+		}		
+	}
+
+	@Override
+	public void handleCollision(GameObject otherObject) {
+		if (!collidingWith.contains(otherObject)) {
+			// Reusing the methods from A2 for Player robot collisions
+			if (otherObject instanceof Base) {
+				getWorld().collideRobotWithBase(this, (Base)otherObject);
+			} else if (otherObject instanceof EnergyStation) {
+				getWorld().collideRobotWithEnergyStation(this, (EnergyStation)otherObject);
+			} else if (otherObject instanceof Drone) {
+				getWorld().collideRobotWithDrone(this, (Drone)otherObject);
+			} else if (otherObject instanceof NonPlayerRobot) {
+				if (this instanceof NonPlayerRobot) {
+					getWorld().collideNPRWithNPR(this, (NonPlayerRobot)otherObject);
+				} else {
+					// Must be Player Robot with NPR then
+					getWorld().collideRobotWithNPR(this, (NonPlayerRobot)otherObject);
+				}
+			} else if (otherObject instanceof Robot) {
+				// Must be Player Robot with NPR then
+				getWorld().collideRobotWithNPR((Robot)otherObject, (NonPlayerRobot)this);				
+			}
+			collidingWith.add(otherObject);
+			// Make sure the other object doesn't handle this collision.
+			if (!otherObject.collidingWith.contains(this)) {
+				otherObject.collidingWith.add(this);
+			}
 		}
-		
-		// Check if the robot has reached a new base
-//        int currentBase = GameWorld.getInstance().getCurrentBase(this);
-//        if (currentBase > this.lastBaseReached)
 	}
 
 	@Override

@@ -38,4 +38,14 @@ public class Fixed extends GameObject implements ISelectable {
 		}
 		return false;
 	}
+
+	@Override
+	public void handleCollision(GameObject otherObject) {
+		if (!collidingWith.contains(otherObject)) {
+			if (otherObject instanceof Robot) {
+				((Robot)otherObject).handleCollision(this);
+			}
+		}	
+	}
+
 }

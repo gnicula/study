@@ -1,16 +1,21 @@
 package com.mycompany.a3;
 
+import java.util.ArrayList;
+
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Graphics;
 import com.codename1.ui.geom.Point;
 
 // Base class for all the game objects. 
-public class GameObject implements IDrawable {
+public class GameObject implements ICollider, IDrawable {
 	private int size;
 	private double xPos;
 	private double yPos;
 	private int color;
 	private GameWorld world;
+	// Vector to keep objects that this object is currently colliding with.
+	protected ArrayList<GameObject> collidingWith;
+	
 	public static final int STRING_OFFSET = 6;
 
 	// Common to all game objects is size, location, color, and a handle to the model.
@@ -20,6 +25,7 @@ public class GameObject implements IDrawable {
 		this.yPos = y;
 		this.color = color;
 		this.world = w;
+		this.collidingWith = new ArrayList<GameObject>();
 	}
 
 	public int getSize() {
@@ -54,6 +60,43 @@ public class GameObject implements IDrawable {
 		return world;
 	}
 
+	// ICollider interface methods
+	@Override
+	public boolean collidesWith(GameObject other) {
+		double distX = getX() - other.getX();
+		double distY = getY() - other.getY();
+		double distSqr = distX * distX + distY * distY;
+		
+		int thisR= this.getSize() / 2;
+		int otherR= other.getSize() / 2;
+		// Compute (thisR + otherR)^2 to compare directly
+		int minDistSqr= (thisR + otherR) * (thisR + otherR);
+		final boolean isCollision = distSqr < minDistSqr;
+		// If collision didn't happen and they were colliding
+		// Remove each other from their collidingWith list.
+		if (!isCollision) {
+			if (collidingWith.contains(other)) {
+				collidingWith.remove(other);
+			}
+			if (other.collidingWith.contains(this)) {
+				other.collidingWith.remove(this);
+			}			
+		}
+		return isCollision;
+	}
+
+	@Override
+	public void handleCollision(GameObject otherObject) {
+		if (!collidingWith.contains(otherObject)) {
+			collidingWith.add(otherObject);
+			// Make sure the other object doesn't handle this collision.
+			if (!otherObject.collidingWith.contains(this)) {
+				otherObject.collidingWith.add(this);
+			}
+		}
+	}
+
+	// IDrawable interface methods
 	@Override
 	public void draw(Graphics g, Point pCmpRelPrnt) {
 		// Override in derived classes to draw the object.

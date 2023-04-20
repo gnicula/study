@@ -21,15 +21,22 @@ public class GameWorld extends Observable {
 	// Delta in pixels from selection pointer to center of object
 	// to be considered selected.
 	private final int SELECT_DELTA = 15;
+	// Offset of initial objects positions with margins
+	private final int MARGIN_PLACE = 150;
+
+	// Player Robot initial values
+	private final int INITIAL_ENERGY = 1000;
+	private final int NUM_LIVES = 3;
 
 	// Sounds
 	private BGSound bgs;
 	private Sound energy1;
 	private Sound energy2;
-	private Sound collision1;
-	private Sound collision2;
+	private Sound base_collision;
+	private Sound drone_collision;
+	private Sound npr_collision;
 	private Sound destroyed;
-	
+
 	private int height = 0;
 	private int width = 0;
 	private int count = 0;
@@ -45,46 +52,52 @@ public class GameWorld extends Observable {
 	// Creates the initial game setup or when the
 	// player loses a life. 
 	public void init() {
-
 		goc = new GameObjectCollection();
-		// TODO: add these in set dimensions based on w, h
-		goc.add(new Base(60, 100, 60, LIGHTBLUE, this, 1));
-		goc.add(new Base(60, 250, 80, LIGHTBLUE, this, 2));
-		goc.add(new Base(60, 150, 450, LIGHTBLUE, this, 3));
-		goc.add(new Base(60, 550, 650, LIGHTBLUE, this, 4));
-		// goc.add(new Base(60, 50, 450, LIGHTBLUE, this, 5));
-		// goc.add(new Base(60, 800, 800, LIGHTBLUE, this, 6));
+	}
 
-		goc.add(new EnergyStation(50, 200, 200, ENERGYGREEN, this));
-		goc.add(new EnergyStation(80, 600, 300, ENERGYGREEN, this));
-		goc.add(new EnergyStation(40, 700, 400, ENERGYGREEN, this));
-		goc.add(new EnergyStation(70, 300, 700, ENERGYGREEN, this));
+	public void initObjects() {
+		goc = new GameObjectCollection();
+		// Four bases each corner
+		goc.add(new Base(60, MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 1));
+		goc.add(new Base(60, width-MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 2));
+		goc.add(new Base(60, MARGIN_PLACE, height-MARGIN_PLACE, LIGHTBLUE, this, 3));
+		goc.add(new Base(60, width-MARGIN_PLACE, height-MARGIN_PLACE, LIGHTBLUE, this, 4));
 
-		goc.add(new Drone(40, 375, 375, ColorUtil.BLACK, 20, 0, this));
-		goc.add(new Drone(40, 495, 95, ColorUtil.BLACK, 20, 0, this));
+		// Four energy stations for refill
+		goc.add(new EnergyStation(60, width/2, 2 * MARGIN_PLACE, ENERGYGREEN, this));
+		goc.add(new EnergyStation(70, width/2, height - 2 * MARGIN_PLACE, ENERGYGREEN, this));
+		goc.add(new EnergyStation(50, 2* MARGIN_PLACE, height/2, ENERGYGREEN, this));
+		goc.add(new EnergyStation(80, width - 2 * MARGIN_PLACE, height/2, ENERGYGREEN, this));
+
+		// Two drones hovering NW
+		goc.add(new Drone(40, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 25, 45, this));
+		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK, 25, 135, this));
 
 		// Get the first base to initialize Robot locations.
 		IIterator it = goc.getIterator();
 		GameObject first = it.getNext();
 
 		// Initialize 3 enemy non player robots with different strategies.
-		NonPlayerRobot npr = new NonPlayerRobot(50, first.getX() + 250, first.getY() + 25, ColorUtil.MAGENTA, 15, 25, 100, 1,
-				this);
+		// Each of them close to the player robot and the first three bases
+		NonPlayerRobot npr = new NonPlayerRobot(50, 3*MARGIN_PLACE, MARGIN_PLACE, 
+				ColorUtil.MAGENTA, 25, 25, 100, 1, this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(50, first.getX() + 100, first.getY() + 150, ColorUtil.MAGENTA, 20, 25, 100, 1, this);
+		npr = new NonPlayerRobot(50, MARGIN_PLACE, 3*MARGIN_PLACE,
+				ColorUtil.MAGENTA, 25, 25, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
-		npr = new NonPlayerRobot(50, first.getX() + 200, first.getY() + 140, ColorUtil.MAGENTA, 25, 25, 100, 1, this);
+		npr = new NonPlayerRobot(50, width/2-MARGIN_PLACE, height/2-MARGIN_PLACE,
+				ColorUtil.MAGENTA, 25, 25, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 
 		// Player Robot will always be the last element in the collection.
-		goc.add(Robot.getInstance(60, first.getX(), first.getY(), ColorUtil.argb(255, 255, 1, 1), 5, 50, 50, 2, this));
+		goc.add(Robot.getInstance(60, first.getX()+10, first.getY()+10, ColorUtil.argb(255, 255, 1, 1), 100, 100, INITIAL_ENERGY, 1, this));
 
 		numBases = getNumBases();
 	}
-
+	
 	// Iterates through all the GameObjects in the collection
 	// and prints their string representation.
 	public void mCommand() {
@@ -125,10 +138,17 @@ public class GameWorld extends Observable {
 		}
 	}
 	
+	public void playSoundFor(String description) {
+		if (sound && description.equalsIgnoreCase("destroyed")) {
+			destroyed.play();
+		}
+	}
+	
 	// Set the dimensions of the map from MapView.
 	public void setDimensions(int height, int width) {
 		this.setHeight(height);
 		this.setWidth(width);
+		initObjects();
 	}
 
 	public void accelerate() {
@@ -145,12 +165,13 @@ public class GameWorld extends Observable {
 
 	// Each tick we update all movable objects, and notify 
 	// the registered observers: MapView and ScoreView.
-	public void tick() {
+	public void tick(int tickTime) {
 		// If the game is 'Paused' nothing is moving.
 		// Counter is also stopped.
 		if (!paused) {
 			count++;
-			updateMoveableObjects();
+			updateMoveableObjects(tickTime);
+			CheckCollisions();
 		}
 		// Views may update ex. for displaying selections
 		// even if the game is paused.
@@ -195,11 +216,14 @@ public class GameWorld extends Observable {
 	}
 
 	public void exit() {
+		// Gracefully stop background sound
+		bgs.pause();
+		// exit
 		System.exit(0);
 	}
 	
 	public void reInitialize() {
-		init();
+		initObjects();
 		getPlayerRobot().reinitializeRobot();
 	}
 	
@@ -251,70 +275,70 @@ public class GameWorld extends Observable {
 	}
 	
 	// The Drone object does not need any updates on collision.
-	// The amount of damage taken by the player robot is half of the
+	// The amount of damage taken by the robot is half of the
 	// damage dealt by a collision with an NPR.
-	public void collideWithDrone() {
-		Robot myRobot = getPlayerRobot();
-		int currentDamage = myRobot.getDamageLevel();
-		myRobot.setDamageLevel(currentDamage + NPR_COLLISION_DAMAGE/2);
-	}
-
-	// The Robot collides with the first NPR in the collection,
-	// dealing damage to both Robots.
-	public void collideWithNPR() {
-		Robot myRobot = getPlayerRobot();
-		int currentDamage = myRobot.getDamageLevel();
-		myRobot.setDamageLevel(currentDamage + NPR_COLLISION_DAMAGE);
-
-		IIterator it = goc.getIterator();
-		while (it.hasNext()) {
-			GameObject go = it.getNext();
-			if (go instanceof NonPlayerRobot) {
-				currentDamage = ((NonPlayerRobot) go).getDamageLevel();
-				((NonPlayerRobot) go).setDamageLevel(currentDamage + NPR_COLLISION_DAMAGE);
-				break;
-			}
+	public void collideRobotWithDrone(Robot robot, Drone drone) {
+		int currentDamage = robot.getDamageLevel();
+		robot.setDamageLevel(currentDamage + NPR_COLLISION_DAMAGE/2);
+		if (sound) {
+			drone_collision.play();
 		}
 	}
 
-	// As per A1/A2 requirements, have the player input a base sequence number
-	// check if it is one more than the last base reached,
-	// if so, change last base reached.
-	// If not, the last base reached remains the same.
-	public void collideWithBase(int baseNum) {
-		Robot myRobot = getPlayerRobot();
-		int lastBaseReachedCheck = myRobot.getLastBaseReached();
+	// The Robot collides with the NPR,
+	// dealing damage to both Robots.
+	public void collideRobotWithNPR(Robot robot, NonPlayerRobot npr) {
+		robot.setDamageLevel(robot.getDamageLevel() + NPR_COLLISION_DAMAGE);
+		npr.setDamageLevel(npr.getDamageLevel() + NPR_COLLISION_DAMAGE);
+		if (sound) {
+			npr_collision.play();
+		}
+	}
 
-		if ((lastBaseReachedCheck + 1) == baseNum) {
-			myRobot.setLastBaseReached(baseNum);
+	// Handles collision between a Robot/NPR and a Base
+	// New in A3: NPRs increment their last base reached as well. 
+	public void collideRobotWithBase(Robot robot, Base base) {
+		int lastBaseReached = robot.getLastBaseReached();
+		int baseSeqNum = base.getSequenceNumber();
+
+		if ((lastBaseReached + 1) == baseSeqNum) {
+			// This also updates NPR's last base reached.
+			robot.setLastBaseReached(baseSeqNum);
+		}
+		if (sound) {
+			base_collision.play();
 		}
 	}
 
 	// Player robot simulates a collision with an Energy Station.
 	// This drains all the energy from the station and gives it to the Robot.
-	public void collideWithEnergyStation() {
-		Robot myRobot = getPlayerRobot();
-		int currentEnergy = myRobot.getEnergyLevel();
-		int energyStationEnergy;
-
-		IIterator it = goc.getIterator();
-		while (it.hasNext()) {
-			GameObject go = it.getNext();
-			if (go instanceof EnergyStation) {
-				EnergyStation station = (EnergyStation) go;
-				energyStationEnergy = station.getCapacity();
-				// If the energy station is already depleted, go to the next one.
-				if (energyStationEnergy == 0) {
-					continue;
-				}
-				myRobot.setEnergyLevel(currentEnergy + energyStationEnergy);
-				station.setCapacity(0);
-				fadeColor(station);
-				addRandomEnergyStation();
-				break;
-			}
+	public void collideRobotWithEnergyStation(Robot robot, EnergyStation station) {
+		int currentEnergy = robot.getEnergyLevel();
+		int energyStationEnergy = station.getCapacity();
+		// Add random energy station only if the current station was
+		// not already depleted
+		if (energyStationEnergy > 0) {
+			robot.setEnergyLevel(currentEnergy + energyStationEnergy);
+			station.setCapacity(0);
+			fadeColor(station);
+			addRandomEnergyStation();
+		}
+		// Sound collision on both depleted and non-depleted energy stations
+		if (robot instanceof NonPlayerRobot) {
+			energy2.play();
+		} else {
+			energy1.play();
 		}
 	}
+
+	// New in A3: NPRs can collide between themselves and take damage
+	public void collideNPRWithNPR(Robot npr1, NonPlayerRobot npr2) {
+		npr1.setDamageLevel(npr1.getDamageLevel() + NPR_COLLISION_DAMAGE);
+		fadeColor(npr1);
+		npr2.setDamageLevel(npr2.getDamageLevel() + NPR_COLLISION_DAMAGE);
+		fadeColor(npr2);
+	}
+
 	
 	public int getNumBases() {
 		int countBases = 0;
@@ -421,17 +445,37 @@ public class GameWorld extends Observable {
 		bgs = new BGSound("back_lady80s_16khz.wav");
 		energy1 = new Sound("energy1.wav");
 		energy2 = new Sound("energy2.wav");
-		collision1 = new Sound("collision1.wav");
-		collision2 = new Sound("collision2.wav");
+		base_collision = new Sound("base_collision.wav");
+		drone_collision = new Sound("drone_collision.wav");
+		npr_collision = new Sound("npr_collision.wav");
 		destroyed = new Sound("destroyed.wav");
+	}
+
+	// Every tick we check for collisions and delegate to objects
+	// to handle them.
+	private void CheckCollisions() {
+		IIterator iter = goc.getIterator();
+		while (iter.hasNext()) {
+			GameObject thisObj = iter.getNext();
+			IIterator otherIter = goc.getIterator();
+			while (otherIter.hasNext()) {
+				GameObject otherObj = otherIter.getNext();
+				if (!thisObj.equals(otherObj)) {
+					if (thisObj.collidesWith(otherObj)) {
+						System.out.println("CheckCollisions " + thisObj + " collided with " + otherObj);
+						thisObj.handleCollision(otherObj);
+					}
+				}
+			}
+		}
 	}
 
 	// Adds a new Energy Station in a random location with a random size around 10.
 	private void addRandomEnergyStation() {
 		Random rand = new Random();
-		double randXloc = (double) rand.nextInt(600);
-		double randYloc = (double) rand.nextInt(600);
-		int randSize = rand.nextInt(40) + 30;
+		double randXloc = 100 + (double) rand.nextInt(width - 100);
+		double randYloc = 100 + (double) rand.nextInt(height - 100);
+		int randSize = rand.nextInt(50) + 50;
 		int index = goc.size() - 1;
 		if (index < 0) {
 			index = 0;
@@ -443,20 +487,22 @@ public class GameWorld extends Observable {
 	// Halves the current alpha of an object to fade out the color.
 	// Alternatively set a lighter version of the color.
 	private void fadeColor(GameObject obj) {
-//		int currentColor = obj.getColor();
-//		int alpha = ColorUtil.alpha(currentColor) / 3;
-//		obj.setColor(ColorUtil.argb(alpha, ColorUtil.red(currentColor), ColorUtil.green(currentColor),
-//				ColorUtil.blue(currentColor)));
-		obj.setColor(FADEDGREEN);
+		final int fadeValue = 20;
+		int currentColor = obj.getColor();
+		int alpha = Math.max(0, ColorUtil.alpha(currentColor) - fadeValue);
+		int red = Math.max(0, ColorUtil.red(currentColor) - fadeValue);
+		int green = Math.max(0, ColorUtil.green(currentColor) - fadeValue);
+		int blue = Math.max(0, ColorUtil.blue(currentColor) - fadeValue);
+		obj.setColor(ColorUtil.argb(alpha, red, green, blue));
 	}
 
 	// Iterates through the collection and calls every movable object's move() method.
-	private void updateMoveableObjects() {
+	private void updateMoveableObjects(int tickTime) {
 		IIterator it = goc.getIterator();
 		while (it.hasNext()) {
 			GameObject go = it.getNext();
 			if (go instanceof Movable) {
-				((Movable)go).move();
+				((Movable)go).move(tickTime);
 			}
 		}
 	}

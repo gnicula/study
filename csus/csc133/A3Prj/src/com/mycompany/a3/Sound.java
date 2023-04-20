@@ -20,7 +20,7 @@ public class Sound {
 	}
 
 	public void play() {
-//		media.setTime(0);
+		media.setTime(0);
 		media.play();
 	}
 

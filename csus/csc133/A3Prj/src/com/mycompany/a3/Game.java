@@ -18,18 +18,26 @@ import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.layouts.FlowLayout;
 import com.codename1.ui.plaf.Border;
+import com.codename1.ui.util.UITimer;
 
 // Game class acts like a view for the GameWorld model.
 // It creates all the GUI components and arranges them 
 // in a BorderLayout with 5 areas.
 // It also creates the toolbar and the side menu.
-public class Game extends Form {
+public class Game extends Form implements Runnable {
+
+	private final int TICK_TIME = 50;
+
 	private GameWorld gw;
 	private MapView mv;
 	private ScoreView sv;
+	// New in A3, use UITimer to tick() the game world.
+	private UITimer gameTimer;
+	private int elapsedTime = 0;
 
 	private BlueButton pauseGameButton;
 	private BlueButton positionButton;
+	private BlueButton tickDebugButton;
 
 	// Constructor of Game creates and initializes the model and
 	// the views (MapView and ScoreView) and attaches them as
@@ -42,24 +50,44 @@ public class Game extends Form {
 		sv = new ScoreView(gw);
 
 		createGUI();
+		this.show();
+		// NOTE: setDimensions enables GameWorld to place initial 
+		// GameObjects in a nice way, relative to MapView's dimensions.
 		gw.setDimensions(mv.getWidth(), mv.getHeight());
-//		gw.setDimensions(1000, 1000);
+		// gw.setDimensions(1000, 1000);
 		gw.addObserver(sv);
 		gw.addObserver(mv);
-		
-		this.show();
-		
+
+		// create the timer and start ticking
+		gameTimer = new UITimer(this);
+		gameTimer.schedule(TICK_TIME, true, this);
 		// create the sound objects for the game
 		gw.createSounds();
 		revalidate();
 	}
 
+	// Implement Runnable.run()
+	// Tick
+	@Override
+	public void run()
+	{
+		gw.tick(TICK_TIME);
+		elapsedTime += TICK_TIME;		
+	}
+	
 	public void handlePause() {
 		gw.pause();
 		boolean isPaused = gw.getPaused();
+		if (isPaused) {
+			gameTimer.cancel();
+		} else {
+			gameTimer.schedule(TICK_TIME, true, this);
+		}
 		String buttonText = isPaused ? "Play" : "Pause";
 		pauseGameButton.setText(buttonText);
 		positionButton.getCommand().setEnabled(isPaused);
+		positionButton.setEnabled(isPaused);
+		// TODO: Draw the button disabled/enabled
 	}
 
 	// Creates all the GUI elements.
@@ -107,7 +135,7 @@ public class Game extends Form {
 		myToolbar.addCommandToRightBar(helpCommand);
 
 		// DEBUG view of components
-		Command overflowMenuItem1 = new DebugMapViewCommand("Activate DEBUG view", mv, gw);
+		Command overflowMenuItem1 = new DebugMapViewCommand("Activate DEBUG tick", this);
 		myToolbar.addCommandToOverflowMenu(overflowMenuItem1);
 	}
 
@@ -164,40 +192,26 @@ public class Game extends Form {
 		positionButton = new BlueButton("Position");
 		positionButton.setCommand(new PositionCommand("Position", gw));
 		positionButton.getCommand().setEnabled(false);
+		positionButton.setEnabled(false);
 		bottomContainer.add(positionButton);
+		// TODO: Draw the button disabled
 
 		pauseGameButton = new BlueButton("Pause");
 		pauseGameButton.setCommand(new PauseCommand("Pause", this));
 		bottomContainer.add(pauseGameButton);
 		
-		/*
-		BlueButton collideWithNPR = new BlueButton("Collide With NPR");
-		collideWithNPR.setCommand(new CollideWithNPRCommand("Collided with NPR", gw));
-		bottomContainer.add(collideWithNPR);
-		
-		BlueButton collideWithBase = new BlueButton("Collide with Base");
-		collideWithBase.setCommand(new CollideWithBaseCommand("Collided with Base", gw));
-		bottomContainer.add(collideWithBase);
-		
-		BlueButton collideWithEnergyStation = new BlueButton("Collide with Energy Station");
-		Command collideWithEnergyStationCommand = new CollideWithEnergyStationCommand("Collided with Energy Station", gw);
-		collideWithEnergyStation.setCommand(collideWithEnergyStationCommand);
-		this.addKeyListener('e', collideWithEnergyStationCommand);
-		bottomContainer.add(collideWithEnergyStation);
-		
-		BlueButton collideWithDrone = new BlueButton("Collide with Drone");
-		Command collideWithDroneCommand = new CollideWithDroneCommand("Collided with Drone", gw);
-		collideWithDrone.setCommand(collideWithDroneCommand);
-		this.addKeyListener('g', collideWithDroneCommand);
-		bottomContainer.add(collideWithDrone);		
-		*/
-
-		BlueButton tick = new BlueButton("Tick");
+		tickDebugButton = new BlueButton("Tick");
 		Command tickCommand = new TickCommand("Tick", gw);
-		tick.setCommand(tickCommand);
-		this.addKeyListener('t', tickCommand);
-		bottomContainer.add(tick);
+		tickDebugButton.setCommand(tickCommand);
+		tickDebugButton.setHidden(true);
+//		this.addKeyListener('t', tickCommand);
+		bottomContainer.add(tickDebugButton);
 		
 		add(BorderLayout.SOUTH, bottomContainer);
+	}
+	
+	public void enableDebugTicks(boolean enable) {
+		tickDebugButton.setHidden(!enable);
+		tickDebugButton.getParent().animateLayout(200);
 	}
 }

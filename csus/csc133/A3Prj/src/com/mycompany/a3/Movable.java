@@ -31,11 +31,11 @@ public class Movable extends GameObject {
     }
     
     // Move method that all Movable objects derive.
-    public void move() {
+    public void move(int tickTime) {
     	// System.out.println("Movable::move()\n");
         double theta = Math.toRadians(90 - heading);
-        double deltaX = Math.cos(theta) * speed;
-        double deltaY = Math.sin(theta) * speed;
+        double deltaX = (Math.cos(theta) * speed * tickTime) / 1000;
+        double deltaY = (Math.sin(theta) * speed * tickTime) / 1000;
         setX(getX() + deltaX);
         setY(getY() + deltaY);
         locationBoundAdjust();

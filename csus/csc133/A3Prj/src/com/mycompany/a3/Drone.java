@@ -15,7 +15,7 @@ public class Drone extends Movable {
 	}
 
 	@Override
-	public void move() {
+	public void move(int tickTime) {
 		// add small random value (e.g., 5 degrees) to heading while moving
 		Random rand = new Random();
 		int headingChange = rand.nextInt(10) - 5;
@@ -24,8 +24,8 @@ public class Drone extends Movable {
 		// calculate the new position of the drone based on its speed and heading
 		double dx = this.getSpeed() * Math.cos(Math.toRadians(90 - this.getHeading()));
 		double dy = this.getSpeed() * Math.sin(Math.toRadians(90 - this.getHeading()));
-		double newX = this.getX() + dx;
-		double newY = this.getY() + dy;
+		double newX = this.getX() + dx * tickTime / 1000;
+		double newY = this.getY() + dy * tickTime / 1000;
 
 		int currentHeading = getHeading();
 		// check if the new position is within the world bounds
@@ -46,6 +46,24 @@ public class Drone extends Movable {
 		this.setX(newX);
 		this.setY(newY);
 		locationBoundAdjust();
+	}
+
+	@Override
+	public void handleCollision(GameObject otherObject) {
+		if (!collidingWith.contains(otherObject)) {
+			if (otherObject instanceof Fixed) {
+				// Drone collides with Base or EnergyBase, do nothing?
+			} else if (otherObject instanceof Drone) {
+				// Drone collides with other Drone, do nothing?
+			} else if (otherObject instanceof Robot) {
+				getWorld().collideRobotWithDrone((Robot)otherObject, this);
+			}
+			collidingWith.add(otherObject);
+			// Make sure the other object doesn't handle this collision.
+			if (!otherObject.collidingWith.contains(this)) {
+				otherObject.collidingWith.add(this);
+			}
+		}	
 	}
 
 	@Override

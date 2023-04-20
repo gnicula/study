@@ -22,6 +22,17 @@ public class BlueButton extends Button {
 		stl.setPadding(5, 5, 5, 5);
 	}
 	
+	private void setBlueButtonDisabledStyle() {
+		Style stl = getDisabledStyle();
+		stl.setFont(Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL));
+		stl.setBgTransparency(255);
+		stl.setBgColor(ColorUtil.WHITE);
+		stl.setFgColor(ColorUtil.BLUE);
+		stl.setBorder(Border.createBevelRaised());
+		stl.setPadding(5, 5, 5, 5);
+		setDisabledStyle(stl);
+	}
+
 	private void setBlueButtonSelectedStyle() {
 		Style stl = getSelectedStyle();
 		stl.setFont(Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL));
@@ -34,6 +45,7 @@ public class BlueButton extends Button {
 		super(text);
 		setBlueButtonUnselectedStyle();
 		setBlueButtonSelectedStyle();
+		setBlueButtonDisabledStyle();
 	}
 
 //	@Override

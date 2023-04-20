@@ -14,6 +14,8 @@ public class NonPlayerRobot extends Robot {
 	public NonPlayerRobot(int size, double x, double y, int color, int speed, int maximumSpeed, int energyLevel,
 			int energyConsumptionRate, GameWorld world) {
 		super(size, x, y, color, speed, maximumSpeed, energyLevel, energyConsumptionRate, world);
+		// NPRs start with a handicap of 1 base.
+		setLastBaseReached(0);
 	}
 	
 	public void setStrategy(IStrategy strat) {
@@ -36,7 +38,13 @@ public class NonPlayerRobot extends Robot {
 
 	// This strategy will look at the Player Robot's lastBaseReached + 1 and goes to guard that base.
 	public void steerTowardNextBase() {
-		Base nextBase = getWorld().getNextBaseInSequence(getWorld().getPlayerRobot().getLastBaseReached());
+		
+		// Base nextBase = getWorld().getNextBaseInSequence(getWorld().getPlayerRobot().getLastBaseReached());
+		
+		// Since we now automatically detect collisions, we do not need to
+		// assign the next lastBaseReached value to NPRs (A3 requirement).
+		// We use this NPR's last base reached value to get the next base target.
+		Base nextBase = getWorld().getNextBaseInSequence(getLastBaseReached());
 		// System.out.println("Move toward next base " + nextBase);
 		double xBasePos = nextBase.getX();
 		double yBasePos = nextBase.getY();
@@ -66,7 +74,7 @@ public class NonPlayerRobot extends Robot {
 	// run out of energy.
 	// They also use a strategy to automatically adjust their steering.
 	@Override
-	public void move() {
+	public void move(int tickTime) {
 		// System.out.println("NonPlayerRobot::move()\n");
 		
 		// The strategy will adjust the steering direction and set it. 
@@ -79,12 +87,11 @@ public class NonPlayerRobot extends Robot {
 
 			setEnergyLevel(Math.max(10, getEnergyLevel() - getEnergyConsumptionRate()));
 	        double theta = Math.toRadians(90 - getHeading());
-	        double deltaX = Math.cos(theta) * getSpeed();
-	        double deltaY = Math.sin(theta) * getSpeed();
+	        double deltaX = Math.cos(theta) * getSpeed() * tickTime / 1000;
+	        double deltaY = Math.sin(theta) * getSpeed() * tickTime / 1000;
 	        setX(getX() + deltaX);
 	        setY(getY() + deltaY);
 	        locationBoundAdjust();
-
 		}
 	}
 	
@@ -93,7 +100,8 @@ public class NonPlayerRobot extends Robot {
 		int upperLeftX = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
 		int upperLeftY = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
 		g.setColor(getColor());
-		g.drawRect(upperLeftX, upperLeftY, getSize(), getSize());	
+		g.drawRect(upperLeftX, upperLeftY, getSize(), getSize());
+		g.drawRect(upperLeftX+1, upperLeftY+1, getSize()-2, getSize()-2);
 	}
 
 	public String toString() {
