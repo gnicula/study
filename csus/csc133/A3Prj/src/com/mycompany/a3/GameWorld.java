@@ -291,6 +291,7 @@ public class GameWorld extends Observable {
 	public void collideRobotWithNPR(Robot robot, NonPlayerRobot npr) {
 		robot.setDamageLevel(robot.getDamageLevel() + NPR_COLLISION_DAMAGE);
 		npr.setDamageLevel(npr.getDamageLevel() + NPR_COLLISION_DAMAGE);
+		fadeColor(npr);
 		if (sound) {
 			npr_collision.play();
 		}
@@ -340,6 +341,9 @@ public class GameWorld extends Observable {
 		fadeColor(npr1);
 		npr2.setDamageLevel(npr2.getDamageLevel() + NPR_COLLISION_DAMAGE);
 		fadeColor(npr2);
+		if (sound) {
+			npr_collision.play();
+		}
 	}
 
 	
