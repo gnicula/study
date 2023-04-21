@@ -3,6 +3,7 @@ package com.mycompany.a3;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
+// New in A3, pauses the game allowing editing of the game world.
 public class PauseCommand extends Command {
 	
 	private Game game;
@@ -13,7 +14,7 @@ public class PauseCommand extends Command {
 	}
 
 	// This method is called by the 'Pause' button on the bottom panel
-	// and switches between playing and select/edit mode.
+	// and switches between playing and paused select/edit mode.
 	public void actionPerformed(ActionEvent ev) {
 		// System.out.println("Pause");
 		game.handlePause();

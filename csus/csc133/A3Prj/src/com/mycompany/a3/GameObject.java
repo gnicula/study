@@ -16,7 +16,7 @@ public class GameObject implements ICollider, IDrawable {
 	// Vector to keep objects that this object is currently colliding with.
 	protected ArrayList<GameObject> collidingWith;
 	
-	public static final int STRING_OFFSET = 8;
+	public static final int STRING_OFFSET = 6;
 
 	// Common to all game objects is size, location, color, and a handle to the model.
 	public GameObject(int size, double x, double y, int color, GameWorld w) {
@@ -61,17 +61,22 @@ public class GameObject implements ICollider, IDrawable {
 	}
 
 	// ICollider interface methods
+	// Check for collision is done measuring distance
+	// between object centers rather than their bounded
+	// boxes intersection. I choose this method because
+	// the Drones and Bases are triangles and visually
+	// the bounded boxes based collision looks unconfirmed.
 	@Override
 	public boolean collidesWith(GameObject other) {
 		double distX = getX() - other.getX();
 		double distY = getY() - other.getY();
-		double distSqr = distX * distX + distY * distY;
+		double distC = Math.sqrt(distX * distX + distY * distY);
 		
 		int thisR= this.getSize() / 2;
 		int otherR= other.getSize() / 2;
-		// Compute (thisR + otherR)^2 to compare directly
-		int minDistSqr= (thisR + otherR) * (thisR + otherR);
-		final boolean isCollision = distSqr < minDistSqr;
+		// Compute (thisR + otherR - 1) to compare
+		int minDist = thisR + otherR - 1;
+		final boolean isCollision = distC < minDist;
 		// If collision didn't happen and they were colliding
 		// Remove each other from their collidingWith list.
 		if (!isCollision) {

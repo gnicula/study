@@ -23,12 +23,10 @@ public class ScoreView extends Container implements Observer {
 	
 	public ScoreView(GameWorld gw) {
 		super();
-				
-//		Robot playerRobot = gw.getPlayerRobot();
 		int timeStep = gw.getCount();
-		int livesLeft = 3; //gw.getLivesLeft();
+		int livesLeft = gw.getRobotInitialLives();
 		int lastBase = 1; //playerRobot.getLastBaseReached();
-		int energyValue = 100; // playerRobot.getEnergyLevel();
+		int energyValue = gw.getRobotInitialEnergy();
 		int damageValue = 0; //playerRobot.getDamageLevel();
 		boolean soundSetting = gw.getSoundSetting();
 		createUiElements(timeStep, livesLeft, lastBase, energyValue, damageValue, soundSetting);

@@ -166,6 +166,7 @@ public class Robot extends Movable implements ISteerable {
 		this.lastBaseReached = lastBaseReached;
 		
 		if (lastBaseReached == getWorld().getNumBases()) {
+			getWorld().playSoundFor("game_win");
 			System.out.println("Game over, you win! Total time: #" + getWorld().getCount());
 			getWorld().exit();
 		}
@@ -255,6 +256,8 @@ public class Robot extends Movable implements ISteerable {
 		}
 	}
 
+	// Draw itself as a filled rectangle.
+	// I also added lines that show heading and steering.
 	@Override
 	public void draw(Graphics g, Point pCmpRelPrnt) {
 		int centerX = pCmpRelPrnt.getX() + (int)getX();

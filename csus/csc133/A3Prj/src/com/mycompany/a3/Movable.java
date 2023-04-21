@@ -1,5 +1,6 @@
 package com.mycompany.a3;
 
+// Movable object base class
 public class Movable extends GameObject {
     // Class Attributes
     private int speed;

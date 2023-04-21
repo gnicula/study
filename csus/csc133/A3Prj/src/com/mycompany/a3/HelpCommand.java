@@ -19,7 +19,8 @@ public class HelpCommand extends Command {
 
 	private void displayHelpDialogue() {
 		Command cOk = new Command("Ok");
-		String dialogText = "Accelerate - 'a'\nBrake - 'b'\nTurn Left - 'l'\nTurn Right - 'r'\nCollide With Energy Station - 'e'\nCollide With Drone - 'g'\nTick - 't'";
+		String dialogText = "Commnads available:\n" + 
+				"Accelerate - 'a'\nBrake - 'b'\nTurn Left - 'l'\nTurn Right - 'r'\n";
 		Command[] cmds = new Command[] { cOk };
 		Dialog.show("Game Help", dialogText, cmds);
 	}

@@ -7,29 +7,30 @@ import com.codename1.ui.Display;
 
 public class BGSound implements Runnable {
 
-	private Media mmanager;
+	private Media sndMedia;
 
 	public BGSound(String fIn) {
 		try {
 			InputStream in = Display.getInstance().getResourceAsStream(getClass(), "/" + fIn);
-			mmanager = MediaManager.createMedia(in, "audio/wav", this);
+			sndMedia = MediaManager.createMedia(in, "audio/wav", this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void pause() {
-		mmanager.pause();
+		sndMedia.pause();
 	}
 
 	public void play() {
-		mmanager.play();
+		sndMedia.play();
 	}
 
+	// Should loop from beginning.
 	@Override
 	public void run() {
-		mmanager.setTime(0);
-		mmanager.play();
+		sndMedia.setTime(0);
+		sndMedia.play();
 	}
 
 }

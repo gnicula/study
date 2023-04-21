@@ -1,6 +1,5 @@
 package com.mycompany.a3;
 
-import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Graphics;
 import com.codename1.ui.geom.Point;
 
@@ -29,6 +28,7 @@ public class Base extends Fixed {
 		this.sequenceNumber = sequenceNumber;
 	}
 
+	// Draw itself as a triangle
 	@Override
 	public void draw(Graphics g, Point pCmpRelPrnt) {
 		int x[] = new int[3];

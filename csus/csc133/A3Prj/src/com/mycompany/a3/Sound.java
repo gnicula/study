@@ -5,14 +5,15 @@ import com.codename1.media.Media;
 import com.codename1.media.MediaManager;
 import com.codename1.ui.Display;
 
+// New in A3, Sound class that loads a file and plays it.
 public class Sound {
 
-	private Media media;
+	private Media sndMedia;
 
 	public Sound(String fIn) {
 		try {
 			InputStream in = Display.getInstance().getResourceAsStream(getClass(), "/" + fIn);
-			media = MediaManager.createMedia(in, "audio/wav");
+			sndMedia = MediaManager.createMedia(in, "audio/wav");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -20,8 +21,8 @@ public class Sound {
 	}
 
 	public void play() {
-		media.setTime(0);
-		media.play();
+		sndMedia.setTime(0);
+		sndMedia.play();
 	}
 
 }

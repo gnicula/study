@@ -133,7 +133,7 @@ public class NonPlayerRobot extends Robot {
 		// Find ideal heading (90 - beta)
 		int idealHeading = (int)(90.0 - angleBDegree);
 		// Compute and adjust steering
-		// IMPORTANT Do not pass values that have absolute value > 180
+		// IMPORTANT scale steerAdjust to (-180, 180)
 		int steerAdjust = getHeading() - idealHeading;
 		if (steerAdjust > 180) {
 			steerAdjust %= 360;

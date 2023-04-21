@@ -20,13 +20,13 @@ public class GameWorld extends Observable {
 	private final int NPR_COLLISION_DAMAGE = 10;
 	// Delta in pixels from selection pointer to center of object
 	// to be considered selected.
-	private final int SELECT_DELTA = 15;
+	private final int SELECT_DELTA = 25;
 	// Offset of initial objects positions with margins
 	private final int MARGIN_PLACE = 150;
 
 	// Player Robot initial values
 	private final int INITIAL_ENERGY = 600;
-	private final int NUM_LIVES = 3;
+	private final int INITIAL_NUM_LIVES = 3;
 
 	// Sounds
 	private BGSound bgs;
@@ -36,6 +36,8 @@ public class GameWorld extends Observable {
 	private Sound drone_collision;
 	private Sound npr_collision;
 	private Sound destroyed;
+	private Sound game_win;
+	private Sound game_lost;
 
 	private int height = 0;
 	private int width = 0;
@@ -69,10 +71,14 @@ public class GameWorld extends Observable {
 		goc.add(new EnergyStation(90, 2* MARGIN_PLACE, height/2, ENERGYGREEN, this));
 		goc.add(new EnergyStation(80, width - 2 * MARGIN_PLACE, height/2, ENERGYGREEN, this));
 
-		// Three drones hovering NW
-		goc.add(new Drone(40, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 35, 45, this));
-		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK, 35, 135, this));
-		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK, 35, 225, this));
+		// Three drones hovering NW with random speed and random heading
+		Random rand = new Random();
+		goc.add(new Drone(50, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 
+				rand.nextInt(10) + 35, rand.nextInt(360), this));
+		goc.add(new Drone(50, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK,
+				rand.nextInt(10) + 35, rand.nextInt(360), this));
+		goc.add(new Drone(50, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK,
+				rand.nextInt(10) + 35, rand.nextInt(360), this));
 
 		// Get the first base to initialize Robot locations.
 		IIterator it = goc.getIterator();
@@ -81,20 +87,21 @@ public class GameWorld extends Observable {
 		// Initialize 3 enemy non player robots with different strategies.
 		// Each of them close to the player robot and the first three bases
 		NonPlayerRobot npr = new NonPlayerRobot(50, 3*MARGIN_PLACE, MARGIN_PLACE, 
-				ColorUtil.MAGENTA, 30, 30, 100, 1, this);
+				ColorUtil.MAGENTA, 40, 40, 100, 1, this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
 		npr = new NonPlayerRobot(50, MARGIN_PLACE, 3*MARGIN_PLACE,
-				ColorUtil.MAGENTA, 30, 30, 100, 1, this);
+				ColorUtil.MAGENTA, 40, 40, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 		npr = new NonPlayerRobot(50, width/2-MARGIN_PLACE, height/2-MARGIN_PLACE,
-				ColorUtil.MAGENTA, 30, 30, 100, 1, this);
+				ColorUtil.MAGENTA, 40, 40, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 
 		// Player Robot will always be the last element in the collection.
-		goc.add(Robot.getInstance(60, first.getX()+10, first.getY()+10, ColorUtil.argb(255, 255, 1, 1), 50, 100, INITIAL_ENERGY, 1, this));
+		goc.add(Robot.getInstance(60, first.getX()+10, first.getY()+10, 
+				ColorUtil.argb(255, 255, 1, 1), 50, 100, INITIAL_ENERGY, 1, this));
 
 		numBases = getNumBases();
 	}
@@ -124,6 +131,14 @@ public class GameWorld extends Observable {
 		return getPlayerRobot().getLives();
 	}
 
+	public int getRobotInitialEnergy() {
+		return INITIAL_ENERGY;
+	}
+
+	public int getRobotInitialLives() {
+		return INITIAL_NUM_LIVES;
+	}
+
 	public boolean getSoundSetting() {
 		return sound;
 	}
@@ -140,8 +155,15 @@ public class GameWorld extends Observable {
 	}
 	
 	public void playSoundFor(String description) {
-		if (sound && description.equalsIgnoreCase("destroyed")) {
-			destroyed.play();
+		if (sound) {
+			if (description.equalsIgnoreCase("destroyed")) {
+				destroyed.play();
+			} else if (description.equalsIgnoreCase("game_win")) {
+				bgs.pause();
+				game_win.play();
+			} else if (description.equalsIgnoreCase("game_lost")) {
+				game_lost.play();
+			}
 		}
 	}
 	
@@ -220,6 +242,7 @@ public class GameWorld extends Observable {
 		// Gracefully stop background sound
 		bgs.pause();
 		// exit
+		// TODO: Add an exit dialog with statistics
 		System.exit(0);
 	}
 	
@@ -386,7 +409,9 @@ public class GameWorld extends Observable {
 	}
 
 	public void enablePosition(boolean b) {
-		userEdit = b;
+		if (currentSelectedObject != null) {
+			userEdit = b;
+		}
 	}
 	
 	public boolean isUserEdit() {
@@ -437,6 +462,7 @@ public class GameWorld extends Observable {
 	}
 	
 	public void moveSelectedObjectTo(int xPos, int yPos) {
+		// System.out.println("moveSelectedObjectTo: " + xPos + ", " + yPos);
 		// Check if there is a selected object and move it to
 		// its new location.
 		if (currentSelectedObject != null) {
@@ -460,6 +486,8 @@ public class GameWorld extends Observable {
 		drone_collision = new Sound("drone_collision.wav");
 		npr_collision = new Sound("npr_collision.wav");
 		destroyed = new Sound("destroyed.wav");
+		game_win = new Sound("game_win.wav");
+		game_lost = new Sound("game_lost.wav");
 	}
 
 	// Every tick we check for collisions and delegate to objects

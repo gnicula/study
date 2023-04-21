@@ -4,6 +4,7 @@ import com.codename1.ui.CheckBox;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
+// Enables/disables game sound.
 public class SoundCommand extends Command {
 	private GameWorld gw;
 

@@ -43,11 +43,14 @@ public class Fixed extends GameObject implements ISelectable {
 		return false;
 	}
 
+	// Collisions with Fixed objects (Base and Energy Stations)
+	// are handled by the Movable Objects that they collide with.
+	// So we just dispatch to them for handling.
 	@Override
 	public void handleCollision(GameObject otherObject) {
 		if (!collidingWith.contains(otherObject)) {
-			if (otherObject instanceof Robot) {
-				((Robot)otherObject).handleCollision(this);
+			if (otherObject instanceof Movable) {
+				otherObject.handleCollision(this);
 			}
 		}	
 	}

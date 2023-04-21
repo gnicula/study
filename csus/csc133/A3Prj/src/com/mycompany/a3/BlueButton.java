@@ -3,7 +3,6 @@ package com.mycompany.a3;
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Button;
 import com.codename1.ui.Font;
-import com.codename1.ui.geom.Dimension;
 import com.codename1.ui.plaf.Border;
 import com.codename1.ui.plaf.Style;
 
@@ -22,6 +21,7 @@ public class BlueButton extends Button {
 		stl.setPadding(5, 5, 5, 5);
 	}
 	
+	// Set disabled style for A3 disabled button state.
 	private void setBlueButtonDisabledStyle() {
 		Style stl = getDisabledStyle();
 		stl.setFont(Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL));
@@ -30,7 +30,6 @@ public class BlueButton extends Button {
 		stl.setFgColor(ColorUtil.BLUE);
 		stl.setBorder(Border.createBevelRaised());
 		stl.setPadding(5, 5, 5, 5);
-		setDisabledStyle(stl);
 	}
 
 	private void setBlueButtonSelectedStyle() {

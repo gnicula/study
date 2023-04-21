@@ -4,11 +4,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.codename1.charts.util.ColorUtil;
-import com.codename1.ui.ComponentImage;
 import com.codename1.ui.Container;
 import com.codename1.ui.Graphics;
-import com.codename1.ui.Image;
-import com.codename1.ui.Label;
 import com.codename1.ui.geom.Point;
 
 public class MapView extends Container implements Observer {
@@ -25,16 +22,17 @@ public class MapView extends Container implements Observer {
 		// Call the method in GameWorld (Observable) that outputs the
 		// game object information to the console.
 		gw.mCommand();
-		// Repaint all objects.
+		// Repaint will trigger paint() and it should paint all objects.
 		repaint();
 	}
 
 	@Override
 	public void paint(Graphics g) {
-		// Set a light gray background 
+		// Set a white background 
 		 g.setColor(ColorUtil.WHITE);
 		 g.fillRect(getX(), getY(), gw.getWidth(), gw.getHeight());
-		// Now paint all objects as rectangles on the image
+		// Iterate through all objects and ask them to draw() themselves
+		 // using this Graphics object.
 		IIterator it = gw.getGameObjectsIterator();
 		while (it.hasNext()) {
 			GameObject go = it.getNext();
@@ -42,8 +40,10 @@ public class MapView extends Container implements Observer {
 		}
 	}
 
+	// Used by the editing mode when game is paused.
 	@Override 
 	public void pointerPressed(int x, int y) {
+		// Handle pointer pressed only when 'paused'
 		if (gw.getPaused()) {
 			int xPos = x - getParent().getAbsoluteX() - getX();
 			int	yPos = y - getParent().getAbsoluteY() - getY();

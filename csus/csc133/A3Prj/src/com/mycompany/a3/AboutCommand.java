@@ -20,7 +20,8 @@ public class AboutCommand extends Command {
 	// This method is a helper and displays the about dialog.
 	private void displayAboutDialogue() {
 		Command cOk = new Command("Close");
-		String dialogText = "Name: Gabriele Nicula\nCourse Name: CSC-133\nVersion: 2.1";
+		String dialogText = "Name: Gabriele Nicula\nCourse Name: CSC-133\nVersion: 3.2" +
+				"\n\nSounds from findsounds.com and pixabay.com";
 		Command[] cmds = new Command[] {cOk};
 		Dialog.show("About", dialogText, cmds);
 	}

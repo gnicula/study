@@ -4,13 +4,9 @@ import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.CheckBox;
 import com.codename1.ui.Command;
 import com.codename1.ui.Component;
-import com.codename1.ui.ComponentImage;
 import com.codename1.ui.Container;
-import com.codename1.ui.Dialog;
 import com.codename1.ui.Form;
-import com.codename1.ui.Image;
 import com.codename1.ui.Label;
-import com.codename1.ui.TextField;
 import com.codename1.ui.Toolbar;
 import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.events.ActionListener;
@@ -35,6 +31,7 @@ public class Game extends Form implements Runnable {
 	private UITimer gameTimer;
 	private int elapsedTime = 0;
 
+	private Command debugMapCommand;
 	private Command accelerateCommand;
 	private BlueButton accelerateButton;
 	private BlueButton brakeButton;
@@ -161,8 +158,10 @@ public class Game extends Form implements Runnable {
 		myToolbar.addCommandToRightBar(helpCommand);
 
 		// DEBUG view of components
-		Command overflowMenuItem1 = new DebugMapViewCommand("Activate DEBUG tick", this);
-		myToolbar.addCommandToOverflowMenu(overflowMenuItem1);
+//		debugMapCommand = new DebugMapViewCommand("Activate DEBUG tick", this);
+//		// Change to 'true' to activate debug cmd in overflow menu.
+//		debugMapCommand.setEnabled(false);
+//		myToolbar.addCommandToOverflowMenu(debugMapCommand);
 	}
 
 	// Left container has three buttons in a vertical BoxLayout.
@@ -239,16 +238,17 @@ public class Game extends Form implements Runnable {
 	}
 	
 	// NOT part of A3 assignment, can be used to debug by running
-	// step by step. It works just one time and it's not enabled/disabled
-	// correctly with pause/play.
+	// step by step. It works only when the game is not paused.
 	public void enableDebugTicks(boolean enable) {
-		tickDebugButton.setHidden(!enable);
-		tickDebugButton.getParent().animateLayout(200);
-		if (enable) {
-			// Stop timer
-			gameTimer.cancel();
-		} else {
-			gameTimer.schedule(TICK_TIME, true, this);			
+		if (!gw.getPaused() ) {
+			tickDebugButton.setHidden(!enable);
+			tickDebugButton.getParent().animateLayout(200);
+			if (enable) {
+				// Stop timer
+				gameTimer.cancel();
+			} else {
+				gameTimer.schedule(TICK_TIME, true, this);			
+			}
 		}
 	}
 }

@@ -3,10 +3,9 @@ package com.mycompany.a3;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
-// This class is a debug command that I used to visually see
-// the position of the game objects. 
-// I used it to test my implementation of non player robot strategies
-// and generally was helpful to get visual feedback of the model 
+// This class is a debug command that can be used to perform
+// manual 'ticks' of the GameWorld.
+// It can be used to check expected behavior step by step.
 public class DebugMapViewCommand extends Command {
 
 	private boolean isActive = false;

@@ -3,6 +3,8 @@ package com.mycompany.a3;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
+// New in A3, enables position mode which can be used to
+// drop the currently selected game object to a new location.
 public class PositionCommand extends Command {
 	private GameWorld gw;
 
