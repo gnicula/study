@@ -1,5 +1,6 @@
 package com.mycompany.a3;
 
+import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Graphics;
 import com.codename1.ui.geom.Point;
 
@@ -15,6 +16,7 @@ public class Robot extends Movable implements ISteerable {
 	private final int SPEED_INCREASE = 5;
 	private final int SPEED_DECREASE = 5;
 	private final int MAX_STEERING_DIRECTION = 40;
+	private final int STEERING_ADJUST_STEP = 4;
 	private final int MAX_POSSIBLE_DAMAGE = 100;
 
 	// steeringDirection is the adjustment angle in degrees in range -40 to 40.
@@ -24,7 +26,7 @@ public class Robot extends Movable implements ISteerable {
 	private int energyConsumptionRate;
 	// damage level is an int between 0-100.
 	protected int damageLevel;
-	private int lastBaseReached;
+	protected int lastBaseReached;
 	private int lives;
 	// Use the following attributes to memorize initial position and energy value.
 	// These are used for reinitializing after losing a life.
@@ -92,12 +94,12 @@ public class Robot extends Movable implements ISteerable {
 
 	// Methods for ISteerable interface
 	public void steerLeft() {
-		this.steeringDirection += 5;
+		this.steeringDirection += STEERING_ADJUST_STEP;
 		clampSteering();
 	}
 
 	public void steerRight() {
-		this.steeringDirection -= 5;
+		this.steeringDirection -= STEERING_ADJUST_STEP;
 		clampSteering();
 	}
 
@@ -163,7 +165,7 @@ public class Robot extends Movable implements ISteerable {
 	public void setLastBaseReached(int lastBaseReached) {
 		this.lastBaseReached = lastBaseReached;
 		
-		if (lastBaseReached == getWorld().getNumBases()) { 
+		if (lastBaseReached == getWorld().getNumBases()) {
 			System.out.println("Game over, you win! Total time: #" + getWorld().getCount());
 			getWorld().exit();
 		}
@@ -185,8 +187,8 @@ public class Robot extends Movable implements ISteerable {
 	// Adjusts speed based on damage taken.
 	private void adjustSpeed(int speed) {
 
-		speed = Math.min(maximumSpeed, speed);
-		speed = (int)((float)speed * ((100.0 - (float)damageLevel) / 100.0));
+		int currentMaxSpeed = (int)((float)maximumSpeed * ((100.0 - (float)damageLevel) / 100.0));
+		speed = Math.min(currentMaxSpeed, speed);
 
 		if (energyLevel == 0) {
 			speed = 0;
@@ -207,6 +209,15 @@ public class Robot extends Movable implements ISteerable {
 			// Update the heading of the robot
 			setHeading(newHeading);			
 			super.move(tickTime);
+			// Simulate steering direction pull towards center.
+			// Makes game more enjoyable, hope it stays within A3
+			// requirements with this.
+			// Comment below code to remove it if so desired.
+			if (steeringDirection > 0) {
+				steeringDirection -= 1;
+			} else if (steeringDirection < 0) {
+				steeringDirection += 1;
+			}
 		} else {
 			getWorld().playSoundFor("destroyed");
 			System.out.println("Out of Energy, you lose a life.");
@@ -246,10 +257,23 @@ public class Robot extends Movable implements ISteerable {
 
 	@Override
 	public void draw(Graphics g, Point pCmpRelPrnt) {
-		int upperLeftX = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
-		int upperLeftY = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
+		int centerX = pCmpRelPrnt.getX() + (int)getX();
+		int centerY = pCmpRelPrnt.getY() + (int)getY();
+		int upperLeftX = centerX - getSize()/2;
+		int upperLeftY = centerY - getSize()/2;
 		g.setColor(getColor());
-		g.fillRect(upperLeftX, upperLeftY, getSize(), getSize());	
+		g.fillRect(upperLeftX, upperLeftY, getSize(), getSize());
+		// Add heading and steering directions as lines
+		g.setColor(ColorUtil.WHITE);
+		g.drawLine(centerX, centerY, 
+				(int)(centerX + getSize() * Math.sin(Math.toRadians(getHeading()))/2),
+				(int)(centerY + getSize() * Math.cos(Math.toRadians(getHeading()))/2));
+		g.setColor(ColorUtil.BLACK);
+		g.drawLine(centerX, centerY, 
+				(int)(centerX + 
+						getSize() * Math.sin(Math.toRadians(getHeading()+steeringDirection))/2),
+				(int)(centerY + 
+						getSize() * Math.cos(Math.toRadians(getHeading()+steeringDirection))/2));
 	}
 	
 	private void clampSteering() {

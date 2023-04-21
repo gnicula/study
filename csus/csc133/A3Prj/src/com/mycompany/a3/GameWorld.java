@@ -25,7 +25,7 @@ public class GameWorld extends Observable {
 	private final int MARGIN_PLACE = 150;
 
 	// Player Robot initial values
-	private final int INITIAL_ENERGY = 1000;
+	private final int INITIAL_ENERGY = 600;
 	private final int NUM_LIVES = 3;
 
 	// Sounds
@@ -66,12 +66,13 @@ public class GameWorld extends Observable {
 		// Four energy stations for refill
 		goc.add(new EnergyStation(60, width/2, 2 * MARGIN_PLACE, ENERGYGREEN, this));
 		goc.add(new EnergyStation(70, width/2, height - 2 * MARGIN_PLACE, ENERGYGREEN, this));
-		goc.add(new EnergyStation(50, 2* MARGIN_PLACE, height/2, ENERGYGREEN, this));
+		goc.add(new EnergyStation(90, 2* MARGIN_PLACE, height/2, ENERGYGREEN, this));
 		goc.add(new EnergyStation(80, width - 2 * MARGIN_PLACE, height/2, ENERGYGREEN, this));
 
-		// Two drones hovering NW
-		goc.add(new Drone(40, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 25, 45, this));
-		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK, 25, 135, this));
+		// Three drones hovering NW
+		goc.add(new Drone(40, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 35, 45, this));
+		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK, 35, 135, this));
+		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK, 35, 225, this));
 
 		// Get the first base to initialize Robot locations.
 		IIterator it = goc.getIterator();
@@ -80,20 +81,20 @@ public class GameWorld extends Observable {
 		// Initialize 3 enemy non player robots with different strategies.
 		// Each of them close to the player robot and the first three bases
 		NonPlayerRobot npr = new NonPlayerRobot(50, 3*MARGIN_PLACE, MARGIN_PLACE, 
-				ColorUtil.MAGENTA, 25, 25, 100, 1, this);
+				ColorUtil.MAGENTA, 30, 30, 100, 1, this);
 		npr.setStrategy(new AttackStrategy(npr));
 		goc.add(npr);
 		npr = new NonPlayerRobot(50, MARGIN_PLACE, 3*MARGIN_PLACE,
-				ColorUtil.MAGENTA, 25, 25, 100, 1, this);
+				ColorUtil.MAGENTA, 30, 30, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 		npr = new NonPlayerRobot(50, width/2-MARGIN_PLACE, height/2-MARGIN_PLACE,
-				ColorUtil.MAGENTA, 25, 25, 100, 1, this);
+				ColorUtil.MAGENTA, 30, 30, 100, 1, this);
 		npr.setStrategy(new NextBaseStrategy(npr));
 		goc.add(npr);
 
 		// Player Robot will always be the last element in the collection.
-		goc.add(Robot.getInstance(60, first.getX()+10, first.getY()+10, ColorUtil.argb(255, 255, 1, 1), 100, 100, INITIAL_ENERGY, 1, this));
+		goc.add(Robot.getInstance(60, first.getX()+10, first.getY()+10, ColorUtil.argb(255, 255, 1, 1), 50, 100, INITIAL_ENERGY, 1, this));
 
 		numBases = getNumBases();
 	}
@@ -145,9 +146,9 @@ public class GameWorld extends Observable {
 	}
 	
 	// Set the dimensions of the map from MapView.
-	public void setDimensions(int height, int width) {
-		this.setHeight(height);
-		this.setWidth(width);
+	public void setDimensions(int width, int height) {
+		setHeight(height);
+		setWidth(width);
 		initObjects();
 	}
 
@@ -324,10 +325,12 @@ public class GameWorld extends Observable {
 			addRandomEnergyStation();
 		}
 		// Sound collision on both depleted and non-depleted energy stations
-		if (robot instanceof NonPlayerRobot) {
-			energy2.play();
-		} else {
-			energy1.play();
+		if (sound) {
+			if (robot instanceof NonPlayerRobot) {
+				energy2.play();
+			} else {
+				energy1.play();
+			}
 		}
 	}
 
@@ -414,6 +417,8 @@ public class GameWorld extends Observable {
 		if (!foundObjectToSelect) {
 			unselectAllObjects();
 		}
+		setChanged();
+		notifyObservers();
 	}
 	
 	public void selectObject(Fixed obj) {
@@ -439,6 +444,8 @@ public class GameWorld extends Observable {
 			// clear userEdit flag
 			userEdit = false;
 		}
+		setChanged();
+		notifyObservers();
 	}
 	
 	public void createSounds() {
@@ -487,12 +494,12 @@ public class GameWorld extends Observable {
 	// Halves the current alpha of an object to fade out the color.
 	// Alternatively set a lighter version of the color.
 	private void fadeColor(GameObject obj) {
-		final int fadeValue = 20;
+		final int fadeValue = 30;
 		int currentColor = obj.getColor();
-		int alpha = Math.max(0, ColorUtil.alpha(currentColor) - fadeValue);
-		int red = Math.max(0, ColorUtil.red(currentColor) - fadeValue);
-		int green = Math.max(0, ColorUtil.green(currentColor) - fadeValue);
-		int blue = Math.max(0, ColorUtil.blue(currentColor) - fadeValue);
+		int alpha = Math.max(10, ColorUtil.alpha(currentColor) - fadeValue);
+		int red = Math.min(245, ColorUtil.red(currentColor) + fadeValue);
+		int green = Math.min(245, ColorUtil.green(currentColor) + fadeValue);
+		int blue = Math.min(245, ColorUtil.blue(currentColor) + fadeValue);
 		obj.setColor(ColorUtil.argb(alpha, red, green, blue));
 	}
 

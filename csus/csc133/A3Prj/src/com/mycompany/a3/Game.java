@@ -26,7 +26,7 @@ import com.codename1.ui.util.UITimer;
 // It also creates the toolbar and the side menu.
 public class Game extends Form implements Runnable {
 
-	private final int TICK_TIME = 50;
+	private final int TICK_TIME = 20;
 
 	private GameWorld gw;
 	private MapView mv;
@@ -35,6 +35,12 @@ public class Game extends Form implements Runnable {
 	private UITimer gameTimer;
 	private int elapsedTime = 0;
 
+	private Command accelerateCommand;
+	private BlueButton accelerateButton;
+	private BlueButton brakeButton;
+	private BlueButton leftButton;
+	private BlueButton rightButton;
+	
 	private BlueButton pauseGameButton;
 	private BlueButton positionButton;
 	private BlueButton tickDebugButton;
@@ -79,15 +85,34 @@ public class Game extends Form implements Runnable {
 		gw.pause();
 		boolean isPaused = gw.getPaused();
 		if (isPaused) {
+			// Disable key listeners
+			this.removeKeyListener('a', accelerateCommand);
+			this.removeKeyListener('b', brakeButton.getCommand());
+			this.removeKeyListener('l', leftButton.getCommand());
+			this.removeKeyListener('r', rightButton.getCommand());
+			
 			gameTimer.cancel();
 		} else {
+			// Re-enable key listeners
+			this.addKeyListener('a', accelerateCommand);
+			this.addKeyListener('b', brakeButton.getCommand());
+			this.addKeyListener('l', leftButton.getCommand());
+			this.addKeyListener('r', rightButton.getCommand());
+			
 			gameTimer.schedule(TICK_TIME, true, this);
 		}
+		// Enable/Disable menu item commands as per A3 assignment
+		accelerateCommand.setEnabled(!isPaused);
+		// Enable/Disable Buttons as per A3 assignment
+		accelerateButton.setEnabled(!isPaused);
+		brakeButton.setEnabled(!isPaused);
+		leftButton.setEnabled(!isPaused);
+		rightButton.setEnabled(!isPaused);
+		
 		String buttonText = isPaused ? "Play" : "Pause";
 		pauseGameButton.setText(buttonText);
 		positionButton.getCommand().setEnabled(isPaused);
 		positionButton.setEnabled(isPaused);
-		// TODO: Draw the button disabled/enabled
 	}
 
 	// Creates all the GUI elements.
@@ -104,8 +129,8 @@ public class Game extends Form implements Runnable {
 		// centerContainer.getAllStyles().setBgColor(ColorUtil.LTGRAY);
 		centerContainer.getAllStyles().setBorder(
 				Border.createLineBorder(2, ColorUtil.rgb(255, 0, 0)));
-		add(BorderLayout.CENTER, centerContainer);
 		createToolbar();
+		add(BorderLayout.CENTER, centerContainer);
 	}
 
 	// Creates a toolbar with a menu and labels as defined in the assignment.
@@ -117,9 +142,10 @@ public class Game extends Form implements Runnable {
 		myTF.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 0));
 		myToolbar.setTitleComponent(myTF);
 		
-		Command sideMenuItem1 = new AccelerateCommand("Accelerate", gw);
+		// Accelerate command is initialized by the left container
+		Command sideMenuItem1 = accelerateCommand;
 		myToolbar.addCommandToSideMenu(sideMenuItem1);
-		this.addKeyListener('a', sideMenuItem1);
+//		this.addKeyListener('a', sideMenuItem1);
 
 		CheckBox sideMenuItem2 = new CheckBox("Sound ON/OFF");
 		sideMenuItem2.setCommand(new SoundCommand("Sound Command", gw));
@@ -144,15 +170,17 @@ public class Game extends Form implements Runnable {
 		Container leftContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
 		leftContainer.getAllStyles().setPadding(Component.TOP, 100);
 		
-		BlueButton accel = new BlueButton("Accelerate");
-		accel.setCommand(new AccelerateCommand("Accelerate", gw));
-		leftContainer.add(accel);
+		accelerateButton = new BlueButton("Accelerate");
+		accelerateCommand = new AccelerateCommand("Accelerate", gw);
+		accelerateButton.setCommand(accelerateCommand);
+		this.addKeyListener('a', accelerateCommand);
+		leftContainer.add(accelerateButton);
 		
-		BlueButton left = new BlueButton("Left");
+		leftButton = new BlueButton("Left");
 		Command leftCommand = new LeftCommand("Left", gw);
-		left.setCommand(leftCommand);
+		leftButton.setCommand(leftCommand);
 		this.addKeyListener('l', leftCommand);
-		leftContainer.add(left);
+		leftContainer.add(leftButton);
 		
 		BlueButton strats = new BlueButton("Change Strategies");
 		strats.setCommand(new StrategiesCommand("Strategy", gw));
@@ -168,17 +196,17 @@ public class Game extends Form implements Runnable {
 		Container rightContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
 		rightContainer.getAllStyles().setPadding(Component.TOP, 100);
 		
-		BlueButton brake = new BlueButton("Brake");
+		brakeButton = new BlueButton("Brake");
 		Command brakeCommand = new BrakeCommand("Brake", gw);
-		brake.setCommand(brakeCommand);
+		brakeButton.setCommand(brakeCommand);
 		this.addKeyListener('b', brakeCommand);
-		rightContainer.add(brake);
+		rightContainer.add(brakeButton);
 		
-		BlueButton right = new BlueButton("Right");
+		rightButton = new BlueButton("Right");
 		Command rightCommand = new RightCommand("Right", gw);
-		right.setCommand(rightCommand);
+		rightButton.setCommand(rightCommand);
 		this.addKeyListener('r', rightCommand);
-		rightContainer.add(right);
+		rightContainer.add(rightButton);
 			
 		rightContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.BLUE));
 		add(BorderLayout.EAST, rightContainer);
@@ -210,8 +238,17 @@ public class Game extends Form implements Runnable {
 		add(BorderLayout.SOUTH, bottomContainer);
 	}
 	
+	// NOT part of A3 assignment, can be used to debug by running
+	// step by step. It works just one time and it's not enabled/disabled
+	// correctly with pause/play.
 	public void enableDebugTicks(boolean enable) {
 		tickDebugButton.setHidden(!enable);
 		tickDebugButton.getParent().animateLayout(200);
+		if (enable) {
+			// Stop timer
+			gameTimer.cancel();
+		} else {
+			gameTimer.schedule(TICK_TIME, true, this);			
+		}
 	}
 }

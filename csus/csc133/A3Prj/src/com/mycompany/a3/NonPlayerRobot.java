@@ -70,6 +70,17 @@ public class NonPlayerRobot extends Robot {
 		this.damageLevel = damageLevel;
 	}
 	
+	@Override
+	public void setLastBaseReached(int lastBaseReached) {
+		this.lastBaseReached = lastBaseReached;
+		
+		if (lastBaseReached == getWorld().getNumBases()) {
+			System.out.println("Non Player Robot reached all bases.");
+			System.out.println("Game over, you lose! Total time: #" + getWorld().getCount());
+			getWorld().exit();
+		}
+	}
+
 	// Overrides the move() from Player Robot because NPRs do not 
 	// run out of energy.
 	// They also use a strategy to automatically adjust their steering.

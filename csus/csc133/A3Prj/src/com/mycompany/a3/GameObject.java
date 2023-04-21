@@ -16,7 +16,7 @@ public class GameObject implements ICollider, IDrawable {
 	// Vector to keep objects that this object is currently colliding with.
 	protected ArrayList<GameObject> collidingWith;
 	
-	public static final int STRING_OFFSET = 6;
+	public static final int STRING_OFFSET = 8;
 
 	// Common to all game objects is size, location, color, and a handle to the model.
 	public GameObject(int size, double x, double y, int color, GameWorld w) {

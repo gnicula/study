@@ -9,7 +9,7 @@ public class EnergyStation extends Fixed {
 	
 	public EnergyStation(int size, double x, double y, int color, GameWorld w) {
 		super(size, x, y, color, w);
-		this.capacity = size * 1;
+		this.capacity = size * 3;
 	}
 	
 	public int getCapacity() {
