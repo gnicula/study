@@ -20,6 +20,10 @@ public class Sound {
 		}
 	}
 
+	public Media getMedia() {
+		return sndMedia;
+	}
+
 	public void play() {
 		sndMedia.setTime(0);
 		sndMedia.play();

@@ -161,6 +161,7 @@ public class GameWorld extends Observable {
 			} else if (description.equalsIgnoreCase("game_win")) {
 				bgs.pause();
 				game_win.play();
+				// TODO: add PauseTransition?
 			} else if (description.equalsIgnoreCase("game_lost")) {
 				game_lost.play();
 			}
