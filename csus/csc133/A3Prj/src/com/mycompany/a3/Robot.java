@@ -166,7 +166,7 @@ public class Robot extends Movable implements ISteerable {
 		this.lastBaseReached = lastBaseReached;
 		
 		if (lastBaseReached == getWorld().getNumBases()) {
-			getWorld().playSoundFor("game_win");
+//			getWorld().playSoundFor("game_win");
 			System.out.println("Game over, you win! Total time: #" + getWorld().getCount());
 			getWorld().exit();
 		}

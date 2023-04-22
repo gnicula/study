@@ -10,11 +10,13 @@ public class BGSound implements Runnable {
 	private Media sndMedia;
 
 	public BGSound(String fIn) {
-		try {
-			InputStream in = Display.getInstance().getResourceAsStream(getClass(), "/" + fIn);
-			sndMedia = MediaManager.createMedia(in, "audio/wav", this);
-		} catch (Exception e) {
-			e.printStackTrace();
+		while (sndMedia == null) { // ADD THIS
+			try {
+				InputStream in = Display.getInstance().getResourceAsStream(getClass(), "/" + fIn);
+				sndMedia = MediaManager.createMedia(in, "audio/wav", this);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

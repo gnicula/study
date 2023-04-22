@@ -158,12 +158,6 @@ public class GameWorld extends Observable {
 		if (sound) {
 			if (description.equalsIgnoreCase("destroyed")) {
 				destroyed.play();
-			} else if (description.equalsIgnoreCase("game_win")) {
-				bgs.pause();
-				game_win.play();
-				// TODO: add PauseTransition?
-			} else if (description.equalsIgnoreCase("game_lost")) {
-				game_lost.play();
 			}
 		}
 	}
