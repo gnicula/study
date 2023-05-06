@@ -52,6 +52,8 @@ public class GNicula_MemoryManagement {
             // Found an empty frame, return it.
             return frameToReplace;
         }
+        // Return the index of the frame holding the first page loaded.
+        // Remove the page from the head of the deque since it's being unloaded.
         return getFrameNumber(requestQueue.poll());
     }
 
