@@ -1,7 +1,9 @@
 /*
  * Name: Gabriele Nicula
  * Class: CSC140
- * Student ID: 219969192a
+ * Student ID: 219969192
+ * Tested on: MacBook Air M1
+ * 			  ecs-pa-coding2.ecs.csus.edu
  */
 import java.io.File;
 import java.io.FileNotFoundException;
