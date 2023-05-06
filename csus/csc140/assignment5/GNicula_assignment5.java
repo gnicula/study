@@ -1,3 +1,8 @@
+/*
+ * Name: Gabriele Nicula
+ * Class: CSC140
+ * Student ID: 219969192a
+ */
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -13,7 +18,7 @@ public class GNicula_assignment5 {
             this.node = node;
             this.cost = cost;
         }
-    
+    // Override the built in compareTo function to be able to pass it our nodes cost.
         @Override
         public int compareTo(Node other) {
             if (cost < other.cost)
@@ -65,14 +70,22 @@ public class GNicula_assignment5 {
 
     // Driver code
     public static void main(String args[]) {
-        if (args.length < 1) {
-            System.out.println("Program expects an input file name as the first command line argument.");
-            System.out.println("Example: %java GNicula_assignment5.java input1.txt");
-            return;
-        }
 
-        String inputFileName = args[0];
-        try (Scanner scanner = new Scanner(new File(inputFileName))) {
+    	// It is unclear whether the assignment expects the file in the command line as an argument, or should 
+    	// automatically try an input.txt that is hardcoded. 
+    	// If it is the former please uncomment the following code.
+        // if (args.length < 1) {
+        //     System.out.println("Program expects an input file name as the first command line argument.");
+        //     System.out.println("Example: %java GNicula_assignment5.java input1.txt");
+        //     return;
+        // }
+    	// String inputFileName = args[0];
+        
+    	try {
+    		// If the file should be an argument passed with the execution command, uncomment the next
+    		// line of code and comment the one after it.
+    		// Scanner scanner = new Scanner(New File(InputFileName));
+        	Scanner scanner = new Scanner(new File("input.txt"));
             PrintWriter outWriter = new PrintWriter(new File("output.txt"));
             int V = scanner.nextInt();
             int E = scanner.nextInt();
@@ -116,7 +129,7 @@ public class GNicula_assignment5 {
             outWriter.println();
             outWriter.close();
         } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + inputFileName);
+            System.out.println("File not found: ");
         }
     }
 }
