@@ -3,6 +3,12 @@
  * ID: 219969192
  * Tested on: MacBook Air M1, Java version 16.0.1 2021-04-20
  * 			  ecs-pa-coding2.ecs.csus.edu Java version 11.0.18 2023-01-17 LTS
+ * 
+ * NOTE for grader:
+ *  In the assignment's example output, the word 'Frame' is always written with a 
+ *  capital 'F'. However, in the zipped test cases the 'F' is capitalized inconsistently.
+ *  I respected the assignment format always using capital 'F'.
+ *  I tested using 'diff -i' to validate my output.
  */
 
 import java.io.File;
