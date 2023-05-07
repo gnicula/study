@@ -1,0 +1,20 @@
+package com.mycompany.a4;
+
+import com.codename1.ui.Command;
+import com.codename1.ui.events.ActionEvent;
+
+// Not used in A3, except in debug mode.
+public class TickCommand extends Command {
+	
+	private GameWorld gw;
+
+	public TickCommand(String command, GameWorld world) {
+		super(command);
+		gw = world;
+	}
+
+	// Calls tick() when 'Tick' is pressed in the bottom container.
+	public void actionPerformed(ActionEvent ev) {
+		gw.tick(100);
+	}
+}
