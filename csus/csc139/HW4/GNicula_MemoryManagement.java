@@ -224,7 +224,6 @@ public class GNicula_MemoryManagement {
             writer.println();
             // Execute the LRU simulation.
             runLRU(writer);
-            writer.println();
             // Flush and close the output file.
             writer.close();
         } catch (FileNotFoundException e) {
