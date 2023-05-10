@@ -47,19 +47,16 @@ public class Game extends Form implements Runnable {
 	// observers to the model.
 	public Game() {
 		gw = new GameWorld();
-		gw.init();
 		mv = new MapView(gw);
-		// Sending model for the initial values.
 		sv = new ScoreView(gw);
 
 		createGUI();
 		this.show();
-		// NOTE: setDimensions enables GameWorld to place initial 
-		// GameObjects in a nice way, relative to MapView's dimensions.
-		gw.setDimensions(mv.getWidth(), mv.getHeight());
-		// gw.setDimensions(1000, 1000);
+		gw.setDimensions(mv.getWidth()/2, mv.getHeight()/2);
+		mv.resetViewWindow();
 		gw.addObserver(sv);
 		gw.addObserver(mv);
+		this.repaint();
 
 		// create the timer and start ticking
 		gameTimer = new UITimer(this);
@@ -114,9 +111,10 @@ public class Game extends Form implements Runnable {
 
 	// Creates all the GUI elements.
 	private void createGUI() {
+		createToolbar();
 		setLayout(new BorderLayout());
 		Container topContainer = sv;
-		topContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.LTGRAY));
+		topContainer.getAllStyles().setBorder(Border.createLineBorder(2, ColorUtil.LTGRAY));
 		add(BorderLayout.NORTH, topContainer);
 		createBottomContainer();
 		createLeftContainer();
@@ -126,7 +124,6 @@ public class Game extends Form implements Runnable {
 		// centerContainer.getAllStyles().setBgColor(ColorUtil.LTGRAY);
 		centerContainer.getAllStyles().setBorder(
 				Border.createLineBorder(2, ColorUtil.rgb(255, 0, 0)));
-		createToolbar();
 		add(BorderLayout.CENTER, centerContainer);
 	}
 
@@ -134,15 +131,15 @@ public class Game extends Form implements Runnable {
 	private void createToolbar() {
 		Toolbar myToolbar = new Toolbar();
 		setToolbar(myToolbar);
-		
+
 		Label myTF = new Label("Robo-Track Game");
 		myTF.getAllStyles().setFgColor(ColorUtil.argb(255, 0, 0, 0));
 		myToolbar.setTitleComponent(myTF);
 		
 		// Accelerate command is initialized by the left container
+		accelerateCommand = new AccelerateCommand("Accelerate", gw);
 		Command sideMenuItem1 = accelerateCommand;
 		myToolbar.addCommandToSideMenu(sideMenuItem1);
-//		this.addKeyListener('a', sideMenuItem1);
 
 		CheckBox sideMenuItem2 = new CheckBox("Sound ON/OFF");
 		sideMenuItem2.setCommand(new SoundCommand("Sound Command", gw));
@@ -170,7 +167,6 @@ public class Game extends Form implements Runnable {
 		leftContainer.getAllStyles().setPadding(Component.TOP, 100);
 		
 		accelerateButton = new BlueButton("Accelerate");
-		accelerateCommand = new AccelerateCommand("Accelerate", gw);
 		accelerateButton.setCommand(accelerateCommand);
 		this.addKeyListener('a', accelerateCommand);
 		leftContainer.add(accelerateButton);
@@ -185,8 +181,7 @@ public class Game extends Form implements Runnable {
 		strats.setCommand(new StrategiesCommand("Strategy", gw));
 		leftContainer.add(strats);
 		
-		leftContainer.getAllStyles().setBorder(Border.createLineBorder(4,
-		ColorUtil.BLUE));
+		leftContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.BLUE));
 		add(BorderLayout.WEST,leftContainer);
 	}
 	
@@ -221,7 +216,6 @@ public class Game extends Form implements Runnable {
 		positionButton.getCommand().setEnabled(false);
 		positionButton.setEnabled(false);
 		bottomContainer.add(positionButton);
-		// TODO: Draw the button disabled
 
 		pauseGameButton = new BlueButton("Pause");
 		pauseGameButton.setCommand(new PauseCommand("Pause", this));

@@ -2,6 +2,7 @@ package com.mycompany.a4;
 
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Graphics;
+import com.codename1.ui.Transform;
 import com.codename1.ui.geom.Point;
 
 // This is the player controlled Robot class.
@@ -33,10 +34,12 @@ public class Robot extends Movable implements ISteerable {
 	private double initialXLocation;
 	private double initialYLocation;
 	private int initialEnergyValue;
+
+	protected RobotShape myRobotShape;
 	
 	// Constructor
-	protected Robot(int size, double x, double y, int color, int speed, int maximumSpeed, int energyLevel, int energyConsumptionRate,
-			GameWorld world) {
+	protected Robot(int size, double x, double y, int color, int speed, int maximumSpeed,
+					int energyLevel, int energyConsumptionRate, GameWorld world) {
 		super(size, x, y, color, speed, energyConsumptionRate, world);
 		this.maximumSpeed = maximumSpeed;
 		this.energyLevel = energyLevel;
@@ -49,6 +52,8 @@ public class Robot extends Movable implements ISteerable {
 		this.initialEnergyValue = energyLevel;
 		this.initialXLocation = x;
 		this.initialYLocation = y;
+		myRobotShape = new RobotShape(size, size, color);
+		myRobotShape.setFilled(true);
 	}
 	
 	// getInstance is the only way to create a Robot object and it will create it only once.
@@ -94,12 +99,12 @@ public class Robot extends Movable implements ISteerable {
 
 	// Methods for ISteerable interface
 	public void steerLeft() {
-		this.steeringDirection += STEERING_ADJUST_STEP;
+		this.steeringDirection -= STEERING_ADJUST_STEP;
 		clampSteering();
 	}
 
 	public void steerRight() {
-		this.steeringDirection -= STEERING_ADJUST_STEP;
+		this.steeringDirection += STEERING_ADJUST_STEP;
 		clampSteering();
 	}
 
@@ -256,6 +261,7 @@ public class Robot extends Movable implements ISteerable {
 		}
 	}
 
+	/*
 	// Draw itself as a filled rectangle.
 	// I also added lines that show heading and steering.
 	@Override
@@ -278,7 +284,35 @@ public class Robot extends Movable implements ISteerable {
 				(int)(centerY + 
 						getSize() * Math.cos(Math.toRadians(getHeading()+steeringDirection))/2));
 	}
-	
+	*/
+
+	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
+		// Do not forget to do “local origin” transformations.
+		// ORDER of LTs: Scaling LT will be applied to coordinates FIRST,
+		// then Translation LT, and lastly Rotation LT.
+		// Also restore the xform at the end of draw() to remove this sub-shape’s LTs
+		// from xform of the Graphics object. Otherwise, we would also
+		// apply these LTs to the next sub-shape since it also uses the same Graphics object.
+		Transform gXform = Transform.makeIdentity();
+		g.getTransform(gXform);
+		Transform gOrigXform = gXform.copy(); //save the original xform
+		// gXform.translate(pCmpRelScrn.getX(),pCmpRelScrn.getY());
+		gXform.concatenate(myRotate); //Rotation is LAST
+		// gXform.translate(myTranslate.getTranslateX(), myTranslate.getTranslateY());
+		gXform.translate((float)getX(), (float)getY());
+		gXform.scale(myScale.getScaleX(), myScale.getScaleY());
+		// gXform.translate(-pCmpRelScrn.getX(),-pCmpRelScrn.getY());
+		g.setTransform(gXform);
+		//draw the lines as before
+		myRobotShape.rotateWheels(pCmpRelScrn);
+		myRobotShape.draw(g);
+		// g.drawLine(pCmpRelPrnt.getX()+top.getX(), pCmpRelPrnt.getY()+top.getY(),
+		// pCmpRelPrnt.getX() + bottomLeft.getX(),pCmpRelPrnt.getY() + bottomLeft.getY());
+		//...[draw the rest of the lines]
+		g.setTransform(gOrigXform); //restore the original xform (remove LTs)
+		//do not use resetAffine() in draw()! Instead use getTransform()/setTransform(gOrigForm)
+	}
+
 	private void clampSteering() {
 		this.steeringDirection = Math.min(MAX_STEERING_DIRECTION, Math.max(this.steeringDirection, -MAX_STEERING_DIRECTION));
 	}

@@ -1,9 +1,11 @@
 package com.mycompany.a4;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Graphics;
+import com.codename1.ui.Transform;
 import com.codename1.ui.geom.Point;
 
 // Base class for all the game objects. 
@@ -15,6 +17,9 @@ public class GameObject implements ICollider, IDrawable {
 	private GameWorld world;
 	// Vector to keep objects that this object is currently colliding with.
 	protected ArrayList<GameObject> collidingWith;
+	// New in A4: myTranslate, myRotate, and myScale private fields
+	// of type Transform to perform local to top level transformations.
+	Transform myTranslate, myRotate, myScale;
 	
 	public static final int STRING_OFFSET = 6;
 
@@ -26,6 +31,9 @@ public class GameObject implements ICollider, IDrawable {
 		this.color = color;
 		this.world = w;
 		this.collidingWith = new ArrayList<GameObject>();
+		myTranslate = Transform.makeIdentity();
+		myRotate = Transform.makeIdentity();
+		myScale = Transform.makeIdentity();
 	}
 
 	public int getSize() {
@@ -103,8 +111,9 @@ public class GameObject implements ICollider, IDrawable {
 
 	// IDrawable interface methods
 	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
+	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
 		// Override in derived classes to draw the object.
+		System.out.println("Method must be implemented by derived classes.");
 	}
 	
 	// This method is overridden by the base classes 

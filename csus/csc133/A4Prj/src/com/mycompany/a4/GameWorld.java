@@ -39,8 +39,8 @@ public class GameWorld extends Observable {
 	private Sound game_win;
 	private Sound game_lost;
 
-	private int height = 0;
-	private int width = 0;
+	private int height = 639;
+	private int width = 931;
 	private int count = 0;
 	// Flag indicating whether sound is on or off.
 	private boolean sound = false;
@@ -58,7 +58,7 @@ public class GameWorld extends Observable {
 	}
 
 	public void initObjects() {
-		goc = new GameObjectCollection();
+		init();
 		// Four bases each corner
 		goc.add(new Base(60, MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 1));
 		goc.add(new Base(60, width-MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 2));
@@ -104,6 +104,7 @@ public class GameWorld extends Observable {
 				ColorUtil.argb(255, 255, 1, 1), 50, 100, INITIAL_ENERGY, 1, this));
 
 		numBases = getNumBases();
+		notifyObservers(this);
 	}
 	
 	// Iterates through all the GameObjects in the collection
@@ -164,8 +165,8 @@ public class GameWorld extends Observable {
 	
 	// Set the dimensions of the map from MapView.
 	public void setDimensions(int width, int height) {
-		setHeight(height);
-		setWidth(width);
+		this.width = width;
+		this.height = height;
 		initObjects();
 	}
 
@@ -246,20 +247,12 @@ public class GameWorld extends Observable {
 		getPlayerRobot().reinitializeRobot();
 	}
 	
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
 	public int getWidth() {
 		return width;
 	}
 
-	public void setWidth(int width) {
-		this.width = width;
+	public int getHeight() {
+		return height;
 	}
 
 	// The player Robot is the last item in the collection.

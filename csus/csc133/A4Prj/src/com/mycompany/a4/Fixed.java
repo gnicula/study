@@ -37,7 +37,7 @@ public class Fixed extends GameObject implements ISelectable {
 		int objX = (int) getX();
 		int objY = (int) getY();
 		if (Math.abs(objX - pPtrRel.getX()) < pCmpRel.getX() 
-				&& Math.abs(objY - pPtrRel.getX()) < pCmpRel.getY()) {
+				&& Math.abs(objY - pPtrRel.getY()) < pCmpRel.getY()) {
 			return true;
 		}
 		return false;
