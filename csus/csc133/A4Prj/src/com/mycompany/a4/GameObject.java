@@ -25,15 +25,15 @@ public class GameObject implements ICollider, IDrawable {
 
 	// Common to all game objects is size, location, color, and a handle to the model.
 	public GameObject(int size, double x, double y, int color, GameWorld w) {
+		myTranslate = Transform.makeIdentity();
+		myRotate = Transform.makeIdentity();
+		myScale = Transform.makeIdentity();
 		this.size = size;
 		this.xPos = x;
 		this.yPos = y;
 		this.color = color;
 		this.world = w;
 		this.collidingWith = new ArrayList<GameObject>();
-		myTranslate = Transform.makeIdentity();
-		myRotate = Transform.makeIdentity();
-		myScale = Transform.makeIdentity();
 	}
 
 	public int getSize() {

@@ -120,7 +120,7 @@ public class MapView extends Container implements Observer {
 		g.setTransform(oldOne);
 		g.setColor(ColorUtil.BLUE);
 		g.drawRect(10+getX(), 10+getY(), this.getWidth()-20, this.getHeight()-20);
-		// g.resetAffine();
+		g.resetAffine();
 	}
 		
 	// Used by the editing mode when game is paused.

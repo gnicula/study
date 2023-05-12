@@ -1,8 +1,10 @@
 package com.mycompany.a4;
 
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Random;
 
+import com.codename1.charts.models.Point;
 import com.codename1.charts.util.ColorUtil;
 
 // GameWorld acts as the model and handles all the initializations
@@ -46,6 +48,8 @@ public class GameWorld extends Observable {
 	private boolean sound = false;
 	private boolean paused = false;
 	private int numBases = 0;
+	// New in A4, shockwaves
+	private ArrayList<Point> newShockWaves = null;
 
 	private GameObjectCollection goc = null;
 	private Fixed currentSelectedObject = null;
@@ -55,6 +59,7 @@ public class GameWorld extends Observable {
 	// player loses a life. 
 	public void init() {
 		goc = new GameObjectCollection();
+		newShockWaves = new ArrayList<Point>();
 	}
 
 	public void initObjects() {
@@ -191,6 +196,8 @@ public class GameWorld extends Observable {
 			count++;
 			updateMoveableObjects(tickTime);
 			CheckCollisions();
+			// New in A4
+			handleShockwaves();
 		}
 		// Views may update ex. for displaying selections
 		// even if the game is paused.
@@ -295,6 +302,7 @@ public class GameWorld extends Observable {
 		if (sound) {
 			drone_collision.play();
 		}
+		addShockWave(robot.getX(), robot.getY());
 	}
 
 	// The Robot collides with the NPR,
@@ -306,6 +314,7 @@ public class GameWorld extends Observable {
 		if (sound) {
 			npr_collision.play();
 		}
+		addShockWave(robot.getX(), robot.getY());
 	}
 
 	// Handles collision between a Robot/NPR and a Base
@@ -355,8 +364,8 @@ public class GameWorld extends Observable {
 		if (sound) {
 			npr_collision.play();
 		}
+		addShockWave(npr1.getX(), npr2.getY());
 	}
-
 	
 	public int getNumBases() {
 		int countBases = 0;
@@ -478,6 +487,10 @@ public class GameWorld extends Observable {
 		game_lost = new Sound("game_lost.wav");
 	}
 
+	public void addShockWave(double x, double y) {
+		newShockWaves.add(new Point((float)x, (float)y));
+	}
+
 	// Every tick we check for collisions and delegate to objects
 	// to handle them.
 	private void CheckCollisions() {
@@ -521,6 +534,28 @@ public class GameWorld extends Observable {
 		int green = Math.min(245, ColorUtil.green(currentColor) + fadeValue);
 		int blue = Math.min(245, ColorUtil.blue(currentColor) + fadeValue);
 		obj.setColor(ColorUtil.argb(alpha, red, green, blue));
+	}
+
+	private void handleShockwaves() {
+		// First remove all spent shockwaves
+		IIterator it = goc.getIterator();
+		while (it.hasNext()) {
+			GameObject go = it.getNext();
+			if (go instanceof ShockWave) {
+				if (((ShockWave)go).isSpent()) {
+					goc.remove(go);
+				}
+			}
+		}
+		// Then add new collision shockwaves
+		Random shwRand = new Random();
+		for (int i=0; i < newShockWaves.size(); ++i) {
+			ShockWave shw = new ShockWave(shwRand.nextInt(360), (double)newShockWaves.get(i).getX(), 
+				(double)newShockWaves.get(i).getY(), ColorUtil.BLUE, 50 + shwRand.nextInt(100), 
+				shwRand.nextInt(360), this);
+			goc.add(0, shw);
+		}
+		newShockWaves.clear();
 	}
 
 	// Iterates through the collection and calls every movable object's move() method.

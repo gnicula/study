@@ -45,6 +45,10 @@ public class GameObjectCollection implements ICollection {
 		objectList.add(index, go);
 	}
 	
+	public void remove(GameObject go) {
+		objectList.remove(go);
+	}
+
 	public int size() {
 		return objectList.size();
 	}
