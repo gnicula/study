@@ -83,7 +83,7 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="1.0"/>
+    <a name="simulationFrequency" val="8.0"/>
     <comp lib="0" loc="(100,700)" name="Clock"/>
     <comp lib="0" loc="(1130,270)" name="Pin">
       <a name="appearance" val="NewPins"/>
@@ -146,7 +146,8 @@
       <a name="addrWidth" val="13"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 13 12
-cf0 df1 eff 312 302
+c01 e00 d0f 223 183 77 df0 312
+11 313 22 7f7
 </a>
       <a name="dataWidth" val="12"/>
     </comp>
@@ -182,6 +183,12 @@ cf0 df1 eff 312 302
     </comp>
     <comp lib="5" loc="(1430,850)" name="7-Segment Display">
       <a name="labelvisible" val="true"/>
+    </comp>
+    <comp lib="8" loc="(1538,1232)" name="Text">
+      <a name="text" val="Celsius"/>
+    </comp>
+    <comp lib="8" loc="(1552,890)" name="Text">
+      <a name="text" val="Fahrenheit"/>
     </comp>
     <comp lib="9" loc="(1070,1200)" name="BCD_to_7_Segment_decoder"/>
     <comp lib="9" loc="(1070,850)" name="BCD_to_7_Segment_decoder"/>
@@ -468,8 +475,8 @@ cf0 df1 eff 312 302
     <wire from="(660,1240)" to="(670,1240)"/>
     <wire from="(660,890)" to="(670,890)"/>
     <wire from="(670,1200)" to="(680,1200)"/>
-    <wire from="(700,210)" to="(730,210)"/>
-    <wire from="(700,230)" to="(770,230)"/>
+    <wire from="(700,210)" to="(780,210)"/>
+    <wire from="(700,230)" to="(730,230)"/>
     <wire from="(700,250)" to="(820,250)"/>
     <wire from="(700,270)" to="(770,270)"/>
     <wire from="(700,310)" to="(750,310)"/>
@@ -479,8 +486,8 @@ cf0 df1 eff 312 302
     <wire from="(700,430)" to="(750,430)"/>
     <wire from="(700,450)" to="(760,450)"/>
     <wire from="(730,1200)" to="(770,1200)"/>
-    <wire from="(730,210)" to="(730,320)"/>
-    <wire from="(730,210)" to="(780,210)"/>
+    <wire from="(730,230)" to="(730,320)"/>
+    <wire from="(730,230)" to="(820,230)"/>
     <wire from="(730,320)" to="(780,320)"/>
     <wire from="(730,850)" to="(770,850)"/>
     <wire from="(740,140)" to="(740,170)"/>
@@ -492,13 +499,9 @@ cf0 df1 eff 312 302
     <wire from="(760,120)" to="(760,370)"/>
     <wire from="(760,380)" to="(760,450)"/>
     <wire from="(760,380)" to="(800,380)"/>
-    <wire from="(770,230)" to="(770,240)"/>
-    <wire from="(770,240)" to="(780,240)"/>
     <wire from="(770,270)" to="(770,450)"/>
     <wire from="(770,450)" to="(820,450)"/>
-    <wire from="(780,210)" to="(780,230)"/>
-    <wire from="(780,230)" to="(820,230)"/>
-    <wire from="(780,240)" to="(780,290)"/>
+    <wire from="(780,210)" to="(780,290)"/>
     <wire from="(780,290)" to="(820,290)"/>
     <wire from="(780,310)" to="(780,320)"/>
     <wire from="(780,310)" to="(820,310)"/>
@@ -8180,6 +8183,18 @@ cf0 df1 eff 312 302
       <a name="incoming" val="8"/>
     </comp>
     <comp lib="0" loc="(510,980)" name="Clock"/>
+    <comp lib="0" loc="(520,340)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+      <a name="label" val="RA1"/>
+      <a name="output" val="true"/>
+      <a name="width" val="2"/>
+    </comp>
+    <comp lib="0" loc="(520,370)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+      <a name="label" val="RA0"/>
+      <a name="output" val="true"/>
+      <a name="width" val="2"/>
+    </comp>
     <comp lib="0" loc="(520,520)" name="Splitter">
       <a name="appear" val="right"/>
       <a name="fanout" val="12"/>
@@ -8218,18 +8233,6 @@ cf0 df1 eff 312 302
       <a name="facing" val="south"/>
       <a name="fanout" val="4"/>
       <a name="incoming" val="4"/>
-    </comp>
-    <comp lib="0" loc="(730,360)" name="Pin">
-      <a name="appearance" val="NewPins"/>
-      <a name="label" val="RA1"/>
-      <a name="output" val="true"/>
-      <a name="width" val="2"/>
-    </comp>
-    <comp lib="0" loc="(730,380)" name="Pin">
-      <a name="appearance" val="NewPins"/>
-      <a name="label" val="RA0"/>
-      <a name="output" val="true"/>
-      <a name="width" val="2"/>
     </comp>
     <comp lib="0" loc="(750,380)" name="Splitter">
       <a name="facing" val="south"/>
@@ -8294,6 +8297,9 @@ cf0 df1 eff 312 302
       <a name="inputs" val="7"/>
       <a name="label" val="CZ"/>
     </comp>
+    <comp lib="1" loc="(1190,360)" name="OR Gate">
+      <a name="facing" val="north"/>
+    </comp>
     <comp lib="1" loc="(580,810)" name="NOT Gate"/>
     <comp lib="1" loc="(660,770)" name="XOR Gate"/>
     <comp lib="1" loc="(660,830)" name="OR Gate"/>
@@ -8304,6 +8310,10 @@ cf0 df1 eff 312 302
     <comp lib="1" loc="(870,870)" name="AND Gate"/>
     <comp lib="1" loc="(870,950)" name="AND Gate"/>
     <comp lib="1" loc="(930,1050)" name="AND Gate"/>
+    <comp lib="2" loc="(580,370)" name="Multiplexer">
+      <a name="facing" val="west"/>
+      <a name="width" val="2"/>
+    </comp>
     <comp lib="2" loc="(770,700)" name="Multiplexer">
       <a name="width" val="13"/>
     </comp>
@@ -8330,20 +8340,29 @@ cf0 df1 eff 312 302
     <wire from="(1010,460)" to="(1070,460)"/>
     <wire from="(1010,470)" to="(1070,470)"/>
     <wire from="(1010,480)" to="(1070,480)"/>
-    <wire from="(1010,490)" to="(1070,490)"/>
-    <wire from="(1010,500)" to="(1070,500)"/>
+    <wire from="(1010,490)" to="(1030,490)"/>
+    <wire from="(1010,500)" to="(1040,500)"/>
     <wire from="(1010,520)" to="(1080,520)"/>
     <wire from="(1010,560)" to="(1060,560)"/>
     <wire from="(1010,570)" to="(1050,570)"/>
     <wire from="(1010,640)" to="(1010,690)"/>
     <wire from="(1010,690)" to="(1080,690)"/>
+    <wire from="(1030,420)" to="(1030,490)"/>
+    <wire from="(1030,420)" to="(1170,420)"/>
+    <wire from="(1030,490)" to="(1070,490)"/>
     <wire from="(1030,620)" to="(1030,900)"/>
+    <wire from="(1040,430)" to="(1040,500)"/>
+    <wire from="(1040,430)" to="(1210,430)"/>
+    <wire from="(1040,500)" to="(1070,500)"/>
     <wire from="(1050,570)" to="(1050,600)"/>
     <wire from="(1050,600)" to="(1080,600)"/>
     <wire from="(1060,560)" to="(1060,990)"/>
     <wire from="(1060,560)" to="(1080,560)"/>
     <wire from="(1120,470)" to="(1150,470)"/>
     <wire from="(1150,300)" to="(1150,470)"/>
+    <wire from="(1170,410)" to="(1170,420)"/>
+    <wire from="(1190,310)" to="(1190,360)"/>
+    <wire from="(1210,410)" to="(1210,430)"/>
     <wire from="(400,300)" to="(1150,300)"/>
     <wire from="(400,300)" to="(400,960)"/>
     <wire from="(400,960)" to="(600,960)"/>
@@ -8364,6 +8383,8 @@ cf0 df1 eff 312 302
     <wire from="(510,850)" to="(610,850)"/>
     <wire from="(510,870)" to="(720,870)"/>
     <wire from="(510,980)" to="(600,980)"/>
+    <wire from="(520,340)" to="(770,340)"/>
+    <wire from="(520,370)" to="(580,370)"/>
     <wire from="(520,500)" to="(520,520)"/>
     <wire from="(520,500)" to="(650,500)"/>
     <wire from="(530,920)" to="(550,920)"/>
@@ -8392,9 +8413,17 @@ cf0 df1 eff 312 302
     <wire from="(580,730)" to="(790,730)"/>
     <wire from="(580,750)" to="(600,750)"/>
     <wire from="(580,810)" to="(610,810)"/>
+    <wire from="(600,390)" to="(600,400)"/>
+    <wire from="(600,400)" to="(640,400)"/>
     <wire from="(600,980)" to="(610,980)"/>
+    <wire from="(610,360)" to="(750,360)"/>
+    <wire from="(610,380)" to="(650,380)"/>
     <wire from="(610,980)" to="(610,990)"/>
     <wire from="(630,440)" to="(650,440)"/>
+    <wire from="(640,310)" to="(1190,310)"/>
+    <wire from="(640,310)" to="(640,400)"/>
+    <wire from="(650,320)" to="(650,380)"/>
+    <wire from="(650,320)" to="(820,320)"/>
     <wire from="(650,440)" to="(650,500)"/>
     <wire from="(650,440)" to="(690,440)"/>
     <wire from="(660,770)" to="(670,770)"/>
@@ -8423,19 +8452,18 @@ cf0 df1 eff 312 302
     <wire from="(720,520)" to="(720,710)"/>
     <wire from="(720,710)" to="(740,710)"/>
     <wire from="(720,870)" to="(720,930)"/>
-    <wire from="(730,360)" to="(770,360)"/>
-    <wire from="(730,380)" to="(750,380)"/>
     <wire from="(730,420)" to="(730,460)"/>
     <wire from="(730,460)" to="(850,460)"/>
     <wire from="(730,630)" to="(730,690)"/>
     <wire from="(730,630)" to="(760,630)"/>
     <wire from="(730,690)" to="(740,690)"/>
     <wire from="(740,790)" to="(750,790)"/>
+    <wire from="(750,360)" to="(750,380)"/>
     <wire from="(750,720)" to="(750,790)"/>
     <wire from="(760,400)" to="(760,420)"/>
     <wire from="(760,630)" to="(760,640)"/>
     <wire from="(770,1010)" to="(820,1010)"/>
-    <wire from="(770,360)" to="(770,370)"/>
+    <wire from="(770,340)" to="(770,370)"/>
     <wire from="(770,400)" to="(770,420)"/>
     <wire from="(770,700)" to="(820,700)"/>
     <wire from="(770,760)" to="(770,810)"/>
@@ -8461,6 +8489,7 @@ cf0 df1 eff 312 302
     <wire from="(790,930)" to="(820,930)"/>
     <wire from="(800,390)" to="(800,420)"/>
     <wire from="(810,390)" to="(810,420)"/>
+    <wire from="(820,320)" to="(820,340)"/>
     <wire from="(820,340)" to="(820,370)"/>
     <wire from="(820,340)" to="(900,340)"/>
     <wire from="(850,1010)" to="(860,1010)"/>
