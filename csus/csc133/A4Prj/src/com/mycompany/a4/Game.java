@@ -52,7 +52,7 @@ public class Game extends Form implements Runnable {
 
 		createGUI();
 		this.show();
-		gw.setDimensions(mv.getWidth()/2, mv.getHeight()/2);
+		gw.setDimensions(mv.getInnerWidth(), mv.getInnerHeight());
 		mv.resetViewWindow();
 		gw.addObserver(sv);
 		gw.addObserver(mv);

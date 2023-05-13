@@ -104,8 +104,15 @@ public class MapView extends Container implements Observer {
 		g.getTransform(gXform);
 		Transform oldOne = gXform.copy();
 		// System.out.println("Y container: " + getY());
-		gXform.translate(getX(), getY()); //+340
-		gXform.concatenate(theVTM); // VTM xform
+		// gXform.translate(getParent().getAbsoluteX() + getX(), getParent().getAbsoluteY() + getY()); //+340
+		gXform.translate(getAbsoluteX(), getAbsoluteY()); //+340
+		gXform.translate(0, getHeight()); //+340
+		gXform.scale(1, -1);
+		gXform.translate(-getAbsoluteX(), -getAbsoluteY());
+		
+		// ndToDisplay = buildNDToDisplayXform(this.getWidth(), gw.getHeight());
+		// gXform.concatenate(theVTM); // VTM xform
+		// gXform.concatenate(ndToDisplay); // VTM xform
 		// gXform.translate(-getAbsoluteX(), -getAbsoluteY());
 		g.setTransform(gXform);
 		Point pCmpRelPrnt = new Point(this.getX(), this.getY());
@@ -115,11 +122,26 @@ public class MapView extends Container implements Observer {
 			GameObject go = it.getNext();
 			go.draw(g, pCmpRelPrnt, pCmpRelScrn);
 		}
+		System.out.println("World X, Y: " + gw.getWidth() + ", " + gw.getHeight());
+		System.out.println("Comp X, Y: " + getWidth() + ", " + getHeight());
+		System.out.println("Comp offset: " + getX() + ", " + getY());
+		float trp[] = gXform.transformPoint(new float[]{100, (int)gw.getHeight() - 100});
+		float crn[] = gXform.transformPoint(new float[]{0, 0});
+		float cen[] = gXform.transformPoint(new float[]{gw.getWidth() / 2, gw.getHeight() /2});
+		System.out.println("Transformed X, Y: " + trp[0] + ", " + trp[1]);
+		System.out.println("Transformed Origin: " + crn[0] + ", " + crn[1]);
+		System.out.println("Transformed Center: " + cen[0] + ", " + cen[1]);
+		System.out.println("Comp Center: " + (getX() + getWidth()/2) + ", " + (getY() + getHeight()/2));
 		g.setColor(ColorUtil.GREEN);
-		g.drawRect(10, 10, (int)gw.getWidth()-20, (int)gw.getHeight()-20);
+		// g.drawRect((int)cen[0]-200, 
+		// 	(int)cen[1]-200, 400, 400); //(int)gw.getWidth()-200, (int)gw.getHeight()-200);
+		g.drawRect(getX() + (int)gw.getWidth()/2 - 200, 
+			getY() + (int)gw.getHeight()/2 - 200, 400, 400); //(int)gw.getWidth()-200, (int)gw.getHeight()-200);
+		g.drawLine(getX()+0, getY()+0, getX() + gw.getWidth(), getY() + gw.getHeight());
 		g.setTransform(oldOne);
 		g.setColor(ColorUtil.BLUE);
 		g.drawRect(10+getX(), 10+getY(), this.getWidth()-20, this.getHeight()-20);
+		g.drawLine(getX()+0, getY()+0, getX()+ this.getWidth(), getY()+ this.getHeight());
 		g.resetAffine();
 	}
 		
@@ -158,7 +180,6 @@ public class MapView extends Container implements Observer {
 		theVTM.concatenate(worldToND);
 	}
 	
-	/*
 	private Transform buildWorldToNDXform(float winWidth, float winHeight, float winLeft, float winBottom) {
 		Transform tmpXfrom = Transform.makeIdentity();
 		tmpXfrom.scale((float) (1.0 / winWidth), (float) (1.0 / winHeight));
@@ -169,10 +190,10 @@ public class MapView extends Container implements Observer {
 	private Transform buildNDToDisplayXform(float displayWidth, float displayHeight) {
 		Transform tmpXfrom = Transform.makeIdentity();
 		tmpXfrom.translate(0, displayHeight);
-		tmpXfrom.scale(displayWidth, -displayHeight);
+		// tmpXfrom.scale(displayWidth, -displayHeight);
+		tmpXfrom.scale(1, -1);
 		return tmpXfrom;
 	}
-	*/
 
 	public void zoom(float factor) {
 		float newWidth = originalViewWidth * factor;
