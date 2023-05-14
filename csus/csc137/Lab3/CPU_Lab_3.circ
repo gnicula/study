@@ -84,7 +84,6 @@
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="128.0"/>
-    <comp lib="0" loc="(100,700)" name="Clock"/>
     <comp lib="0" loc="(1130,270)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="west"/>
@@ -128,18 +127,17 @@
     <comp lib="0" loc="(830,160)" name="Splitter">
       <a name="facing" val="west"/>
     </comp>
-    <comp lib="1" loc="(110,580)" name="NOT Gate">
-      <a name="facing" val="south"/>
-    </comp>
+    <comp lib="0" loc="(90,910)" name="Clock"/>
     <comp lib="1" loc="(110,630)" name="AND Gate"/>
+    <comp lib="1" loc="(110,780)" name="AND Gate"/>
     <comp lib="1" loc="(1260,520)" name="AND Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="IOSel"/>
     </comp>
     <comp lib="1" loc="(630,1220)" name="AND Gate"/>
     <comp lib="1" loc="(630,870)" name="AND Gate"/>
-    <comp lib="1" loc="(70,520)" name="OR Gate">
-      <a name="facing" val="south"/>
+    <comp lib="1" loc="(80,540)" name="NOT Gate">
+      <a name="facing" val="west"/>
     </comp>
     <comp lib="2" loc="(1320,600)" name="Decoder">
       <a name="select" val="4"/>
@@ -152,13 +150,13 @@
       <a name="addrWidth" val="13"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 13 12
-c04 c02 c3d 223 183 77 fc1 312
-11 313 22 7f7
+ffd 310
 </a>
       <a name="dataWidth" val="12"/>
     </comp>
     <comp lib="4" loc="(180,570)" name="RAM">
       <a name="appearance" val="logisim_evolution"/>
+      <a name="asyncread" val="true"/>
     </comp>
     <comp lib="4" loc="(670,1170)" name="Register">
       <a name="appearance" val="logisim_evolution"/>
@@ -210,7 +208,6 @@ c04 c02 c3d 223 183 77 fc1 312
     <comp loc="(700,210)" name="ControlCPU"/>
     <comp loc="(990,1200)" name="DisplayDecoder"/>
     <comp loc="(990,850)" name="DisplayDecoder"/>
-    <wire from="(100,700)" to="(130,700)"/>
     <wire from="(1010,1030)" to="(1260,1030)"/>
     <wire from="(1010,1260)" to="(1010,1380)"/>
     <wire from="(1010,1380)" to="(1260,1380)"/>
@@ -273,10 +270,9 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(1090,710)" to="(1090,850)"/>
     <wire from="(1090,710)" to="(1450,710)"/>
     <wire from="(1090,910)" to="(1090,1020)"/>
-    <wire from="(110,540)" to="(110,550)"/>
     <wire from="(110,540)" to="(1130,540)"/>
-    <wire from="(110,580)" to="(110,590)"/>
     <wire from="(110,630)" to="(180,630)"/>
+    <wire from="(110,780)" to="(120,780)"/>
     <wire from="(1100,1050)" to="(1100,1200)"/>
     <wire from="(1100,1050)" to="(1460,1050)"/>
     <wire from="(1100,700)" to="(1100,850)"/>
@@ -337,6 +333,8 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(1190,920)" to="(1190,950)"/>
     <wire from="(1190,920)" to="(1220,920)"/>
     <wire from="(1190,950)" to="(1340,950)"/>
+    <wire from="(120,620)" to="(120,780)"/>
+    <wire from="(120,620)" to="(180,620)"/>
     <wire from="(1210,1160)" to="(1210,1200)"/>
     <wire from="(1210,1160)" to="(1330,1160)"/>
     <wire from="(1210,1260)" to="(1210,1290)"/>
@@ -380,8 +378,6 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(1280,830)" to="(1280,850)"/>
     <wire from="(130,140)" to="(130,440)"/>
     <wire from="(130,140)" to="(740,140)"/>
-    <wire from="(130,640)" to="(130,700)"/>
-    <wire from="(130,640)" to="(180,640)"/>
     <wire from="(1310,600)" to="(1310,620)"/>
     <wire from="(1320,600)" to="(1320,630)"/>
     <wire from="(1330,1160)" to="(1330,1200)"/>
@@ -411,11 +407,8 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(1390,760)" to="(1390,850)"/>
     <wire from="(1390,910)" to="(1390,980)"/>
     <wire from="(140,1200)" to="(580,1200)"/>
-    <wire from="(140,130)" to="(140,450)"/>
+    <wire from="(140,130)" to="(140,850)"/>
     <wire from="(140,130)" to="(750,130)"/>
-    <wire from="(140,450)" to="(140,620)"/>
-    <wire from="(140,620)" to="(140,850)"/>
-    <wire from="(140,620)" to="(180,620)"/>
     <wire from="(140,850)" to="(140,1200)"/>
     <wire from="(140,850)" to="(580,850)"/>
     <wire from="(1400,1100)" to="(1400,1200)"/>
@@ -444,6 +437,8 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(150,520)" to="(1130,520)"/>
     <wire from="(150,520)" to="(150,580)"/>
     <wire from="(150,580)" to="(180,580)"/>
+    <wire from="(150,640)" to="(150,910)"/>
+    <wire from="(150,640)" to="(180,640)"/>
     <wire from="(150,80)" to="(1050,80)"/>
     <wire from="(150,80)" to="(150,520)"/>
     <wire from="(1500,440)" to="(1500,1410)"/>
@@ -454,9 +449,10 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(160,90)" to="(160,660)"/>
     <wire from="(170,120)" to="(170,210)"/>
     <wire from="(170,120)" to="(760,120)"/>
-    <wire from="(30,540)" to="(30,650)"/>
-    <wire from="(30,540)" to="(70,540)"/>
-    <wire from="(30,650)" to="(60,650)"/>
+    <wire from="(180,620)" to="(190,620)"/>
+    <wire from="(40,440)" to="(130,440)"/>
+    <wire from="(40,440)" to="(40,650)"/>
+    <wire from="(40,650)" to="(60,650)"/>
     <wire from="(410,260)" to="(420,260)"/>
     <wire from="(420,210)" to="(420,260)"/>
     <wire from="(420,210)" to="(480,210)"/>
@@ -472,11 +468,14 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(460,70)" to="(460,230)"/>
     <wire from="(460,830)" to="(460,1180)"/>
     <wire from="(460,830)" to="(640,830)"/>
-    <wire from="(50,440)" to="(130,440)"/>
-    <wire from="(50,440)" to="(50,470)"/>
-    <wire from="(50,590)" to="(110,590)"/>
-    <wire from="(50,590)" to="(50,610)"/>
+    <wire from="(50,540)" to="(50,610)"/>
+    <wire from="(50,540)" to="(80,540)"/>
+    <wire from="(50,610)" to="(50,760)"/>
     <wire from="(50,610)" to="(60,610)"/>
+    <wire from="(50,760)" to="(60,760)"/>
+    <wire from="(50,800)" to="(50,850)"/>
+    <wire from="(50,800)" to="(60,800)"/>
+    <wire from="(50,850)" to="(140,850)"/>
     <wire from="(560,1410)" to="(1500,1410)"/>
     <wire from="(560,890)" to="(560,1410)"/>
     <wire from="(560,890)" to="(580,890)"/>
@@ -492,7 +491,6 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(660,1240)" to="(670,1240)"/>
     <wire from="(660,890)" to="(670,890)"/>
     <wire from="(670,1200)" to="(680,1200)"/>
-    <wire from="(70,520)" to="(70,540)"/>
     <wire from="(700,210)" to="(780,210)"/>
     <wire from="(700,230)" to="(730,230)"/>
     <wire from="(700,250)" to="(820,250)"/>
@@ -551,8 +549,7 @@ c04 c02 c3d 223 183 77 fc1 312
     <wire from="(860,110)" to="(860,130)"/>
     <wire from="(860,130)" to="(870,130)"/>
     <wire from="(890,170)" to="(890,180)"/>
-    <wire from="(90,450)" to="(140,450)"/>
-    <wire from="(90,450)" to="(90,470)"/>
+    <wire from="(90,910)" to="(150,910)"/>
     <wire from="(910,150)" to="(930,150)"/>
     <wire from="(930,150)" to="(930,190)"/>
     <wire from="(990,1200)" to="(1040,1200)"/>
