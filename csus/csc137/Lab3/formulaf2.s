@@ -20,4 +20,4 @@
 	ST R3 [R1]	; 0x313
 	ADD R2 R2 R0	; 0x022
 ; Jump to Loop: 9 instructions back
-	BNZ 0xF7	; 0x7F7
+	BNZ -9	; 0x7F7
