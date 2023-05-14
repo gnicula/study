@@ -521,8 +521,6 @@
         ST R0 [R1]      ; 0x310
         ADD R1 R1 R2    ; 0x019
 
-; After this address fahrenheit 
-; becomes negative
         MVI R0 0xA7     ; 0xE9C
         ST R0 [R1]      ; 0x310
         ADD R1 R1 R2    ; 0x019
@@ -963,13 +961,73 @@
         ST R0 [R1]      ; 0x310
         ADD R1 R1 R2    ; 0x019
 
-; This is the last valid RAM address EF
         MVI R0 0xE5     ; 0xF94
         ST R0 [R1]      ; 0x310
         ADD R1 R1 R2    ; 0x019
 
-; Reached address F0 stopping.
-; The next 16 RAM addresses are inaccessible
+        MVI R0 0xE5     ; 0xF94
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE6     ; 0xF98
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE6     ; 0xF98
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE7     ; 0xF9C
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE8     ; 0xFA0
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE8     ; 0xFA0
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE9     ; 0xFA4
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xE9     ; 0xFA4
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xEA     ; 0xFA8
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xEA     ; 0xFA8
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xEB     ; 0xFAC
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xEB     ; 0xFAC
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xEC     ; 0xFB0
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xED     ; 0xFB4
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xED     ; 0xFB4
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
+
+        MVI R0 0xEE     ; 0xFB8
+        ST R0 [R1]      ; 0x310
+        ADD R1 R1 R2    ; 0x019
 
 ; Now the table is loaded in RAM
 ; Iterate through RAM addresses and 
