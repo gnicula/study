@@ -13,6 +13,7 @@ public class miscas {
     public int toMachineCode();
   }
 
+  // Base class for 3 operand instructions.
   public class ThreeOpInstruction implements Instruction {
     private final String name;
     private final int opcode;
@@ -324,7 +325,6 @@ public class miscas {
     public void parse() throws IOException {
 
       try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-        int address = 0;
         int lineNo = 0;
         String line;
         while ((line = br.readLine()) != null) {
@@ -335,7 +335,6 @@ public class miscas {
           if (semicolonIndex != -1) {
             line = line.substring(0, semicolonIndex).trim();
           }
-          // System.out.println("While Line " + line);
 
           // Parse instruction
           boolean isCorrectInstruction = true;
@@ -419,15 +418,16 @@ public class miscas {
                     isCorrectInstruction = false;
                   } else {
                     // check and remove square brackets.
-                    if (tokens[2].charAt(0) != '[' 
-                      || tokens[2].charAt(tokens[2].length()-1) != ']') {
+                    if (tokens[2].charAt(0) != '['
+                        || tokens[2].charAt(tokens[2].length() - 1) != ']') {
                       System.err
-                        .println("Invalid address register for instruction <"
-                          + tokens[0] + "> on line <" + lineNo + ">");
+                          .println("Invalid address register for instruction <"
+                              + tokens[0] + "> on line <" + lineNo + ">");
                       ++numParseErrors;
                       isCorrectInstruction = false;
                     } else {
-                      tokens[2] = tokens[2].substring(1, tokens[2].length() - 1);
+                      tokens[2] = tokens[2].substring(1, 
+                        tokens[2].length() - 1);
                       checkRegNames = checkRegisterNames(tokens, 1);
                       if (!checkRegNames) {
                         System.err.println(" on line <" + lineNo + ">");
@@ -459,10 +459,10 @@ public class miscas {
                   break;
               }
               if (isCorrectInstruction) {
-                line = line.replaceAll("\\[", "").replaceAll("\\]", "");
+                line = line.replaceAll("\\[", "")
+                  .replaceAll("\\]", "");
                 // System.out.println("Adding line: " + line);
                 instructionStatements.put(lineNo, line);
-                address++;
               }
             } else {
               System.err.println("Invalid opcode: <" + opcode + "> on line <"
@@ -474,7 +474,7 @@ public class miscas {
       }
       // System.out.println("Instruction statements size " +
       // instructionStatements.size());
-      // Second pass: generate machine code
+      // Now generate machine code based on the parsed instructions.
       for (Integer lineNo : instructionStatements.keySet()) {
         String line = instructionStatements.get(lineNo);
         // System.out.println(line);
@@ -529,7 +529,7 @@ public class miscas {
             break;
           case "mvi":
             instructions.add(new MVI_Instruction(parseRegister(tokens[1]),
-              Integer.decode(tokens[2])));
+                Integer.decode(tokens[2])));
             break;
           default:
             throw new IllegalArgumentException("Invalid opcode: " + opcode);
@@ -615,9 +615,6 @@ public class miscas {
   public static void main(String[] args) throws IOException {
 
     // Check that the correct number of arguments were provided
-    // NOTE: there's and extra q in the doc provided usage string.
-    // USAGE: java Fiscas.javaq <source file> <object file> [-l]
-    // -l : print listing to standard error
     if (args.length < 2 || args.length > 3) {
       System.out.println("USAGE: java miscas <source file> <object file> [-l]");
       System.out.println("\t-l : print listing to standard error");
@@ -632,7 +629,7 @@ public class miscas {
       printListing = true;
     }
 
-    // Create the Fiscas object
+    // Create the miscas object
     miscas as = new miscas();
     AssemblyParser assembler = as.createParser(sourceFile);
 
@@ -642,7 +639,7 @@ public class miscas {
     // Now write the object file
     assembler.writeMachineOutput(objectFile);
 
-    // Print the symbol table if requested
+    // Print the assembled source if requested.
     if (printListing) {
       printMachineCode(assembler.getInstructions());
     }

@@ -985,5 +985,7 @@
 	ADD R1 R1 R0	; 0x011
 ; Send Celsius to port in R1
 	ST R3 [R1]	; 0x313
+; Increment address of Fahrenheit value
 	ADD R2 R2 R0	; 0x022
+; Jump to load Celsius -6 instructions
 	BNZ -6	        ; 0x7FA
