@@ -986,4 +986,4 @@
 ; Send Celsius to port in R1
 	ST R3 [R1]	; 0x313
 	ADD R2 R2 R0	; 0x022
-	BNZ 0x7FA	; 0x7FA
+	BNZ -6	        ; 0x7FA

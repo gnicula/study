@@ -192,7 +192,7 @@ public class miscas {
       this.rd = rd;
       this.rn = rn;
       opcode = 0x0C;
-      System.out.println("ST rn: " + rn);
+      // System.out.println("ST rn: " + rn);
     }
 
     public int toMachineCode() {
@@ -540,7 +540,7 @@ public class miscas {
         System.err.println("There were " + numParseErrors + " parsing errors.");
       }
       boolean outOfBoundsError = false;
-      if (instructions.size() > 64) {
+      if (instructions.size() > 8192) {
         System.err.println(
             "Too many instructions: object file is larger than 64 byte " +
                 "system memory.");
