@@ -8,12 +8,15 @@ import com.codename1.ui.geom.Point;
 
 public class Drone extends Movable {
 	private Random droneRand;
-	private TriangleShape myTriangle;
+	private TriangleShape myTriangle1, myTriangle2;
 	
 	public Drone(int size, double x, double y, int color, int speed, int heading, GameWorld world) {
 		super(size, x, y, color, speed, heading, world);
 		droneRand = new Random();
-		myTriangle = new TriangleShape(size, size, color);
+		myTriangle1 = new TriangleShape(size, size, color);
+		myTriangle2 = new TriangleShape(size/2, size/2, color);
+		myTriangle2.setFilled(true);
+		myTriangle2.translate(0, size/3);
 		myScale.scale(1, -1);
 	}
 
@@ -45,9 +48,7 @@ public class Drone extends Movable {
 		} else if (newY > this.getWorld().getHeight()){
 			setHeading(currentHeading <= 180 ? 180 - currentHeading : 540 - currentHeading);
 		}		
-		this.setX(newX);
-		this.setY(newY);
-		// myRotate.rotate((float)Math.toRadians(getHeading()), (float)newX, (float)newY);
+		this.setXY(newX, newY);
 		locationBoundAdjust();
 	}
 
@@ -70,46 +71,20 @@ public class Drone extends Movable {
 		}	
 	}
 
-	/*
-	// Draws itself as a triangle
-	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
-		int x[] = new int[3];
-		int y[] = new int[3];
-		x[0] = pCmpRelPrnt.getX() + (int)getX();
-		y[0] = pCmpRelPrnt.getY() + (int)getY() + getSize()/2;
-		x[1] = pCmpRelPrnt.getX() + (int)getX() + getSize()/2;
-		y[1] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
-		x[2] = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
-		y[2] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
-		g.setColor(getColor());
-		g.drawPolygon(x, y, 3);
-		myTriangle.draw(g);
-	}
-	*/
-
 	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
-		// Do not forget to do “local origin” transformations.
-		// ORDER of LTs: Scaling LT will be applied to coordinates FIRST,
-		// then Translation LT, and lastly Rotation LT.
-		// Also restore the xform at the end of draw() to remove this sub-shape’s LTs
-		// from xform of the Graphics object. Otherwise, we would also
-		// apply these LTs to the next sub-shape since it also uses the same Graphics object.
+		myRotate = Transform.makeIdentity();
+		myRotate.rotate((float)Math.toRadians(getHeading()-180), 
+			(float)pCmpRelScrn.getX() - pCmpRelPrnt.getX(), 
+			(float)pCmpRelScrn.getY() - pCmpRelPrnt.getY());
 		Transform gXform = Transform.makeIdentity();
 		g.getTransform(gXform);
 		Transform gOrigXform = gXform.copy(); //save the original xform
-		// gXform.translate(pCmpRelScrn.getX(),pCmpRelScrn.getY());
-		gXform.concatenate(myRotate); //Rotation is LAST
-		// gXform.translate(myTranslate.getTranslateX(), myTranslate.getTranslateY());
 		gXform.translate((float)getX(), (float)getY());
 		gXform.scale(myScale.getScaleX(), myScale.getScaleY());
-		// gXform.translate(-pCmpRelScrn.getX(),-pCmpRelScrn.getY());
+		gXform.concatenate(myRotate);
 		g.setTransform(gXform);
-		//draw the lines as before
-		myTriangle.draw(g);
-		// g.drawLine(pCmpRelPrnt.getX()+top.getX(), pCmpRelPrnt.getY()+top.getY(),
-		// pCmpRelPrnt.getX() + bottomLeft.getX(),pCmpRelPrnt.getY() + bottomLeft.getY());
-		//...[draw the rest of the lines]
+		myTriangle1.draw(g);
+		myTriangle2.draw(g);
 		g.setTransform(gOrigXform); //restore the original xform (remove LTs)
 		//do not use resetAffine() in draw()! Instead use getTransform()/setTransform(gOrigForm)
 	}

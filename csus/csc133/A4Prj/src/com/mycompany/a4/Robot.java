@@ -1,5 +1,7 @@
 package com.mycompany.a4;
 
+import java.util.Random;
+
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Graphics;
 import com.codename1.ui.Transform;
@@ -40,7 +42,7 @@ public class Robot extends Movable implements ISteerable {
 	// Constructor
 	protected Robot(int size, double x, double y, int color, int speed, int maximumSpeed,
 					int energyLevel, int energyConsumptionRate, GameWorld world) {
-		super(size, x, y, color, speed, energyConsumptionRate, world);
+		super(size, x, y, color, speed, 0, world);
 		this.maximumSpeed = maximumSpeed;
 		this.energyLevel = energyLevel;
 		this.energyConsumptionRate = energyConsumptionRate;
@@ -52,6 +54,7 @@ public class Robot extends Movable implements ISteerable {
 		this.initialEnergyValue = energyLevel;
 		this.initialXLocation = x;
 		this.initialYLocation = y;
+		setHeading(new Random().nextInt(360));
 		myRobotShape = new RobotShape(size, size, color);
 		myRobotShape.setFilled(true);
 	}
@@ -72,8 +75,7 @@ public class Robot extends Movable implements ISteerable {
 		this.lastBaseReached = 1;
 		this.setSpeed(20);
 		this.setEnergyLevel(initialEnergyValue);
-		this.setX(initialXLocation);
-		this.setY(initialYLocation);
+		this.setXY(initialXLocation, initialYLocation);
 	}
 
 	// Increases speed based on constant SPEED_INCREASE
@@ -261,54 +263,21 @@ public class Robot extends Movable implements ISteerable {
 		}
 	}
 
-	/*
-	// Draw itself as a filled rectangle.
-	// I also added lines that show heading and steering.
-	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
-		int centerX = pCmpRelPrnt.getX() + (int)getX();
-		int centerY = pCmpRelPrnt.getY() + (int)getY();
-		int upperLeftX = centerX - getSize()/2;
-		int upperLeftY = centerY - getSize()/2;
-		g.setColor(getColor());
-		g.fillRect(upperLeftX, upperLeftY, getSize(), getSize());
-		// Add heading and steering directions as lines
-		g.setColor(ColorUtil.WHITE);
-		g.drawLine(centerX, centerY, 
-				(int)(centerX + getSize() * Math.sin(Math.toRadians(getHeading()))/2),
-				(int)(centerY + getSize() * Math.cos(Math.toRadians(getHeading()))/2));
-		g.setColor(ColorUtil.BLACK);
-		g.drawLine(centerX, centerY, 
-				(int)(centerX + 
-						getSize() * Math.sin(Math.toRadians(getHeading()+steeringDirection))/2),
-				(int)(centerY + 
-						getSize() * Math.cos(Math.toRadians(getHeading()+steeringDirection))/2));
-	}
-	*/
-
 	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
-		// Do not forget to do “local origin” transformations.
-		// ORDER of LTs: Scaling LT will be applied to coordinates FIRST,
-		// then Translation LT, and lastly Rotation LT.
-		// Also restore the xform at the end of draw() to remove this sub-shape’s LTs
-		// from xform of the Graphics object. Otherwise, we would also
-		// apply these LTs to the next sub-shape since it also uses the same Graphics object.
+		myRotate = Transform.makeIdentity();
+		myRotate.rotate((float)Math.toRadians(getHeading()+steeringDirection), 
+			(float)pCmpRelScrn.getX() - pCmpRelPrnt.getX(), 
+			(float)pCmpRelScrn.getY() - pCmpRelPrnt.getY());
+
 		Transform gXform = Transform.makeIdentity();
 		g.getTransform(gXform);
 		Transform gOrigXform = gXform.copy(); //save the original xform
-		// gXform.translate(pCmpRelScrn.getX(),pCmpRelScrn.getY());
-		gXform.concatenate(myRotate); //Rotation is LAST
-		// gXform.translate(myTranslate.getTranslateX(), myTranslate.getTranslateY());
 		gXform.translate((float)getX(), (float)getY());
 		gXform.scale(myScale.getScaleX(), myScale.getScaleY());
-		// gXform.translate(-pCmpRelScrn.getX(),-pCmpRelScrn.getY());
+		gXform.concatenate(myRotate);
 		g.setTransform(gXform);
-		//draw the lines as before
 		myRobotShape.rotateWheels(pCmpRelScrn);
 		myRobotShape.draw(g);
-		// g.drawLine(pCmpRelPrnt.getX()+top.getX(), pCmpRelPrnt.getY()+top.getY(),
-		// pCmpRelPrnt.getX() + bottomLeft.getX(),pCmpRelPrnt.getY() + bottomLeft.getY());
-		//...[draw the rest of the lines]
 		g.setTransform(gOrigXform); //restore the original xform (remove LTs)
 		//do not use resetAffine() in draw()! Instead use getTransform()/setTransform(gOrigForm)
 	}

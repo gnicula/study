@@ -11,14 +11,13 @@ import com.codename1.ui.geom.Point;
 // Base class for all the game objects. 
 public class GameObject implements ICollider, IDrawable {
 	private int size;
-	private double xPos;
-	private double yPos;
 	private int color;
 	private GameWorld world;
 	// Vector to keep objects that this object is currently colliding with.
 	protected ArrayList<GameObject> collidingWith;
 	// New in A4: myTranslate, myRotate, and myScale private fields
 	// of type Transform to perform local to top level transformations.
+	// Also new in A4: there's no xPos and yPos - this are kept in myTranslate.
 	Transform myTranslate, myRotate, myScale;
 	
 	public static final int STRING_OFFSET = 6;
@@ -29,8 +28,9 @@ public class GameObject implements ICollider, IDrawable {
 		myRotate = Transform.makeIdentity();
 		myScale = Transform.makeIdentity();
 		this.size = size;
-		this.xPos = x;
-		this.yPos = y;
+		// this.xPos = x;
+		// this.yPos = y;
+		myTranslate.translate((float)x, (float)y);
 		this.color = color;
 		this.world = w;
 		this.collidingWith = new ArrayList<GameObject>();
@@ -40,20 +40,18 @@ public class GameObject implements ICollider, IDrawable {
 		return size;
 	}
 
+	// New in A4 - use local transform to keep object's world location.
 	public double getX() {
-		return xPos;
+		return myTranslate.getTranslateX();
 	}
 
-	public void setX(double x) {
-		xPos = x;
+	public void setXY(double x, double y) {
+		myTranslate = Transform.makeIdentity();
+		myTranslate.translate((float)x, (float)y);
 	}
 
 	public double getY() {
-		return yPos;
-	}
-
-	public void setY(double y) {
-		yPos = y;
+		return myTranslate.getTranslateY();
 	}
 
 	public void setColor(int c) {
@@ -119,7 +117,7 @@ public class GameObject implements ICollider, IDrawable {
 	// This method is overridden by the base classes 
 	// so they can add their specific attributes.
 	public String toString() {
-		String myDesc = "location=" + xPos + ", " + yPos + ", color(ARGB)=" + "[" + ColorUtil.alpha(color) + ","
+		String myDesc = "location=" + getX() + ", " + getY() + ", color(ARGB)=" + "[" + ColorUtil.alpha(color) + ","
 				+ ColorUtil.red(color) + "," + ColorUtil.green(color) + "," + ColorUtil.blue(color) + "]" + ", size="
 				+ size;
 		;

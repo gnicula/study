@@ -28,12 +28,17 @@ public abstract class TransformedShape {
         }
         selfDraw(g);
         if (text != null) {
+            // TODO: Scale and display text.
             // g.setFont(textFont);
-            g.setColor(ColorUtil.BLACK);
-            g.scale(1, -1);
-            g.drawString(text, -GameObject.STRING_OFFSET, 2*GameObject.STRING_OFFSET);
+            // g.setColor(ColorUtil.BLACK);
+            // g.scale(1, -1);
+            // g.drawString(text, -GameObject.STRING_OFFSET, GameObject.STRING_OFFSET);
         }
         g.setTransform(oldOne);
+    }
+
+    public void translate(float dx, float dy) {
+        localXform.translate(dx, dy);
     }
 
     public void setText(String text) {

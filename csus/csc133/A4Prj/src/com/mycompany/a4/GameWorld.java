@@ -24,7 +24,7 @@ public class GameWorld extends Observable {
 	// to be considered selected.
 	private final int SELECT_DELTA = 25;
 	// Offset of initial objects positions with margins
-	private final int MARGIN_PLACE = 150;
+	private final int MARGIN_PLACE = 120;
 
 	// Player Robot initial values
 	private final int INITIAL_ENERGY = 600;
@@ -65,24 +65,24 @@ public class GameWorld extends Observable {
 	public void initObjects() {
 		init();
 		// Four bases each corner
-		goc.add(new Base(60, MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 1));
-		goc.add(new Base(60, width-MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 2));
-		goc.add(new Base(60, MARGIN_PLACE, height-MARGIN_PLACE, LIGHTBLUE, this, 3));
-		goc.add(new Base(60, width-MARGIN_PLACE, height-MARGIN_PLACE, LIGHTBLUE, this, 4));
+		goc.add(new Base(50, MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 1));
+		goc.add(new Base(50, width-MARGIN_PLACE, MARGIN_PLACE, LIGHTBLUE, this, 2));
+		goc.add(new Base(50, MARGIN_PLACE, height-MARGIN_PLACE, LIGHTBLUE, this, 3));
+		goc.add(new Base(50, width-MARGIN_PLACE, height-MARGIN_PLACE, LIGHTBLUE, this, 4));
 
 		// Four energy stations for refill
-		goc.add(new EnergyStation(60, width/2, 2 * MARGIN_PLACE, ENERGYGREEN, this));
-		goc.add(new EnergyStation(70, width/2, height - 2 * MARGIN_PLACE, ENERGYGREEN, this));
-		goc.add(new EnergyStation(90, 2* MARGIN_PLACE, height/2, ENERGYGREEN, this));
-		goc.add(new EnergyStation(80, width - 2 * MARGIN_PLACE, height/2, ENERGYGREEN, this));
+		goc.add(new EnergyStation(40, width/2, 2 * MARGIN_PLACE, ENERGYGREEN, this));
+		goc.add(new EnergyStation(50, width/2, height - 2 * MARGIN_PLACE, ENERGYGREEN, this));
+		goc.add(new EnergyStation(70, 2* MARGIN_PLACE, height/2, ENERGYGREEN, this));
+		goc.add(new EnergyStation(60, width - 2 * MARGIN_PLACE, height/2, ENERGYGREEN, this));
 
 		// Three drones hovering NW with random speed and random heading
 		Random rand = new Random();
-		goc.add(new Drone(50, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 
+		goc.add(new Drone(40, width/3 + MARGIN_PLACE, height/3, ColorUtil.BLACK, 
 				rand.nextInt(10) + 35, rand.nextInt(360), this));
-		goc.add(new Drone(50, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK,
+		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK,
 				rand.nextInt(10) + 35, rand.nextInt(360), this));
-		goc.add(new Drone(50, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK,
+		goc.add(new Drone(40, width/3, height/3 + MARGIN_PLACE, ColorUtil.BLACK,
 				rand.nextInt(10) + 35, rand.nextInt(360), this));
 
 		// Get the first base to initialize Robot locations.
@@ -302,6 +302,7 @@ public class GameWorld extends Observable {
 		if (sound) {
 			drone_collision.play();
 		}
+		// Add ShockWave for this collision.
 		addShockWave(robot.getX(), robot.getY());
 	}
 
@@ -314,6 +315,7 @@ public class GameWorld extends Observable {
 		if (sound) {
 			npr_collision.play();
 		}
+		// Add ShockWave for this collision.
 		addShockWave(robot.getX(), robot.getY());
 	}
 
@@ -364,6 +366,7 @@ public class GameWorld extends Observable {
 		if (sound) {
 			npr_collision.play();
 		}
+		// Add ShockWave for this collision.
 		addShockWave(npr1.getX(), npr2.getY());
 	}
 	
@@ -463,8 +466,7 @@ public class GameWorld extends Observable {
 		// Check if there is a selected object and move it to
 		// its new location.
 		if (currentSelectedObject != null) {
-			currentSelectedObject.setX(xPos);
-			currentSelectedObject.setY(yPos);
+			currentSelectedObject.setXY(xPos, yPos);
 			// unselect moved item
 			currentSelectedObject.setSelected(false);
 			currentSelectedObject = null;
@@ -550,7 +552,7 @@ public class GameWorld extends Observable {
 		// Then add new collision shockwaves
 		Random shwRand = new Random();
 		for (int i=0; i < newShockWaves.size(); ++i) {
-			ShockWave shw = new ShockWave(shwRand.nextInt(360), (double)newShockWaves.get(i).getX(), 
+			ShockWave shw = new ShockWave(100+shwRand.nextInt(200), (double)newShockWaves.get(i).getX(), 
 				(double)newShockWaves.get(i).getY(), ColorUtil.BLUE, 50 + shwRand.nextInt(100), 
 				shwRand.nextInt(360), this);
 			goc.add(0, shw);

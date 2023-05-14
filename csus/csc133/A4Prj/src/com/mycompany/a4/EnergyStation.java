@@ -24,46 +24,17 @@ public class EnergyStation extends Fixed {
 		capacity = cap;
 	}
 
-	/*
-	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
-		g.setColor(getColor());
-		if (!isSelected) {
-			g.fillArc(pCmpRelPrnt.getX() + (int)getX() - getSize()/2,
-					pCmpRelPrnt.getY() + (int)getY() - getSize()/2,
-					getSize(), getSize(), 0, 360);
-		} else {
-			g.drawArc(pCmpRelPrnt.getX() + (int)getX() - getSize()/2,
-					pCmpRelPrnt.getY() + (int)getY() - getSize()/2,
-					getSize(), getSize(), 0, 360);			
-		}
-		drawNumber(g,  pCmpRelPrnt, getCapacity());
-	}
-	*/
-
 	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
-		// Do not forget to do “local origin” transformations.
-		// ORDER of LTs: Scaling LT will be applied to coordinates FIRST,
-		// then Translation LT, and lastly Rotation LT.
-		// Also restore the xform at the end of draw() to remove this sub-shape’s LTs
-		// from xform of the Graphics object. Otherwise, we would also
-		// apply these LTs to the next sub-shape since it also uses the same Graphics object.
 		Transform gXform = Transform.makeIdentity();
 		g.getTransform(gXform);
 		Transform gOrigXform = gXform.copy(); //save the original xform
-		// gXform.translate(pCmpRelScrn.getX(),pCmpRelScrn.getY());
-		gXform.concatenate(myRotate); //Rotation is LAST
-		// gXform.translate(myTranslate.getTranslateX(), myTranslate.getTranslateY());
+		gXform.concatenate(myRotate);
 		gXform.translate((float)getX(), (float)getY());
 		gXform.scale(myScale.getScaleX(), myScale.getScaleY());
-		// gXform.translate(-pCmpRelScrn.getX(),-pCmpRelScrn.getY());
 		g.setTransform(gXform);
-		//draw the lines as before
+
 		myEllipse.setFilled(!isSelected);
 		myEllipse.draw(g);
-		// g.drawLine(pCmpRelPrnt.getX()+top.getX(), pCmpRelPrnt.getY()+top.getY(),
-		// pCmpRelPrnt.getX() + bottomLeft.getX(),pCmpRelPrnt.getY() + bottomLeft.getY());
-		//...[draw the rest of the lines]
 		g.setTransform(gOrigXform); //restore the original xform (remove LTs)
 		//do not use resetAffine() in draw()! Instead use getTransform()/setTransform(gOrigForm)
 	}

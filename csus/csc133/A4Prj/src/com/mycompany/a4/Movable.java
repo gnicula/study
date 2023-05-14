@@ -1,5 +1,7 @@
 package com.mycompany.a4;
 
+import java.util.Random;
+
 // Movable object base class
 public class Movable extends GameObject {
     // Class Attributes
@@ -11,7 +13,7 @@ public class Movable extends GameObject {
     public Movable(int size, double x, double y, int color, int speed, int heading, GameWorld world) {
     	super(size, x, y, color, world);
     	this.speed = speed;
-        this.heading = heading;        
+        this.heading = heading;
     }
 
     // getters and setters
@@ -37,8 +39,7 @@ public class Movable extends GameObject {
         double theta = Math.toRadians(90 - heading);
         double deltaX = (Math.cos(theta) * speed * tickTime) / 1000;
         double deltaY = (Math.sin(theta) * speed * tickTime) / 1000;
-        setX(getX() + deltaX);
-        setY(getY() + deltaY);
+        setXY(getX() + deltaX, getY() + deltaY);
         locationBoundAdjust();
     }
     
@@ -52,17 +53,17 @@ public class Movable extends GameObject {
     // It accomplishes this by resetting the specific out of bounds coordinate
     // to the edge of the boundary. 
     protected void locationBoundAdjust() {
-    	if (getX() < 0) {
-    		setX(0);
+    	if (getX() < 5) {
+    		setXY(5, getY());
     	}
-    	if (getX() > getWorld().getWidth()) {
-    		setX(getWorld().getWidth());
+    	if (getX() > getWorld().getWidth()-5) {
+    		setXY(getWorld().getWidth()-5, getY());
     	}
-    	if (getY() < 0) {
-    		setY(0);
+    	if (getY() < 5) {
+    		setXY(getX(), 5);
     	}
-    	if (getY() > getWorld().getHeight()) {
-    		setY(getWorld().getHeight());
+    	if (getY() > getWorld().getHeight()-10) {
+    		setXY(getX(), getWorld().getHeight()-10);
     	}
     }
 }

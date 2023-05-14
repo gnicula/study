@@ -32,51 +32,17 @@ public class Base extends Fixed {
 		this.sequenceNumber = sequenceNumber;
 	}
 
-	/*
-	// Draw itself as a triangle
-	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
-		int x[] = new int[3];
-		int y[] = new int[3];
-		x[0] = pCmpRelPrnt.getX() + (int)getX();
-		y[0] = pCmpRelPrnt.getY() + (int)getY() + getSize()/2;
-		x[1] = pCmpRelPrnt.getX() + (int)getX() + getSize()/2;
-		y[1] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
-		x[2] = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
-		y[2] = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
-		g.setColor(getColor());
-		if (!isSelected) {
-			g.fillPolygon(x, y, 3);
-		} else {
-			g.drawPolygon(x, y, 3);			
-		}
-		drawNumber(g,  pCmpRelPrnt, sequenceNumber);
-	}
-	*/
-
 	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
-		// Do not forget to do “local origin” transformations.
-		// ORDER of LTs: Scaling LT will be applied to coordinates FIRST,
-		// then Translation LT, and lastly Rotation LT.
-		// Also restore the xform at the end of draw() to remove this sub-shape’s LTs
-		// from xform of the Graphics object. Otherwise, we would also
-		// apply these LTs to the next sub-shape since it also uses the same Graphics object.
 		Transform gXform = Transform.makeIdentity();
 		g.getTransform(gXform);
 		Transform gOrigXform = gXform.copy(); //save the original xform
-		// gXform.translate(pCmpRelScrn.getX(),pCmpRelScrn.getY());
-		gXform.concatenate(myRotate); //Rotation is LAST
-		// gXform.translate(myTranslate.getTranslateX(), myTranslate.getTranslateY());
+		gXform.concatenate(myRotate);
 		gXform.translate((float)getX(), (float)getY());
 		gXform.scale(myScale.getScaleX(), myScale.getScaleY());
-		// gXform.translate(-pCmpRelScrn.getX(),-pCmpRelScrn.getY());
 		g.setTransform(gXform);
-		//draw the lines as before
+
 		myTriangle.setFilled(!isSelected);
 		myTriangle.draw(g);
-		// g.drawLine(pCmpRelPrnt.getX()+top.getX(), pCmpRelPrnt.getY()+top.getY(),
-		// pCmpRelPrnt.getX() + bottomLeft.getX(),pCmpRelPrnt.getY() + bottomLeft.getY());
-		//...[draw the rest of the lines]
 		g.setTransform(gOrigXform); //restore the original xform (remove LTs)
 		//do not use resetAffine() in draw()! Instead use getTransform()/setTransform(gOrigForm)
 	}

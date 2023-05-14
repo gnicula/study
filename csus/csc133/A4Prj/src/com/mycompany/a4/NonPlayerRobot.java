@@ -9,6 +9,7 @@ import java.lang.Math;
 public class NonPlayerRobot extends Robot {
 	
 	private final int NPR_MAX_POSSIBLE_DAMAGE = 1000;
+	private int lastHeading;
 	
 	private IStrategy strategy;
 	
@@ -18,6 +19,7 @@ public class NonPlayerRobot extends Robot {
 		// NPRs start with a handicap of 1 base.
 		setLastBaseReached(0);
 		myRobotShape.setFilled(false);
+		lastHeading = getHeading();
 	}
 	
 	public void setStrategy(IStrategy strat) {
@@ -95,6 +97,8 @@ public class NonPlayerRobot extends Robot {
 		if (damageLevel < NPR_MAX_POSSIBLE_DAMAGE) {
 			// Calculate the heading based on steeringDirection
 			int newHeading = (getHeading() + getSteeringDirection() + 360) % 360;
+			// Smooth out angle for rotation purposes.
+			lastHeading = Math.abs(getHeading() - newHeading) > 35 ? getHeading() : lastHeading;
 			// Update the heading of the robot
 			setHeading(newHeading);
 
@@ -102,51 +106,29 @@ public class NonPlayerRobot extends Robot {
 	        double theta = Math.toRadians(90 - getHeading());
 	        double deltaX = Math.cos(theta) * getSpeed() * tickTime / 1000;
 	        double deltaY = Math.sin(theta) * getSpeed() * tickTime / 1000;
-	        setX(getX() + deltaX);
-	        setY(getY() + deltaY);
+	        setXY(getX() + deltaX, getY() + deltaY);
 	        locationBoundAdjust();
 		}
 	}
-	
-	/*
-	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
-		int upperLeftX = pCmpRelPrnt.getX() + (int)getX() - getSize()/2;
-		int upperLeftY = pCmpRelPrnt.getY() + (int)getY() - getSize()/2;
-		g.setColor(getColor());
-		g.drawRect(upperLeftX, upperLeftY, getSize(), getSize());
-		g.drawRect(upperLeftX+1, upperLeftY+1, getSize()-2, getSize()-2);
-	}
-	*/
 
-	/*
 	@Override
-	public void draw(Graphics g, Point pCmpRelPrnt) {
-		// Do not forget to do “local origin” transformations.
-		// ORDER of LTs: Scaling LT will be applied to coordinates FIRST,
-		// then Translation LT, and lastly Rotation LT.
-		// Also restore the xform at the end of draw() to remove this sub-shape’s LTs
-		// from xform of the Graphics object. Otherwise, we would also
-		// apply these LTs to the next sub-shape since it also uses the same Graphics object.
+	public void draw(Graphics g, Point pCmpRelPrnt, Point pCmpRelScrn) {
+		myRotate = Transform.makeIdentity();
+		myRotate.rotate((float)Math.toRadians(lastHeading), 
+			(float)pCmpRelScrn.getX() - pCmpRelPrnt.getX(), 
+			(float)pCmpRelScrn.getY() - pCmpRelPrnt.getY());
+
 		Transform gXform = Transform.makeIdentity();
 		g.getTransform(gXform);
 		Transform gOrigXform = gXform.copy(); //save the original xform
-		// gXform.translate(pCmpRelScrn.getX(),pCmpRelScrn.getY());
-		gXform.concatenate(myRotate); //Rotation is LAST
-		// gXform.translate(myTranslate.getTranslateX(), myTranslate.getTranslateY());
 		gXform.translate((float)getX(), (float)getY());
 		gXform.scale(myScale.getScaleX(), myScale.getScaleY());
-		// gXform.translate(-pCmpRelScrn.getX(),-pCmpRelScrn.getY());
+		gXform.concatenate(myRotate);
 		g.setTransform(gXform);
-		//draw the lines as before
-		myRectangle.draw(g);
-		// g.drawLine(pCmpRelPrnt.getX()+top.getX(), pCmpRelPrnt.getY()+top.getY(),
-		// pCmpRelPrnt.getX() + bottomLeft.getX(),pCmpRelPrnt.getY() + bottomLeft.getY());
-		//...[draw the rest of the lines]
+		myRobotShape.rotateWheels(pCmpRelScrn);
+		myRobotShape.draw(g);
 		g.setTransform(gOrigXform); //restore the original xform (remove LTs)
-		//do not use resetAffine() in draw()! Instead use getTransform()/setTransform(gOrigForm)
 	}
-	*/
 
 	public String toString() {
 		String parentDesc = super.toString();

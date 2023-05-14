@@ -52,7 +52,8 @@ public class Game extends Form implements Runnable {
 
 		createGUI();
 		this.show();
-		gw.setDimensions(mv.getInnerWidth(), mv.getInnerHeight());
+		// Set GameWorld dimension smaller than the view.
+		gw.setDimensions(mv.getInnerWidth() / 2, mv.getInnerHeight() / 2);
 		mv.resetViewWindow();
 		gw.addObserver(sv);
 		gw.addObserver(mv);
@@ -241,7 +242,7 @@ public class Game extends Form implements Runnable {
 				// Stop timer
 				gameTimer.cancel();
 			} else {
-				gameTimer.schedule(TICK_TIME, true, this);			
+				gameTimer.schedule(TICK_TIME, true, this);
 			}
 		}
 	}
