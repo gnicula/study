@@ -98,7 +98,7 @@ public class NonPlayerRobot extends Robot {
 			// Calculate the heading based on steeringDirection
 			int newHeading = (getHeading() + getSteeringDirection() + 360) % 360;
 			// Smooth out angle for rotation purposes.
-			lastHeading = Math.abs(getHeading() - newHeading) > 35 ? getHeading() : lastHeading;
+			lastHeading = Math.abs(getHeading() - newHeading) > 40 ? getHeading() : lastHeading;
 			// Update the heading of the robot
 			setHeading(newHeading);
 
