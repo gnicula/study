@@ -122,7 +122,11 @@ void execute_single_command(char* str) {
         num_paths = add_path(str);
         // printf("%s", wish_paths[0]);
     } else if(strcmp(token, "exit") == 0) {
-        exit(0);
+        if (str == NULL) {
+            exit(0);
+        } else {
+            error();
+        }
     } else {
         // try search in path and execute with fork
         resolve_non_built_in_command(token, str, NULL);
