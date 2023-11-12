@@ -40,12 +40,20 @@ int test_ufree(void *ptr)
   return result;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  test_umeminit(128, NEXT_FIT);
+  char const *strategy_names[] = {"BEST_FIT", "WORST_FIT", "FIRST_FIT", "NEXT_FIT", "BUDDY"};
+  if (argc < 2) {
+    printf("Specify strategy as an integer.\n");
+    return 1;
+  }
+  int strategy = atoi(argv[1]);
+  printf("Testing strategy %s.\n", strategy_names[strategy-1]);
+  test_umeminit(128, strategy);
   test_umemdump();
   // Scenario 1: Allocate block and immediately deallocate it.
   // Look for coalesce to return the initial memory.
+
   printf("Scenario 1: \n");
   void *result1 = test_umalloc(75);
   test_umemdump();
@@ -55,7 +63,7 @@ int main()
     printf("Failed\n");
   }
   test_umemdump();
-  
+
   // Scenario 2: Allocate 3 blocks and deallocate 2 of them.
   // Observe memory fragmentation with no coalescing.
   printf("Scenario 2: \n");
@@ -86,6 +94,28 @@ int main()
   test_ufree(result6);
   test_umemdump();
   test_ufree(result7);
+  test_umemdump();
+
+  // Scenario 4: Create 3 blocks of free memory.
+  // Test NEXT_FIT strategy.
+  printf("Scenario 3: \n");
+  void *result8 = test_umalloc(1);
+  void *result9 = test_umalloc(2);
+  void *result10 = test_umalloc(3);
+  void *result11 = test_umalloc(4);
+  void *result12 = test_umalloc(5);
+  test_umemdump();
+  test_ufree(result8);
+  test_ufree(result10);
+  test_ufree(result12);
+  test_umemdump();
+  void *result13 = test_umalloc(6);
+  test_umemdump();
+  test_ufree(result9);
+  test_umemdump();
+  test_ufree(result11);
+  test_umemdump();
+  test_ufree(result13);
   test_umemdump();
 
   return 0;
