@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   // Scenario 1: Allocate block and immediately deallocate it.
   // Look for coalesce to return the initial memory.
 
-  printf("Scenario 1: \n");
+  printf("Scenario 1: \n\n");
   void *result1 = test_umalloc(75);
   test_umemdump();
   int freeTest = test_ufree(result1);
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 
   // Scenario 2: Allocate 3 blocks and deallocate 2 of them.
   // Observe memory fragmentation with no coalescing.
-  printf("Scenario 2: \n");
+  printf("Scenario 2: \n\n");
   void *result2 = test_umalloc(15);
   test_umemdump();
   void *result3 = test_umalloc(16);
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
   // Scenario 3: Create 1 small block and 1 large block of free memory,
   // And then test policies when allocating.
-  printf("Scenario 3: \n");
+  printf("Scenario 3: \n\n");
   void *result5 = test_umalloc(31);
   void *result6 = test_umalloc(20);
   test_umemdump();
@@ -98,24 +98,28 @@ int main(int argc, char* argv[])
 
   // Scenario 4: Create 3 blocks of free memory.
   // Test NEXT_FIT strategy.
-  printf("Scenario 3: \n");
-  void *result8 = test_umalloc(1);
-  void *result9 = test_umalloc(2);
-  void *result10 = test_umalloc(3);
-  void *result11 = test_umalloc(4);
-  void *result12 = test_umalloc(5);
+  printf("Scenario 4: \n\n");
+  void *result8 = test_umalloc(8);
+  void *result9 = test_umalloc(8);
+  void *result10 = test_umalloc(16);
+  void *result11 = test_umalloc(8);
+  void *result12 = test_umalloc(16);
   test_umemdump();
-  test_ufree(result8);
-  test_ufree(result10);
   test_ufree(result12);
+  test_ufree(result10);
+  test_ufree(result8);
   test_umemdump();
-  void *result13 = test_umalloc(6);
+  void *result13 = test_umalloc(16);
+  test_umemdump();
+  void *result14 = test_umalloc(7);
   test_umemdump();
   test_ufree(result9);
   test_umemdump();
   test_ufree(result11);
   test_umemdump();
   test_ufree(result13);
+  test_umemdump();
+  test_ufree(result14);
   test_umemdump();
 
   return 0;

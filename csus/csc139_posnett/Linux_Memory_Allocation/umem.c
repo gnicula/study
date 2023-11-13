@@ -104,6 +104,7 @@ void umallocSpaceSaver(node_t *allocated, size_t requestedSpace)
     else
     {
       skipNode(allocated, newNode);
+      g_nextFitStart = newNode;
     }
   }
   else
@@ -121,6 +122,7 @@ void umallocSpaceSaver(node_t *allocated, size_t requestedSpace)
     else
     {
       skipNode(allocated, allocated->next);
+      g_nextFitStart = allocated->next != NULL ? allocated->next : g_head;
     }
   }
   allocated->size = requestedSpace;
