@@ -106,6 +106,7 @@ void umallocSpaceSaver(node_t *allocated, size_t requestedSpace)
       skipNode(allocated, newNode);
       g_nextFitStart = newNode;
     }
+    allocated->size = requestedSpace;
   }
   else
   {
@@ -125,7 +126,7 @@ void umallocSpaceSaver(node_t *allocated, size_t requestedSpace)
       g_nextFitStart = allocated->next != NULL ? allocated->next : g_head;
     }
   }
-  allocated->size = requestedSpace;
+  // allocated->size = requestedSpace;
   allocated->next = MARKER;
 }
 
@@ -283,6 +284,7 @@ void coalesce()
       if (g_head == ptrEnd)
       {
         ptr->size = ptr->size + ptrEnd->size + nodeSize;
+        // printf("Head coalescing node: %p with node %p, new size of node: %u\n", ptr, ptrEnd, ptr->size);
         if (g_allocationAlgo == NEXT_FIT && g_nextFitStart == g_head)
         {
           g_nextFitStart = g_head->next;
