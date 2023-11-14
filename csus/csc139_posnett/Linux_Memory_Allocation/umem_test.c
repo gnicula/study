@@ -48,8 +48,13 @@ int main(int argc, char* argv[])
     return 1;
   }
   int strategy = atoi(argv[1]);
+  if (strategy > 5 || strategy < 1) {
+    printf("Specify strategy as an integer between 1 and 5.\n");
+    return 1;
+  }
   printf("Testing strategy %s.\n", strategy_names[strategy-1]);
-  test_umeminit(128, strategy);
+  unsigned int region_size = 12800000;
+  test_umeminit(region_size, strategy);
   test_umemdump();
   // Scenario 1: Allocate block and immediately deallocate it.
   // Look for coalesce to return the initial memory.
@@ -133,5 +138,11 @@ int main(int argc, char* argv[])
   test_ufree(result14);
   test_umemdump();
 
+  // Scenario 5, corner cases
+  printf("Scenario 5: \n\n");
+  void *result15 = test_umalloc(2 * region_size);
+  printf("result15: %p\n", result15);
+  void *result16 = test_umalloc(0);
+  printf("result16: %p\n", result16);
   return 0;
 }
