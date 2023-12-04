@@ -105,12 +105,15 @@ void execute_non_built_in_command(char* name, char* cmd, char* filename) {
         // command output is redirected to a file, create it
         fout = open(filename, O_WRONLY | O_TRUNC | O_CREAT);
         if (fout == -1) {
+            // Test 22 fails on Ubuntu 20.04 with 'Permission denied'
+            // Test 22 tries to redirect to same file concurrently.
+            // perror("Cannot open output file\n");
             error();
             // invalid redirection
             return;
         } 
     }
-    // printf("name: %s, cmd: %s, filename: %s", name, cmd, filename);
+    // printf("name: %s, cmd: %s, filename: %s\n", name, cmd, filename);
     fflush(stdout);
     int pid = fork();
     if (pid == 0) {
@@ -147,7 +150,7 @@ void execute_non_built_in_command(char* name, char* cmd, char* filename) {
 }
 
 void resolve_non_built_in_command(char* name, char* cmd, char* filename) {
-    // printf("Name: |%s|, cmd: %s", name, cmd);
+    // printf("Name: |%s|, cmd: %s\n", name, cmd);
     if (name == NULL || name[0] == '\0') {
         error();
         return;
@@ -225,6 +228,7 @@ void execute_line_commands(char* str) {
 }
 
 void process_line(char* input) {
+    // printf("process line: [%s]\n", input);
     input[strcspn(input, "\r\n")] = 0;
     char* trimmed_input = trim_white_space(input);
     if (trimmed_input != NULL && strlen(trimmed_input) > 0) {
@@ -236,13 +240,13 @@ void run_interactive_mode() {
     // Interactive mode
     char* input = NULL;
     size_t input_size = 0;
-
-    while (getline(&input, &input_size, stdin) == -1) {
-        printf("wish> ");
+    printf("wish> ");
+    while (getline(&input, &input_size, stdin) != -1) {
         process_line(input);
         free(input);
         input = NULL;
         input_size = 0;
+        printf("wish> ");
     }
     free(input); // Free the dynamically allocated input buffer
     input = NULL;
@@ -289,4 +293,3 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
-
