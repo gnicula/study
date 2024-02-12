@@ -86,6 +86,11 @@ public class GameObject
 	private PhysicsObject physicsObject;
 	private boolean isTerrain = false;
 
+	/** Pitch variables */
+	private Matrix4f currentPitch, // current pitch in radians (x, y, z, 1)
+			newPitch, // new pitch in radians (x, y, z, 1)
+			pitchPositionAngle; // pitch vector in radians (x, y, z, 1)
+
 	//------------------ CONSTRUCTORS -----------------
 
 	// only applicable for creating the root node
@@ -398,5 +403,42 @@ public class GameObject
 		{	setTextureFile(textureFile);
 			Engine.getEngine().getRenderSystem().addTexture((TextureImage)this);
 		}
+	}
+
+		/**
+	 * Pitch the object around the up vector of the object
+	 * (not the world up vector).
+	 * 
+	 * @param pitchSpeed the amount to pitch the object
+	 */
+	public void pitch(float pitchSpeed) {
+		currentPitch = new Matrix4f(this.getWorldRotation());
+		pitchPositionAngle = new Matrix4f()
+				.rotation(pitchSpeed, new Vector3f(1f, 0f, 0f));
+		newPitch = currentPitch;
+		newPitch.mul(pitchPositionAngle);
+		this.setLocalRotation(newPitch);
+	}
+	/**
+	 * Yaw the object around the up vector of the object
+	 * (not the world up vector) by the specified amount.
+	 * 
+	 * @param rotationSpeed the amount to rotate by
+	 */
+	public void yaw(float rotationSpeed) {
+		Matrix4f previousRotation = new Matrix4f(getWorldRotation());
+		Vector4f previousUpAngle = new Vector4f(0f, 1f, 0f, 1f)
+				.mul(previousRotation);
+
+		Matrix4f rotationAroundGameObjUpAngle;
+		rotationAroundGameObjUpAngle = new Matrix4f().rotation(
+				rotationSpeed, new Vector3f(
+						previousUpAngle.x(),
+						previousUpAngle.y(),
+						previousUpAngle.z()));
+
+		Matrix4f newRotation = previousRotation;
+		rotationAroundGameObjUpAngle.mul(newRotation);
+		setLocalRotation(rotationAroundGameObjUpAngle);
 	}
 }
