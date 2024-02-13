@@ -4,6 +4,8 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.PitchAction;
+import tage.input.action.ForwardBackAction;
+import tage.input.action.YawActionK;
 
 import net.java.games.input.Controller;
 
@@ -21,6 +23,7 @@ public class MyGame extends VariableFrameRateGame
 	private static Engine engine;
 
 	private boolean paused=false;
+	private boolean offDolphinCam = true;
 	private int counter=0;
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
@@ -31,6 +34,10 @@ public class MyGame extends VariableFrameRateGame
 	private Light light1;
 	private Camera myCamera;
 	private InputManager inputManager;
+	private Vector3f location, // object location in world coordinates
+			forward, // object forward vector in world coordinates (n-vector/z-axis)
+			up, // object up vector in world coordinates (v-vector/y-axis)
+			right; // object right vector in world coordinates (u-vector/x-axis)
 
 	public MyGame() { super(); }
 
@@ -76,7 +83,7 @@ public class MyGame extends VariableFrameRateGame
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
 		initialTranslation = (new Matrix4f()).translation(0,0,0);
-		initialScale = (new Matrix4f()).scaling(1.5f);
+		initialScale = (new Matrix4f()).scaling(0.75f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
 
@@ -133,8 +140,9 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void initializeGame()
-	{	lastFrameTime = System.currentTimeMillis();
+	{	
 		currFrameTime = System.currentTimeMillis();
+		lastFrameTime = currFrameTime;
 		elapsTime = 0.0;
 		(engine.getRenderSystem()).setWindowDimensions(1900,1000);
 
@@ -144,12 +152,12 @@ public class MyGame extends VariableFrameRateGame
 
 		inputManager = engine.getInputManager();
 		ArrayList<Controller> controllers = inputManager.getControllers(); // get all our controllers
-		// MoveForwardActionKeyboard moveForward = new MoveForwardActionKeyboard(this);
-		// MoveBackwardActionKeyboard moveBackward = new MoveBackwardActionKeyboard(this);
-		// MoveYawActionKeyboard yawLeft = new MoveYawActionKeyboard(this, 1);
-		// MoveYawActionKeyboard yawRight = new MoveYawActionKeyboard(this, -1);
 		PitchAction pitchUp = new PitchAction(this, 0.0005f);
 		PitchAction pitchDown = new PitchAction(this, -0.0005f);
+		ForwardBackAction moveForward = new ForwardBackAction(this, 0.0005f);
+		ForwardBackAction moveBackward = new ForwardBackAction(this, -0.0005f);
+		YawActionK leftYaw = new YawActionK(this, 1);
+		YawActionK rightYaw = new YawActionK(this, -1);
 
 		inputManager.associateActionWithAllKeyboards(
 						net.java.games.input.Component.Identifier.Key.UP,
@@ -159,6 +167,22 @@ public class MyGame extends VariableFrameRateGame
 						net.java.games.input.Component.Identifier.Key.DOWN,
 						pitchDown,
 						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllKeyboards(
+						net.java.games.input.Component.Identifier.Key.W,
+						moveForward,
+						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllKeyboards(
+						net.java.games.input.Component.Identifier.Key.S,
+						moveBackward,
+						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllKeyboards(
+						net.java.games.input.Component.Identifier.Key.A,
+						leftYaw,
+						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllKeyboards(
+						net.java.games.input.Component.Identifier.Key.D,
+						rightYaw,
+						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	}
 
 	private float getFramesPerSecond() {
@@ -167,7 +191,7 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void update()
-	{	// rotate dolphin if not paused
+	{
 		lastFrameTime = currFrameTime;
 		currFrameTime = System.currentTimeMillis();
 		if (!paused) 
@@ -198,12 +222,12 @@ public class MyGame extends VariableFrameRateGame
 		{	case KeyEvent.VK_C:
 				counter++;
 				break;
-			case KeyEvent.VK_W:
-				fwd = dol.getWorldForwardVector();
-				loc = dol.getWorldLocation();
-				newLocation = loc.add(fwd.mul(0.02f));
-				dol.setLocalLocation(newLocation);
-				break;
+			// case KeyEvent.VK_W:
+			// 	fwd = dol.getWorldForwardVector();
+			// 	loc = dol.getWorldLocation();
+			// 	newLocation = loc.add(fwd.mul(0.02f));
+			// 	dol.setLocalLocation(newLocation);
+			// 	break;
 			case KeyEvent.VK_1:
 				paused = !paused;
 				break;
@@ -215,6 +239,16 @@ public class MyGame extends VariableFrameRateGame
 				break;
 			case KeyEvent.VK_4:
 				(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0,0,0));
+				offDolphinCam = true;
+				break;
+			case KeyEvent.VK_SPACE:
+				if (offDolphinCam) {
+					setOnDolphinCam();
+					offDolphinCam = false;
+				} else {
+					setOffDolphinCam();
+					offDolphinCam = true;
+				}
 				break;
 		}
 		super.keyPressed(e);
@@ -222,6 +256,42 @@ public class MyGame extends VariableFrameRateGame
 
 	public Camera getCameraMain() {
 		return myCamera;
+	}
+
+	public boolean onDolphinCam() {
+		return !offDolphinCam;
+	}
+
+	public void setOnDolphinCam() {
+		float hopOnDistance = -4.5f;
+		float upDistance = 1.0f;
+		location = getAvatar().getWorldLocation();
+		forward = getAvatar().getWorldForwardVector();
+		up = getAvatar().getWorldUpVector();
+		right = getAvatar().getWorldRightVector();
+		myCamera.setU(right);
+		myCamera.setV(up);
+		myCamera.setN(forward);
+		myCamera.setLocation(location
+				.add(up.mul(upDistance))
+				.add(forward.mul(hopOnDistance)));
+	}
+
+	public void setOffDolphinCam() {
+		float hopOffDistance = -5f;
+		float upDistance = 0.5f;
+		// if (!offDolphinCam) {
+			location = getAvatar().getWorldLocation();
+			forward = getAvatar().getWorldForwardVector();
+			up = getAvatar().getWorldUpVector();
+			right = getAvatar().getWorldRightVector();
+			getCameraMain().setU(right);
+			getCameraMain().setV(up);
+			getCameraMain().setN(forward);
+			getCameraMain().setLocation(location
+					.add(up.mul(upDistance))
+					.add(forward.mul(hopOffDistance)));
+		// }
 	}
 
 	public GameObject getAvatar() {

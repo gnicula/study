@@ -83,6 +83,10 @@ public class GameObject
 	private boolean applyParentRotationToPosition, applyParentScaleToPosition;
 	private Vector3f v = new Vector3f(); // utility vector for JOML calls
 
+	// moveForward()
+	private Vector3f curLocation, newLocation;
+	private Vector4f forwardVec;
+
 	private PhysicsObject physicsObject;
 	private boolean isTerrain = false;
 
@@ -405,7 +409,24 @@ public class GameObject
 		}
 	}
 
-		/**
+	/**
+	 * Moves the object forward in the direction it is facing by the specified time
+	 * 
+	 * @param time
+	 */
+	public void moveForwardBack(float movementSpeed) {
+		curLocation = this.getWorldLocation();
+		forwardVec = new Vector4f(0f, 0f, 1f, 1f);
+		forwardVec.mul(this.getWorldRotation());
+		forwardVec.mul(movementSpeed);
+		newLocation = curLocation.add(
+				forwardVec.x(),
+				forwardVec.y(),
+				forwardVec.z());
+		this.setLocalLocation(newLocation);
+	}
+
+	/**
 	 * Pitch the object around the up vector of the object
 	 * (not the world up vector).
 	 * 
