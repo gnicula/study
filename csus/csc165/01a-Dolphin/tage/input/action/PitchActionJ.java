@@ -22,7 +22,7 @@ public class PitchActionJ extends AbstractInputAction {
      */
     public PitchActionJ(MyGame game) {
         this.game = game;
-        this.dolph = game.getAvatar();
+        this.dolph = game.getDolphin();
         this.camera = game.getMyCamera();
     }
 

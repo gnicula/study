@@ -34,7 +34,7 @@ public class YawActionK extends AbstractInputAction {
      */
     public YawActionK(MyGame game, int direction) {
         this.game = game;
-        this.dolph = game.getAvatar();
+        this.dolph = game.getDolphin();
         this.camera = game.getMyCamera();
         this.yaw_direction = direction;
     }

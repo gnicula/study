@@ -22,7 +22,7 @@ public class YawActionJ extends AbstractInputAction {
      */
     public YawActionJ(MyGame game) {
         this.game = game;
-        this.dolph = game.getAvatar();
+        this.dolph = game.getDolphin();
         this.camera = game.getMyCamera();
     }
 

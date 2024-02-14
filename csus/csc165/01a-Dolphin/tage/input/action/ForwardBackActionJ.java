@@ -17,7 +17,7 @@ public class ForwardBackActionJ extends AbstractInputAction {
 
     public ForwardBackActionJ(MyGame game, float factor) {
         this.game = game;
-        this.dolph = game.getAvatar();
+        this.dolph = game.getDolphin();
         this.camera = game.getMyCamera();
         this.scale = factor;
     }

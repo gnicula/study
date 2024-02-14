@@ -4,12 +4,6 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
-// import tage.input.action.PitchActionK;
-// import tage.input.action.PitchActionJ;
-// import tage.input.action.ForwardBackActionK;
-// import tage.input.action.ForwardBackActionJ;
-// import tage.input.action.YawActionK;
-// import tage.input.action.YawActionJ;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -31,9 +25,9 @@ public class MyGame extends VariableFrameRateGame
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, cub, torus, sphere, plane, wAxisX, wAxisY, wAxisZ;
-	private ObjShape dolS, cubS, torusS, sphereS, planeS, wAxisLineShapeX, wAxisLineShapeY, wAxisLineShapeZ;
-	private TextureImage doltx, brick, grass, corvette, assignt;
+	private GameObject dol, cub, torus, sphere, plane, wAxisX, wAxisY, wAxisZ, manual, magnet;
+	private ObjShape dolS, cubS, torusS, sphereS, planeS, wAxisLineShapeX, wAxisLineShapeY, wAxisLineShapeZ, manualS, magnetS;
+	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal;
 	private Light light1;
 	private Camera myCamera;
 	private InputManager inputManager;
@@ -58,6 +52,8 @@ public class MyGame extends VariableFrameRateGame
 		torusS = new Torus();
 		sphereS = new Sphere();
 		planeS = new Plane();
+		manualS = new MyManualObject();
+		magnetS = new MyMagnetObject();
 
 		float lineLength = 1.0f;
 		Vector3f worldOrigin = new Vector3f(0f, 0f, 0f);
@@ -77,6 +73,8 @@ public class MyGame extends VariableFrameRateGame
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
 		assignt = new TextureImage("assign1.png");
+		gold = new TextureImage("gold1.jpg");
+		metal = new TextureImage("magnet1.jpg");
 	}
 
 	@Override
@@ -93,15 +91,15 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationCub, initialScaleCub;
 		// build a brick at the right side of the window
 		cub = new GameObject(GameObject.root(), cubS, brick);
-		initialTranslationCub = (new Matrix4f()).translation(3,1,0);
-		initialScaleCub = (new Matrix4f()).scaling(0.5f);
+		initialTranslationCub = (new Matrix4f()).translation(3,1,-2);
+		initialScaleCub = (new Matrix4f()).scaling(0.25f);
 		cub.setLocalTranslation(initialTranslationCub);
 		cub.setLocalScale(initialScaleCub);
 
 		Matrix4f initialTranslationTorus, initialScaleTorus;
 		// build a grass torus at the left side of the window
 		torus = new GameObject(GameObject.root(), torusS, grass);
-		initialTranslationTorus = (new Matrix4f()).translation(-3,1,0);
+		initialTranslationTorus = (new Matrix4f()).translation(-3,1,-2);
 		initialScaleTorus = (new Matrix4f()).scaling(0.5f);
 		torus.setLocalTranslation(initialTranslationTorus);
 		torus.setLocalScale(initialScaleTorus);
@@ -109,7 +107,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationSphere, initialScaleSphere;
 		// build a sphere logo textured at the right side of the window
 		sphere = new GameObject(GameObject.root(), sphereS, corvette);
-		initialTranslationSphere = (new Matrix4f()).translation(3,-1,0);
+		initialTranslationSphere = (new Matrix4f()).translation(3,-1,-1);
 		initialScaleSphere = (new Matrix4f()).scaling(0.5f);
 		sphere.setLocalTranslation(initialTranslationSphere);
 		sphere.setLocalScale(initialScaleSphere);
@@ -117,10 +115,19 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationPlane, initialScalePlane;
 		// build a plane textured at the left side of the window
 		plane = new GameObject(GameObject.root(), planeS, assignt);
-		initialTranslationPlane = (new Matrix4f()).translation(-3,-1,0);
-		initialScalePlane = (new Matrix4f()).scaling(0.5f);
+		initialTranslationPlane = (new Matrix4f()).translation(-3,-1,-1);
+		initialScalePlane = (new Matrix4f()).scaling(0.75f);
 		plane.setLocalTranslation(initialTranslationPlane);
 		plane.setLocalScale(initialScalePlane);
+
+		Matrix4f initialTranslationManual, initialScaleManual;
+		// build my manual object
+		manual = new GameObject(GameObject.root(), manualS, gold);
+		initialTranslationManual = (new Matrix4f()).translation(-4.5f,2,0);
+		initialScaleManual = (new Matrix4f()).scaling(0.4f);
+		manual.setLocalTranslation(initialTranslationManual);
+		manual.setLocalScale(initialScaleManual);
+		manual.getRenderStates().hasLighting(true);
 
 		// Build World Axis Lines (X, Y, Z) in the center of the window
 		wAxisX = new GameObject(GameObject.root(), wAxisLineShapeX);
@@ -128,9 +135,10 @@ public class MyGame extends VariableFrameRateGame
 		wAxisZ = new GameObject(GameObject.root(), wAxisLineShapeZ);
 
 		// Set world axis colors (red, green, blue) - X, Y, Z respectively
-		wAxisX.getRenderStates().setColor(new Vector3f(1f, 0, 0));
-		wAxisY.getRenderStates().setColor(new Vector3f(0, 1f, 0));
-		wAxisZ.getRenderStates().setColor(new Vector3f(0, 0, 1f));
+		wAxisX.getRenderStates().setColor(new Vector3f(2f, 0, 0));
+		wAxisY.getRenderStates().setColor(new Vector3f(0, 2f, 0));
+		wAxisZ.getRenderStates().setColor(new Vector3f(0, 0, 2f));
+
 	}
 
 	@Override
@@ -197,7 +205,7 @@ public class MyGame extends VariableFrameRateGame
 				net.java.games.input.Component.Identifier.Key.D,
 				rightYaw,
 				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		// Now bind X, Y, YRot
+		// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Button._1,
 				moveForward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -235,7 +243,7 @@ public class MyGame extends VariableFrameRateGame
 		String elapsTimeStr = Integer.toString(elapsTimeSec);
 		String counterStr = Integer.toString(counter);
 		String dispStr1 = "Time = " + elapsTimeStr;
-		String dispStr2 = "Keyboard hits = " + counterStr;
+		String dispStr2 = "Score = " + counterStr;
 		Vector3f hud1Color = new Vector3f(1,0,0);
 		Vector3f hud2Color = new Vector3f(0,0,1);
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
@@ -251,13 +259,8 @@ public class MyGame extends VariableFrameRateGame
 		switch (e.getKeyCode())
 		{	case KeyEvent.VK_C:
 				counter++;
+				AddMagnetToManualObject();
 				break;
-			// case KeyEvent.VK_W:
-			// 	fwd = dol.getWorldForwardVector();
-			// 	loc = dol.getWorldLocation();
-			// 	newLocation = loc.add(fwd.mul(0.02f));
-			// 	dol.setLocalLocation(newLocation);
-			// 	break;
 			case KeyEvent.VK_1:
 				paused = !paused;
 				break;
@@ -295,10 +298,10 @@ public class MyGame extends VariableFrameRateGame
 	public void setOnDolphinCam() {
 		float hopOnDistance = -4.5f;
 		float upDistance = 1.0f;
-		location = getAvatar().getWorldLocation();
-		forward = getAvatar().getWorldForwardVector();
-		up = getAvatar().getWorldUpVector();
-		right = getAvatar().getWorldRightVector();
+		location = getDolphin().getWorldLocation();
+		forward = getDolphin().getWorldForwardVector();
+		up = getDolphin().getWorldUpVector();
+		right = getDolphin().getWorldRightVector();
 		myCamera.setU(right);
 		myCamera.setV(up);
 		myCamera.setN(forward);
@@ -311,10 +314,10 @@ public class MyGame extends VariableFrameRateGame
 		float hopOffDistance = -5f;
 		float upDistance = 0.5f;
 		// if (!offDolphinCam) {
-			location = getAvatar().getWorldLocation();
-			forward = getAvatar().getWorldForwardVector();
-			up = getAvatar().getWorldUpVector();
-			right = getAvatar().getWorldRightVector();
+			location = getDolphin().getWorldLocation();
+			forward = getDolphin().getWorldForwardVector();
+			up = getDolphin().getWorldUpVector();
+			right = getDolphin().getWorldRightVector();
 			getMyCamera().setU(right);
 			getMyCamera().setV(up);
 			getMyCamera().setN(forward);
@@ -324,7 +327,18 @@ public class MyGame extends VariableFrameRateGame
 		// }
 	}
 
-	public GameObject getAvatar() {
+	public GameObject getDolphin() {
 		return dol;
+	}
+
+	public void AddMagnetToManualObject() {
+		Matrix4f initialTranslationMagnet, initialScaleMagnet;
+		// build the magnet object
+		magnet = new GameObject(GameObject.root(), magnetS, metal);
+		initialTranslationMagnet = (new Matrix4f()).translation(-5.5f,2-counter*0.25f,-1);
+		initialScaleMagnet = (new Matrix4f()).scaling(0.4f);
+		magnet.setLocalTranslation(initialTranslationMagnet);
+		magnet.setLocalScale(initialScaleMagnet);
+		magnet.getRenderStates().hasLighting(true);
 	}
 }
