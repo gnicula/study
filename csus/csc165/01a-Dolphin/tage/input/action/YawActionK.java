@@ -11,65 +11,43 @@ import tage.GameObject;
 public class YawActionK extends AbstractInputAction {
 
     private MyGame game;
-    private GameObject avatar; // the avatar is the "main character" in the game
+    private GameObject dolph;
     private Camera camera;
 
     /**
-     * Arbitrary scaling factor to make the avatar move at a reasonable speed
+     * scaling factor for smoothness
      */
-    private float movement_speed,
-            movement_scale_factor = 0.001f; // positive because we are moving forward
+    private float speed,
+            scale = 0.001f; // scale for smoothness
 
     /**
-     * Arbitrary value denoting that the analog stick is being used to rotate
-     * <ul>
-     * <li><code>1</code> rotate left with keyboard</li>
-     * <li><code>-1</code> rotate right with keyboard</li>
-     * </ul>
+     * yaw direction: 1 (left) or -1 (right)
      */
-    private int inputConfiguration;
+    private int yaw_direction;
 
     /**
-     * Constructor for analog stick input.
+     * Constructor
+     * the direction is either 1 (left) or -1 (right)
      * 
      * @param game
-     */
-    public YawActionK(MyGame game) {
-        this.game = game;
-        this.avatar = game.getAvatar();
-        this.camera = game.getCameraMain();
-    }
-
-    /**
-     * Constructor for keyboard input.
-     * When the analog stick is not used as input,
-     * the direction is either 1 (left) or -1 (right).
-     * 
-     * @param game
-     * @param direction 1 for left, -1 for right:
-     *                  the analog stick is not used as input
+     * @param direction 1 for left, -1 for right
      */
     public YawActionK(MyGame game, int direction) {
         this.game = game;
-        this.avatar = game.getAvatar();
-        this.camera = game.getCameraMain();
-        this.inputConfiguration = direction;
+        this.dolph = game.getAvatar();
+        this.camera = game.getMyCamera();
+        this.yaw_direction = direction;
     }
 
     @Override
     public void performAction(float time, Event evt) {
-        movement_speed = movement_scale_factor * time * inputConfiguration;
+        speed = scale * time * yaw_direction;
 
-        // if (game.isInFreeCamMode()) { // the camera is free to move around
-        //     camera.yaw(movement_speed);
-        // } else { // the camera is bound to the avatar
-            avatar.yaw(movement_speed);
-            if (game.onDolphinCam())
-            {
-                game.setOnDolphinCam();
-            }
+        dolph.yaw(speed);
+        if (game.onDolphinCam())
+        {
+            game.setOnDolphinCam();
+        }
 
-        //     game.positionCameraBehindAvatar();
-        // }
     }
 }

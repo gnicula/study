@@ -3,10 +3,13 @@ package a1;
 import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
-import tage.input.action.PitchAction;
-import tage.input.action.ForwardBackAction;
-import tage.input.action.YawActionK;
-
+import tage.input.action.*;
+// import tage.input.action.PitchActionK;
+// import tage.input.action.PitchActionJ;
+// import tage.input.action.ForwardBackActionK;
+// import tage.input.action.ForwardBackActionJ;
+// import tage.input.action.YawActionK;
+// import tage.input.action.YawActionJ;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -151,38 +154,65 @@ public class MyGame extends VariableFrameRateGame
 		myCamera.setLocation(new Vector3f(0,0,5));
 
 		inputManager = engine.getInputManager();
-		ArrayList<Controller> controllers = inputManager.getControllers(); // get all our controllers
-		PitchAction pitchUp = new PitchAction(this, 0.0005f);
-		PitchAction pitchDown = new PitchAction(this, -0.0005f);
-		ForwardBackAction moveForward = new ForwardBackAction(this, 0.0005f);
-		ForwardBackAction moveBackward = new ForwardBackAction(this, -0.0005f);
+		// Get all our controllers and print their info: name, type
+		ArrayList<Controller> controllers = inputManager.getControllers();
+		for (Controller controller : controllers)
+		{
+			System.err.println("Controller: " + controller.getName());
+			System.err.println("Type: " + controller.getType());
+		}
+
+		PitchActionK pitchUp = new PitchActionK(this, 0.0005f);
+		PitchActionK pitchDown = new PitchActionK(this, -0.0005f);
+		PitchActionJ pitchJ = new PitchActionJ(this);
+		ForwardBackActionK moveForward = new ForwardBackActionK(this, 0.0005f);
+		ForwardBackActionK moveBackward = new ForwardBackActionK(this, -0.0005f);
+		ForwardBackActionJ moveJ = new ForwardBackActionJ(this, 0.0005f);
 		YawActionK leftYaw = new YawActionK(this, 1);
 		YawActionK rightYaw = new YawActionK(this, -1);
+		YawActionJ XYaw = new YawActionJ(this);
 
+		// Bind keyboard keys W, S, A, D, UP, DOWN to their actions
 		inputManager.associateActionWithAllKeyboards(
-						net.java.games.input.Component.Identifier.Key.UP,
-						pitchUp,
-						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Key.UP,
+				pitchUp,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllKeyboards(
-						net.java.games.input.Component.Identifier.Key.DOWN,
-						pitchDown,
-						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Key.DOWN,
+				pitchDown,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllKeyboards(
-						net.java.games.input.Component.Identifier.Key.W,
-						moveForward,
-						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Key.W,
+				moveForward,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllKeyboards(
-						net.java.games.input.Component.Identifier.Key.S,
-						moveBackward,
-						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Key.S,
+				moveBackward,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllKeyboards(
-						net.java.games.input.Component.Identifier.Key.A,
-						leftYaw,
-						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Key.A,
+				leftYaw,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllKeyboards(
-						net.java.games.input.Component.Identifier.Key.D,
-						rightYaw,
-						InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Key.D,
+				rightYaw,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		// Now bind X, Y, YRot
+		inputManager.associateActionWithAllGamepads(
+				net.java.games.input.Component.Identifier.Button._1,
+				moveForward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllGamepads(
+				net.java.games.input.Component.Identifier.Button._2,
+				moveBackward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllGamepads(
+				net.java.games.input.Component.Identifier.Axis.RY,
+				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllGamepads(
+				net.java.games.input.Component.Identifier.Axis.X,
+				XYaw, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllGamepads(
+				net.java.games.input.Component.Identifier.Axis.Y,
+				moveJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	}
 
 	private float getFramesPerSecond() {
@@ -254,7 +284,7 @@ public class MyGame extends VariableFrameRateGame
 		super.keyPressed(e);
 	}
 
-	public Camera getCameraMain() {
+	public Camera getMyCamera() {
 		return myCamera;
 	}
 
@@ -285,10 +315,10 @@ public class MyGame extends VariableFrameRateGame
 			forward = getAvatar().getWorldForwardVector();
 			up = getAvatar().getWorldUpVector();
 			right = getAvatar().getWorldRightVector();
-			getCameraMain().setU(right);
-			getCameraMain().setV(up);
-			getCameraMain().setN(forward);
-			getCameraMain().setLocation(location
+			getMyCamera().setU(right);
+			getMyCamera().setV(up);
+			getMyCamera().setN(forward);
+			getMyCamera().setLocation(location
 					.add(up.mul(upDistance))
 					.add(forward.mul(hopOffDistance)));
 		// }
