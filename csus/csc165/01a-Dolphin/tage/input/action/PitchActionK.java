@@ -1,4 +1,8 @@
-package tage.input.action;
+/*
+ * @author Gabriele Nicula
+ */
+
+ package tage.input.action;
 
 import a1.MyGame;
 import net.java.games.input.Event;
@@ -7,6 +11,7 @@ import tage.GameObject;
 
 /**
  * PitchAction implements pitch up/down of the Game object.
+ * This InputAction works with the keyboard.
  */
 public class PitchActionK extends AbstractInputAction {
     private MyGame game;

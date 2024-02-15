@@ -411,71 +411,81 @@ public class GameObject
 
 	/**
 	 * Moves the object forward/backward
-	 * @param movementSpeed
+	 * There is a limit as to how far the object can move.
+	 * 
+	 * @param speed
 	 */
-	public void moveForwardBack(float movementSpeed) {
+	public void moveForwardBack(float speed) {
 		curLocation = this.getWorldLocation();
 		forwardVec = new Vector4f(0f, 0f, 1f, 1f);
 		forwardVec.mul(this.getWorldRotation());
-		forwardVec.mul(movementSpeed);
+		forwardVec.mul(speed);
 		newLocation = curLocation.add(
 				forwardVec.x(),
 				forwardVec.y(),
 				forwardVec.z());
-		this.setLocalLocation(newLocation);
+		if (newLocation.length() < 14)
+		{
+			this.setLocalLocation(newLocation);
+		}
 	}
 
 	/**
 	 * Pitch (rotate) the object on its side axis
-	 * @param pitchSpeed
+	 * 
+	 * @param speed
 	 */
-	public void pitch(float pitchSpeed) {
+	public void pitch(float speed) {
 		curPitch = new Matrix4f(this.getWorldRotation());
 		pitchPositionAngle = new Matrix4f()
-				.rotation(pitchSpeed, new Vector3f(1f, 0f, 0f));
+				.rotation(speed, new Vector3f(1f, 0f, 0f));
 		newPitch = curPitch;
 		newPitch.mul(pitchPositionAngle);
 		this.setLocalRotation(newPitch);
 	}
+
 	/**
 	 * Yaw (rotate) the object on its normal up vector
-	 * @param rotationSpeed
+	 * 
+	 * @param speed
 	 */
-	public void yaw(float rotationSpeed) {
+	public void yaw(float speed) {
 		Matrix4f previousRotation = new Matrix4f(getWorldRotation());
 		Vector4f previousUpAngle = new Vector4f(0f, 1f, 0f, 1f)
 				.mul(previousRotation);
 
-		Matrix4f rotationAroundGameObjUpAngle;
-		rotationAroundGameObjUpAngle = new Matrix4f().rotation(
-				rotationSpeed, new Vector3f(
+		Matrix4f rotationAngle;
+		rotationAngle = new Matrix4f().rotation(
+				speed, new Vector3f(
 						previousUpAngle.x(),
 						previousUpAngle.y(),
 						previousUpAngle.z()));
 
 		Matrix4f newRotation = previousRotation;
-		rotationAroundGameObjUpAngle.mul(newRotation);
-		setLocalRotation(rotationAroundGameObjUpAngle);
+		rotationAngle.mul(newRotation);
+		setLocalRotation(rotationAngle);
 	}
+
 	/**
 	 * Roll (rotate) the object on its forward axis
-	 * @param rotationSpeed
+	 * 
+	 * @param speed
 	 */
-	public void roll(float rotationSpeed) {
+	public void roll(float speed) {
 		Matrix4f previousRotation = new Matrix4f(getWorldRotation());
 		Vector4f previousRollAngle = new Vector4f(0f, 0f, 1f, 1f)
 				.mul(previousRotation);
 
-		Matrix4f rotationAroundGameAxisAngle;
-		rotationAroundGameAxisAngle = new Matrix4f().rotation(
-				rotationSpeed, new Vector3f(
-					previousRollAngle.x(),
-					previousRollAngle.y(),
-					previousRollAngle.z()));
+		Matrix4f rotationAngle;
+		rotationAngle = new Matrix4f().rotation(
+				speed, new Vector3f(
+						previousRollAngle.x(),
+						previousRollAngle.y(),
+						previousRollAngle.z()));
 
 		Matrix4f newRotation = previousRotation;
-		rotationAroundGameAxisAngle.mul(newRotation);
-		setLocalRotation(rotationAroundGameAxisAngle);
+		rotationAngle.mul(newRotation);
+		setLocalRotation(rotationAngle);
 	}
 
 }

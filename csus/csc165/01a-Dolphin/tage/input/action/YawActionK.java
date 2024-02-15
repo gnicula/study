@@ -3,6 +3,10 @@ package tage.input.action;
 import a1.MyGame;
 import net.java.games.input.Event;
 import tage.Camera;
+/*
+ * @author Gabriele Nicula
+ */
+
 import tage.GameObject;
 
 /**
@@ -18,7 +22,7 @@ public class YawActionK extends AbstractInputAction {
      * scaling factor for smoothness
      */
     private float speed,
-            scale = 0.001f; // scale for smoothness
+            scale = 0.0005f; // scale for smoothness
 
     /**
      * yaw direction: 1 (left) or -1 (right)

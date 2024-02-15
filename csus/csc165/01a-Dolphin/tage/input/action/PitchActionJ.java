@@ -1,3 +1,7 @@
+/*
+ * @author Gabriele Nicula
+ */
+
 package tage.input.action;
 
 import a1.MyGame;
@@ -7,13 +11,14 @@ import tage.GameObject;
 
 /**
  * PitchActionJ nose up/down around local side axis.
+ * This InputAction works with the game controller.
  */
 public class PitchActionJ extends AbstractInputAction {
 
     private MyGame game;
     private GameObject dolph;
     private Camera camera;
-    private float speed, scale = 0.001f;
+    private float speed, scale = 0.0005f;
 
     /**
      * Constructor for joystick input

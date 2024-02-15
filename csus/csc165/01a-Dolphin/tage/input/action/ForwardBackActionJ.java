@@ -1,3 +1,7 @@
+/*
+ * @author Gabriele Nicula
+ */
+
 package tage.input.action;
 
 import a1.MyGame;
@@ -6,7 +10,8 @@ import tage.Camera;
 import tage.GameObject;
 
 /**
- * ForwardBackAction implements moving forward or backward of the Game object.
+ * ForwardBackActionJ implements forward and backward movement of the Game object.
+ * This InputAction works with the Game controller.
  */
 public class ForwardBackActionJ extends AbstractInputAction {
     private MyGame game;

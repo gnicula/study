@@ -1,3 +1,7 @@
+/*
+ * @author Gabriele Nicula
+ */
+
 package a1;
 
 import tage.*;

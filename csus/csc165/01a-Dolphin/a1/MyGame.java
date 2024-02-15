@@ -1,3 +1,7 @@
+/*
+ * @author Gabriele Nicula
+ */
+
 package a1;
 
 import tage.*;
@@ -21,6 +25,7 @@ public class MyGame extends VariableFrameRateGame
 
 	private boolean paused=false;
 	private boolean offDolphinCam = true;
+	private boolean[] visitedSites = new boolean[4]; // default initialized to false
 	private int counter=0;
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
@@ -28,7 +33,7 @@ public class MyGame extends VariableFrameRateGame
 	private GameObject dol, cub, torus, sphere, plane, wAxisX, wAxisY, wAxisZ, manual, magnet;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, wAxisLineShapeX, wAxisLineShapeY, wAxisLineShapeZ, manualS, magnetS;
 	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal;
-	private Light light1;
+	private Light light1, light2;
 	private Camera myCamera;
 	private InputManager inputManager;
 	private Vector3f location, // object location in world coordinates
@@ -147,6 +152,9 @@ public class MyGame extends VariableFrameRateGame
 		light1 = new Light();
 		light1.setLocation(new Vector3f(5.0f, 4.0f, 2.0f));
 		(engine.getSceneGraph()).addLight(light1);
+		light2 = new Light();
+		light2.setLocation(new Vector3f(-5.0f, 4.0f, -2.0f));
+		(engine.getSceneGraph()).addLight(light2);
 	}
 
 	@Override
@@ -170,12 +178,12 @@ public class MyGame extends VariableFrameRateGame
 			System.err.println("Type: " + controller.getType());
 		}
 
-		PitchActionK pitchUp = new PitchActionK(this, 0.0005f);
-		PitchActionK pitchDown = new PitchActionK(this, -0.0005f);
+		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
+		PitchActionK pitchDown = new PitchActionK(this, -0.0002f);
 		PitchActionJ pitchJ = new PitchActionJ(this);
-		ForwardBackActionK moveForward = new ForwardBackActionK(this, 0.0005f);
-		ForwardBackActionK moveBackward = new ForwardBackActionK(this, -0.0005f);
-		ForwardBackActionJ moveJ = new ForwardBackActionJ(this, 0.0005f);
+		ForwardBackActionK moveForward = new ForwardBackActionK(this, 0.0002f);
+		ForwardBackActionK moveBackward = new ForwardBackActionK(this, -0.0002f);
+		ForwardBackActionJ moveJ = new ForwardBackActionJ(this, 0.0002f);
 		YawActionK leftYaw = new YawActionK(this, 1);
 		YawActionK rightYaw = new YawActionK(this, -1);
 		YawActionJ XYaw = new YawActionJ(this);
@@ -233,7 +241,8 @@ public class MyGame extends VariableFrameRateGame
 				moveJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	}
 
-	private float getFramesPerSecond() {
+	private float getFramesPerSecond()
+	{
 		return (float) (frameCounter / elapsTime);
 	}
 
@@ -246,34 +255,36 @@ public class MyGame extends VariableFrameRateGame
 		{
 			elapsTime += (currFrameTime - lastFrameTime) / 1000.0;
 		}
-		// dol.setLocalRotation((new Matrix4f()).rotation((float)elapsTime, 0, 1, 0));
 
 		// build and set HUD
 		int elapsTimeSec = Math.round((float)elapsTime);
 		String elapsTimeStr = Integer.toString(elapsTimeSec);
 		String counterStr = Integer.toString(counter);
 		String dispStr1 = "Time = " + elapsTimeStr;
-		String dispStr2 = "Score = " + counterStr;
+		String dispStr2 = counter < 4 ? "Score = " + counterStr : "You Win!";
 		Vector3f hud1Color = new Vector3f(1,0,0);
 		Vector3f hud2Color = new Vector3f(0,0,1);
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
 		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
 
 		inputManager.update(getFramesPerSecond());
+		updateDolphinScore();
 		frameCounter++;
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e)
-	{	Vector3f loc, fwd, newLocation;
+	{	
+		Vector3f loc, fwd, newLocation;
 		switch (e.getKeyCode())
-		{	case KeyEvent.VK_C:
-				counter++;
-				AddMagnetToManualObject();
-				break;
-			case KeyEvent.VK_1:
-				paused = !paused;
-				break;
+		{	
+			// case KeyEvent.VK_C:
+			// 	counter++;
+			// 	AddMagnetToManualObject();
+			// 	break;
+			// case KeyEvent.VK_1:
+			// 	paused = !paused;
+			// 	break;
 			case KeyEvent.VK_2:
 				dol.getRenderStates().setWireframe(true);
 				break;
@@ -297,15 +308,18 @@ public class MyGame extends VariableFrameRateGame
 		super.keyPressed(e);
 	}
 
-	public Camera getMyCamera() {
+	public Camera getMyCamera()
+	{
 		return myCamera;
 	}
 
-	public boolean onDolphinCam() {
+	public boolean onDolphinCam()
+	{
 		return !offDolphinCam;
 	}
 
-	public void setOnDolphinCam() {
+	public void setOnDolphinCam()
+	{
 		float hopOnDistance = -4.5f;
 		float upDistance = 1.0f;
 		location = getDolphin().getWorldLocation();
@@ -320,35 +334,83 @@ public class MyGame extends VariableFrameRateGame
 				.add(forward.mul(hopOnDistance)));
 	}
 
-	public void setOffDolphinCam() {
+	public void setOffDolphinCam()
+	{
 		float hopOffDistance = -5f;
 		float upDistance = 0.5f;
-		// if (!offDolphinCam) {
-			location = getDolphin().getWorldLocation();
-			forward = getDolphin().getWorldForwardVector();
-			up = getDolphin().getWorldUpVector();
-			right = getDolphin().getWorldRightVector();
-			getMyCamera().setU(right);
-			getMyCamera().setV(up);
-			getMyCamera().setN(forward);
-			getMyCamera().setLocation(location
-					.add(up.mul(upDistance))
-					.add(forward.mul(hopOffDistance)));
-		// }
+		location = getDolphin().getWorldLocation();
+		forward = getDolphin().getWorldForwardVector();
+		up = getDolphin().getWorldUpVector();
+		right = getDolphin().getWorldRightVector();
+		getMyCamera().setU(right);
+		getMyCamera().setV(up);
+		getMyCamera().setN(forward);
+		getMyCamera().setLocation(location
+				.add(up.mul(upDistance))
+				.add(forward.mul(hopOffDistance)));
 	}
 
-	public GameObject getDolphin() {
+	public GameObject getDolphin()
+	{
 		return dol;
 	}
 
-	public void AddMagnetToManualObject() {
+	public void AddMagnetToManualObject(int n_magnet)
+	{
 		Matrix4f initialTranslationMagnet, initialScaleMagnet;
 		// build the magnet object
 		magnet = new GameObject(GameObject.root(), magnetS, metal);
-		initialTranslationMagnet = (new Matrix4f()).translation(-5.5f,2-counter*0.25f,-1);
-		initialScaleMagnet = (new Matrix4f()).scaling(0.4f);
+		initialTranslationMagnet = (new Matrix4f()).translation(
+			-4.6f+n_magnet*0.05f,2.5f-n_magnet*0.125f,-0.5f+n_magnet*0.05f);
+		initialScaleMagnet = (new Matrix4f()).scaling(0.25f);
 		magnet.setLocalTranslation(initialTranslationMagnet);
 		magnet.setLocalScale(initialScaleMagnet);
 		magnet.getRenderStates().hasLighting(true);
+	}
+
+	public boolean checkDolphinNearObject(GameObject gObject)
+	{
+		Vector3d distanceToObj = new Vector3d(0, 0, 0);
+		distanceToObj.x = (Math.abs(
+			dol.getWorldLocation().x() - gObject.getWorldLocation().x()));
+		distanceToObj.y = (Math.abs(
+			dol.getWorldLocation().y() - gObject.getWorldLocation().y()));
+		distanceToObj.z = (Math.abs(
+			dol.getWorldLocation().z() - gObject.getWorldLocation().z()));
+
+		double distance = distanceToObj.length();
+		return (distance < 0.5) ? true : false;
+	}
+
+	public void updateDolphinScore()
+	{
+		// Check for each object (cub, torus, sphere, plane) and update visited state
+		if (!visitedSites[0])
+		{
+			visitedSites[0] = checkDolphinNearObject(cub);
+		} 
+		if (!visitedSites[1])
+		{
+			visitedSites[1] = checkDolphinNearObject(torus);
+		} 
+		if (!visitedSites[2])
+		{
+			visitedSites[2] = checkDolphinNearObject(sphere);
+		} 
+		if (!visitedSites[3])
+		{
+			visitedSites[3] = checkDolphinNearObject(plane);
+		}
+		// Update the score and add magnet(s) if site(s) were visited
+		int old_counter = counter;
+		counter = (visitedSites[0] ? 1 : 0) + (visitedSites[1] ? 1 : 0)
+			+ (visitedSites[2] ? 1 : 0) + (visitedSites[3] ? 1 : 0);
+		if (counter > old_counter)
+		{
+			for (int i=old_counter; i < counter; ++i)
+			{
+				AddMagnetToManualObject(i);
+			}
+		}
 	}
 }
