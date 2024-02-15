@@ -223,7 +223,7 @@ public class MyGame extends VariableFrameRateGame
 				net.java.games.input.Component.Identifier.Button._2,
 				moveBackward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Axis.RZ,
+				net.java.games.input.Component.Identifier.Axis.RY,
 				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Axis.X,
