@@ -179,8 +179,10 @@ public class MyGame extends VariableFrameRateGame
 		YawActionK leftYaw = new YawActionK(this, 1);
 		YawActionK rightYaw = new YawActionK(this, -1);
 		YawActionJ XYaw = new YawActionJ(this);
+		RollActionK leftRoll = new RollActionK(this, -1);
+		RollActionK rightRoll = new RollActionK(this, 1);
 
-		// Bind keyboard keys W, S, A, D, UP, DOWN to their actions
+		// Bind keyboard keys W, S, A, D, Q, E, UP, DOWN to their actions
 		inputManager.associateActionWithAllKeyboards(
 				net.java.games.input.Component.Identifier.Key.UP,
 				pitchUp,
@@ -205,7 +207,15 @@ public class MyGame extends VariableFrameRateGame
 				net.java.games.input.Component.Identifier.Key.D,
 				rightYaw,
 				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		// Now bind X, Y, YRot to joystick/game controller
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.Q,
+				leftRoll,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.E,
+				rightRoll,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+			// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Button._1,
 				moveForward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -213,7 +223,7 @@ public class MyGame extends VariableFrameRateGame
 				net.java.games.input.Component.Identifier.Button._2,
 				moveBackward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Axis.RY,
+				net.java.games.input.Component.Identifier.Axis.RZ,
 				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Axis.X,
