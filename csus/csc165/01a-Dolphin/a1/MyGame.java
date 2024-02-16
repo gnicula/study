@@ -265,7 +265,7 @@ public class MyGame extends VariableFrameRateGame
 		Vector3f hud1Color = new Vector3f(1,0,0);
 		Vector3f hud2Color = new Vector3f(0,0,1);
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
-		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
+		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 700, 15);
 
 		inputManager.update(getFramesPerSecond());
 		updateDolphinScore();
