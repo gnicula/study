@@ -18,7 +18,7 @@ public class PitchActionJ extends AbstractInputAction {
     private MyGame game;
     private GameObject dolph;
     private Camera camera;
-    private float speed, scale = 0.0005f;
+    private float speed, scale = 0.0002f;
 
     /**
      * Constructor for joystick input

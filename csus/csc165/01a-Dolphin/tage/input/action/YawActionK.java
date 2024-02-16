@@ -22,7 +22,7 @@ public class YawActionK extends AbstractInputAction {
      * scaling factor for smoothness
      */
     private float speed,
-            scale = 0.0005f; // scale for smoothness
+            scale = 0.0002f; // scale for smoothness
 
     /**
      * yaw direction: 1 (left) or -1 (right)

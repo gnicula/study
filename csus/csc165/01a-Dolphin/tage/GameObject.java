@@ -90,11 +90,6 @@ public class GameObject
 	private PhysicsObject physicsObject;
 	private boolean isTerrain = false;
 
-	/** Pitch variables */
-	private Matrix4f curPitch, // current pitch in radians (x, y, z, 1)
-			newPitch, // new pitch in radians (x, y, z, 1)
-			pitchPositionAngle; // pitch vector in radians (x, y, z, 1)
-
 	//------------------ CONSTRUCTORS -----------------
 
 	// only applicable for creating the root node
@@ -415,7 +410,7 @@ public class GameObject
 	 * 
 	 * @param speed
 	 */
-	public void moveForwardBack(float speed) {
+	public void moveForwardBack(float speed, Vector3f cameraLoc) {
 		curLocation = this.getWorldLocation();
 		forwardVec = new Vector4f(0f, 0f, 1f, 1f);
 		forwardVec.mul(this.getWorldRotation());
@@ -425,12 +420,12 @@ public class GameObject
 				forwardVec.y(),
 				forwardVec.z());
 		
-		if (v.distance(curLocation, myCamera.getLocation()) > 5)
-		{
-				this.setLocalLocation(newLocation);
-		}
-
-		if (newLocation.length() < 10.4)
+		// Compute new location's distance to camera
+		double distanceToCamera = (cameraLoc.sub(newLocation)).length();
+		// Allow move if:
+		// newLocation is in allowed range around origin and
+		// newLocation is in allowed range around camera.
+		if ((newLocation.length() < 10.4) && (distanceToCamera < 5))
 		{
 			this.setLocalLocation(newLocation);
 		}
@@ -442,10 +437,10 @@ public class GameObject
 	 * @param speed
 	 */
 	public void pitch(float speed) {
-		curPitch = new Matrix4f(this.getWorldRotation());
-		pitchPositionAngle = new Matrix4f()
+		Matrix4f curPitch = new Matrix4f(this.getWorldRotation());
+		Matrix4f pitchPositionAngle = new Matrix4f()
 				.rotation(speed, new Vector3f(1f, 0f, 0f));
-		newPitch = curPitch;
+		Matrix4f newPitch = curPitch;
 		newPitch.mul(pitchPositionAngle);
 		this.setLocalRotation(newPitch);
 	}

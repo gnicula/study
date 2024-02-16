@@ -31,7 +31,7 @@ public class ForwardBackActionK extends AbstractInputAction {
     public void performAction(float time, Event evt) {
         speed = direction_and_scale * time;
 
-        dolph.moveForwardBack(speed);
+        dolph.moveForwardBack(speed, camera.getLocation());
         if (game.onDolphinCam())
         {
             game.setOnDolphinCam();

@@ -8,8 +8,6 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
-import tage.rml.Matrix4f;
-import tage.rml.Vector3f;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -26,7 +24,7 @@ public class MyGame extends VariableFrameRateGame
 	private static Engine engine;
 
 	private boolean paused=false;
-	private boolean offDolphinCam = true;
+	private boolean offDolphinCam = true;            // default camera off dolphin
 	private boolean[] visitedSites = new boolean[4]; // default initialized to false
 	private int counter=0;
 	private int frameCounter = 0;
@@ -38,10 +36,10 @@ public class MyGame extends VariableFrameRateGame
 	private Light light1, light2;
 	private Camera myCamera;
 	private InputManager inputManager;
-	private Vector3f location, // object location in world coordinates
-			forward, // object forward vector in world coordinates (n-vector/z-axis)
-			up, // object up vector in world coordinates (v-vector/y-axis)
-			right; // object right vector in world coordinates (u-vector/x-axis)
+	private Vector3f location; // world object location
+	private Vector3f forward;  // n-vector/z-axis
+	private Vector3f up;       // v-vector/y-axis
+	private Vector3f right;    // u-vector/x-axis
 
 	public MyGame() { super(); }
 
@@ -169,7 +167,7 @@ public class MyGame extends VariableFrameRateGame
 
 		// ------------- positioning the camera -------------
 		myCamera = engine.getRenderSystem().getViewport("MAIN").getCamera();
-		myCamera.setLocation(new Vector3f(0,0,5));
+		myCamera.setLocation(new Vector3f(0,0,5.0f));
 
 		inputManager = engine.getInputManager();
 		// Get all our controllers and print their info: name, type
@@ -300,10 +298,8 @@ public class MyGame extends VariableFrameRateGame
 			case KeyEvent.VK_SPACE:
 				if (offDolphinCam) {
 					setOnDolphinCam();
-					offDolphinCam = false;
 				} else {
 					setOffDolphinCam();
-					offDolphinCam = true;
 				}
 				break;
 		}
@@ -322,35 +318,36 @@ public class MyGame extends VariableFrameRateGame
 
 	public void setOnDolphinCam()
 	{
-		float hopOnDistance = -4.5f;
-		float upDistance = 1.0f;
-		location = getDolphin().getWorldLocation();
-		forward = getDolphin().getWorldForwardVector();
-		up = getDolphin().getWorldUpVector();
-		right = getDolphin().getWorldRightVector();
+		float hopOnDistance = -1.75f;
+		float upDistance = 0.5f;
+		location = dol.getWorldLocation();
+		forward = dol.getWorldForwardVector();
+		up = dol.getWorldUpVector();
+		right = dol.getWorldRightVector();
 		myCamera.setU(right);
 		myCamera.setV(up);
 		myCamera.setN(forward);
-		myCamera.setLocation(location
-				.add(up.mul(upDistance))
-				.add(forward.mul(hopOnDistance)));
+		myCamera.setLocation(location.add(up.mul(upDistance))
+			.add(forward.mul(hopOnDistance)));
+		
+		offDolphinCam = false;
 	}
 
 	public void setOffDolphinCam()
 	{
-		float hopOffDistance = -5f;
-		float upDistance = 0.5f;
-		location = getDolphin().getWorldLocation();
-		forward = getDolphin().getWorldForwardVector();
-		up = getDolphin().getWorldUpVector();
-		right = getDolphin().getWorldRightVector();
-		getMyCamera().setU(right);
-		getMyCamera().setV(up);
-		getMyCamera().setN(forward);
-		getMyCamera().setLocation(location
-				.add(up.mul(upDistance))
-				.add(forward.mul(hopOffDistance)));
+		float hopOffDistance = -2.0f;
+		float upDistance = 1.0f;
+		location = dol.getWorldLocation();
+		forward = dol.getWorldForwardVector();
+		up = dol.getWorldUpVector();
+		right = dol.getWorldRightVector();
+		myCamera.setU(right);
+		myCamera.setV(up);
+		myCamera.setN(forward);
+		myCamera.setLocation(location.add(up.mul(upDistance))
+			.add(forward.mul(hopOffDistance)));
 		
+		offDolphinCam = true;
 	}
 
 	public GameObject getDolphin()
