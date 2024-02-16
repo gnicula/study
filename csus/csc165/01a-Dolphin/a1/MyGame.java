@@ -8,6 +8,8 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
+import tage.rml.Matrix4f;
+import tage.rml.Vector3f;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -320,6 +322,7 @@ public class MyGame extends VariableFrameRateGame
 
 	public void setOnDolphinCam()
 	{
+		
 		float hopOnDistance = -4.5f;
 		float upDistance = 1.0f;
 		location = getDolphin().getWorldLocation();
@@ -348,6 +351,7 @@ public class MyGame extends VariableFrameRateGame
 		getMyCamera().setLocation(location
 				.add(up.mul(upDistance))
 				.add(forward.mul(hopOffDistance)));
+		
 	}
 
 	public GameObject getDolphin()
