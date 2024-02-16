@@ -425,7 +425,7 @@ public class GameObject
 				forwardVec.x(),
 				forwardVec.y(),
 				forwardVec.z());
-		if (offDolphinCam)
+		if (MyGame.offDolphinCam)
 		{
 			if (newLocation.length() < 5)
 			{
