@@ -425,7 +425,7 @@ public class GameObject
 				forwardVec.y(),
 				forwardVec.z());
 		
-		if (vector3f.distance(curLocation, myCamera.getLocation()) > 5)
+		if (distance(curLocation, myCamera.getLocation()) > 5)
 		{
 				this.setLocalLocation(newLocation);
 		}
