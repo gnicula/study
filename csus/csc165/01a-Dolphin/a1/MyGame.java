@@ -260,7 +260,7 @@ public class MyGame extends VariableFrameRateGame
 		int elapsTimeSec = Math.round((float)elapsTime);
 		String elapsTimeStr = Integer.toString(elapsTimeSec);
 		String counterStr = Integer.toString(counter);
-		String dispStr1 = "Time = " + elapsTimeStr;
+		String dispStr1 = "Time = " + elapsTimeStr + " Pos = " + dol.getWorldLocation().toString();
 		String dispStr2 = counter < 4 ? "Score = " + counterStr : "You Win!";
 		Vector3f hud1Color = new Vector3f(1,0,0);
 		Vector3f hud2Color = new Vector3f(0,0,1);
