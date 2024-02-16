@@ -431,6 +431,7 @@ public class GameObject
 				forwardVec.x(),
 				forwardVec.y(),
 				forwardVec.z());
+		
 		if (!cameraSetting)
 		{
 			if (newLocation.length() < 5)
