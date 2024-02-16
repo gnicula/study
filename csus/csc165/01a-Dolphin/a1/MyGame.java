@@ -322,7 +322,6 @@ public class MyGame extends VariableFrameRateGame
 
 	public void setOnDolphinCam()
 	{
-		GameObject.setCameraSetting(true);
 		float hopOnDistance = -4.5f;
 		float upDistance = 1.0f;
 		location = getDolphin().getWorldLocation();
@@ -339,7 +338,6 @@ public class MyGame extends VariableFrameRateGame
 
 	public void setOffDolphinCam()
 	{
-		GameObject.setCameraSetting(false);
 		float hopOffDistance = -5f;
 		float upDistance = 0.5f;
 		location = getDolphin().getWorldLocation();

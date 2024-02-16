@@ -76,7 +76,6 @@ public class GameObject
 	private RenderStates renderStates = new RenderStates();
 	private GameObject parent;
 	private HashSet<GameObject> children = new HashSet<GameObject>();
-	private static boolean cameraSetting; //true is onDolphinCam, false is offDolphinCam
 	
 	private Matrix4f localTranslation, localRotation, localScale;
 	private Matrix4f worldTranslation, worldRotation, worldScale;
@@ -189,12 +188,6 @@ public class GameObject
 
 	/** returns a reference to this GameObject's parent GameObject */
 	public GameObject getParent() { return parent; }
-
-	/** returns this GameObject's camera setting. */
-	public static boolean getCameraSetting() { return cameraSetting; }
-
-	/** sets this GameObject's Camera setting. */
-	public static void setCameraSetting(boolean t) { cameraSetting = t; }
 
 	/** 
 	* Specify a parent for this node when building a scenegraph (tree).
@@ -432,12 +425,9 @@ public class GameObject
 				forwardVec.y(),
 				forwardVec.z());
 		
-		if (!cameraSetting)
+		if (vector3f.distance(curLocation, myCamera.getLocation()) > 5)
 		{
-			if (newLocation.length() < 5)
-			{
 				this.setLocalLocation(newLocation);
-			}
 		}
 
 		if (newLocation.length() < 10.4)
