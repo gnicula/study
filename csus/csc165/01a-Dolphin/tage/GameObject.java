@@ -425,7 +425,7 @@ public class GameObject
 		// Allow move if:
 		// newLocation is in allowed range around origin and
 		// newLocation is in allowed range around camera.
-		if ((newLocation.length() < 10.4) && (distanceToCamera < 5))
+		if ((newLocation.length() < 10.4) && (distanceToCamera < 5.8))
 		{
 			this.setLocalLocation(newLocation);
 		}
