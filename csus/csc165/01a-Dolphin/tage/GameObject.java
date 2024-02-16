@@ -76,7 +76,7 @@ public class GameObject
 	private RenderStates renderStates = new RenderStates();
 	private GameObject parent;
 	private HashSet<GameObject> children = new HashSet<GameObject>();
-	private boolean cameraSetting; //true is onDolphinCam, false is offDolphinCam
+	private static boolean cameraSetting; //true is onDolphinCam, false is offDolphinCam
 	
 	private Matrix4f localTranslation, localRotation, localScale;
 	private Matrix4f worldTranslation, worldRotation, worldScale;
