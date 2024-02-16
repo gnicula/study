@@ -424,7 +424,7 @@ public class GameObject
 				forwardVec.x(),
 				forwardVec.y(),
 				forwardVec.z());
-		if (newLocation.length() < 14)
+		if (newLocation.length() < 10.4)
 		{
 			this.setLocalLocation(newLocation);
 		}
