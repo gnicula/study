@@ -14,16 +14,18 @@ import tage.GameObject;
  * This InputAction works with the game controller.
  */
 public class YawActionJ extends AbstractInputAction {
-
+    // MyGame object where GameObjects are placed in.
     private MyGame game;
+    // Dolphin GameObject which moves.
     private GameObject dolph;
+    // Camera object that is slaved to GameObject dolph.
     private Camera camera;
+    // Scaling factor to slow or speed up rate at which actions can occur.  
     private float speed, scale = 0.0002f;
 
-    /**
-     * Constructor for joystick input
+    /** <code> YawActionJ() </code> is invoked to execute this input action.
      * 
-     * @param game
+     * @param game -- MyGame object where movement is happening.
      */
     public YawActionJ(MyGame game) {
         this.game = game;

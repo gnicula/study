@@ -14,16 +14,19 @@ import tage.GameObject;
  * This InputAction works with the game controller.
  */
 public class PitchActionJ extends AbstractInputAction {
-
+    // MyGame object where GameObjects are placed in.
     private MyGame game;
+    // Dolphin GameObject which moves.
     private GameObject dolph;
+    // Camera object that is slaved to GameObject dolph.
     private Camera camera;
+    // Speed at which action can occur.
+    // Scaling factor to slow or speed up rate at which actions can occur.
     private float speed, scale = 0.0002f;
 
-    /**
-     * Constructor for joystick input
+    /** <code> ForwardBackActionJ() </code> is invoked to execute this input action.
      * 
-     * @param game
+     * @param game -- MyGame object where movement is happening.
      */
     public PitchActionJ(MyGame game) {
         this.game = game;

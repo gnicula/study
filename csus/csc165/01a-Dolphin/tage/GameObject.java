@@ -409,6 +409,7 @@ public class GameObject
 	 * There is a limit as to how far the object can move.
 	 * 
 	 * @param speed
+	 * @param cameraLoc
 	 */
 	public void moveForwardBack(float speed, Vector3f cameraLoc) {
 		curLocation = this.getWorldLocation();
@@ -472,7 +473,7 @@ public class GameObject
 	 * 
 	 * @param speed
 	 */
-	public void roll(float speed) {
+	public void roll(float speed) { 
 		Matrix4f previousRotation = new Matrix4f(getWorldRotation());
 		Vector4f previousRollAngle = new Vector4f(0f, 0f, 1f, 1f)
 				.mul(previousRotation);

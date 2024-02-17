@@ -11,26 +11,22 @@ import tage.GameObject;
 
 /**
  * YawActionK turn the dolphin left/right around the world Y axis.
+ * This input action works with keyboard.
  */
 public class YawActionK extends AbstractInputAction {
-
+    // MyGame object where GameObjects are placed in.
     private MyGame game;
+    // Dolphin GameObject which moves.
     private GameObject dolph;
+    // Camera object that is slaved to GameObject dolph.
     private Camera camera;
-
-    /**
-     * scaling factor for smoothness
-     */
+    // scaling factor for smoothness
     private float speed,
             scale = 0.0002f; // scale for smoothness
-
-    /**
-     * yaw direction: 1 (left) or -1 (right)
-     */
+    // yaw_direction: -- 1 (left) or -1 (right)
     private int yaw_direction;
 
-    /**
-     * Constructor
+    /** <code> YawActionK() </code> is invoked to execute this input action.
      * the direction is either 1 (left) or -1 (right)
      * 
      * @param game

@@ -14,14 +14,13 @@ import tage.GameObject;
  * This InputAction works with the keyboard.
  */
 public class RollActionK extends AbstractInputAction {
-
+    // MyGame object where GameObjects are placed in.
     private MyGame game;
+    // Dolphin GameObject which moves.
     private GameObject dolph;
+    // Camera object that is slaved to GameObject dolph.
     private Camera camera;
-
-    /**
-     * scaling factor for smoothness
-     */
+    // Scaling factor to slow or speed up rate at which actions can occur.  
     private float speed,
             scale = 0.0002f; // scale for smoothness
 
@@ -30,12 +29,10 @@ public class RollActionK extends AbstractInputAction {
      */
     private int roll_direction;
 
-    /**
-     * Constructor
+    /** <code> RollActionK() </code> is invoked to execute this input action.
      * the direction is either 1 (left) or -1 (right)
-     * 
-     * @param game
-     * @param direction 1 for left, -1 for right
+     * @param game -- MyGame object where movement is happening.
+     * @param direction -- 1 for left, -1 for right
      */
     public RollActionK(MyGame game, int direction) {
         this.game = game;
