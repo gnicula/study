@@ -43,6 +43,9 @@ public class MyGame extends VariableFrameRateGame {
 	private Vector3f up; // v-vector/y-axis
 	private Vector3f right; // u-vector/x-axis
 
+	private final int WindowSizeX = 2000;
+	private final int WindowSizeY = 1000;
+
 	public MyGame() {
 		super();
 	}
@@ -184,7 +187,7 @@ public class MyGame extends VariableFrameRateGame {
 		currFrameTime = System.currentTimeMillis();
 		lastFrameTime = currFrameTime;
 		elapsTime = 0.0;
-		(engine.getRenderSystem()).setWindowDimensions(1900, 1000);
+		(engine.getRenderSystem()).setWindowDimensions(WindowSizeX, WindowSizeY);
 
 		// ------------- positioning the camera -------------
 		myCamera = engine.getRenderSystem().getViewport("MAIN").getCamera();
@@ -305,6 +308,35 @@ public class MyGame extends VariableFrameRateGame {
 		return (float) (frameCounter / elapsTime);
 	}
 
+	private void arrangeHUD() {
+		// build and set HUD
+		int elapsTimeSec = Math.round((float) elapsTime);
+		String elapsTimeStr = Integer.toString(elapsTimeSec);
+		String counterStr = Integer.toString(counter);
+		counterStr =  counter < 4 ? "Score = " + counterStr : "Score = " + counterStr + " You Win!";
+		String dispStr1 = "Time = " + elapsTimeStr + " " + counterStr;
+		String dispStr2 = "Pos = " + dol.getWorldLocation().toString();
+		Vector3f hud1Color = new Vector3f(1, 0, 0);
+		Vector3f hud2Color = new Vector3f(0, 0, 1);
+		int hud1x, hud1y, hud2x, hud2y;
+		float mainViewportAbsoluteLeft = engine.getRenderSystem().getViewport("MAIN").getActualLeft();
+		// System.out.println("actual left: " + mainViewportAbsoluteLeft);
+		float mainViewportAbsoluteBottom = engine.getRenderSystem().getViewport("MAIN").getActualBottom();
+		// System.out.println("actual bottom: " + mainViewportAbsoluteBottom);
+		float secondaryViewportAbsoluteLeft = engine.getRenderSystem().getViewport("RIGHT").getActualLeft();
+		// System.out.println("viewport2 actual left: " + secondaryViewportAbsoluteLeft);
+		float secondaryViewportAbsoluteBottom = engine.getRenderSystem().getViewport("RIGHT").getActualBottom();
+		// System.out.println("viewport2 actual bottom: " + secondaryViewportAbsoluteBottom);
+
+		hud1x = (int)(mainViewportAbsoluteLeft) + 10; // - WindowSizeX / 2);
+		hud1y = 10;
+		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, hud1x, hud1y);
+
+		hud2x = (int)(secondaryViewportAbsoluteLeft) + 10; // - WindowSizeX / 2);
+		hud2y = 10;
+		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, hud2x, hud2y);
+	}
+
 	@Override
 	public void update() {
 		lastFrameTime = currFrameTime;
@@ -313,17 +345,7 @@ public class MyGame extends VariableFrameRateGame {
 			elapsTime += (currFrameTime - lastFrameTime) / 1000.0;
 		}
 
-		// build and set HUD
-		int elapsTimeSec = Math.round((float) elapsTime);
-		String elapsTimeStr = Integer.toString(elapsTimeSec);
-		String counterStr = Integer.toString(counter);
-		String dispStr1 = "Time = " + elapsTimeStr + " Pos = " + dol.getWorldLocation().toString();
-		String dispStr2 = counter < 4 ? "Score = " + counterStr : "Score = " + counterStr + " You Win!";
-		Vector3f hud1Color = new Vector3f(1, 0, 0);
-		Vector3f hud2Color = new Vector3f(0, 0, 1);
-		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
-		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 700, 15);
-
+		arrangeHUD();
 		inputManager.update(getFramesPerSecond());
 		updateDolphinScore();
 		frameCounter++;
