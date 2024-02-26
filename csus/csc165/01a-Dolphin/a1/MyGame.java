@@ -8,6 +8,8 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
+// import tage.rml.Matrix4f;
+// import tage.rml.Vector3f;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -19,40 +21,42 @@ import javax.swing.*;
 
 import org.joml.*;
 
-public class MyGame extends VariableFrameRateGame
-{
+public class MyGame extends VariableFrameRateGame {
 	private static Engine engine;
 
-	private boolean paused=false;
-	private boolean offDolphinCam = true;            // default camera off dolphin
+	private boolean paused = false;
+	private boolean offDolphinCam = true; // default camera off dolphin
 	private boolean[] visitedSites = new boolean[4]; // default initialized to false
-	private int counter=0;
+	private int counter = 0;
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
 
 	private GameObject dol, cub, torus, sphere, plane, wAxisX, wAxisY, wAxisZ, manual, magnet;
-	private ObjShape dolS, cubS, torusS, sphereS, planeS, wAxisLineShapeX, wAxisLineShapeY, wAxisLineShapeZ, manualS, magnetS;
+	private ObjShape dolS, cubS, torusS, sphereS, planeS, wAxisLineShapeX, wAxisLineShapeY, wAxisLineShapeZ, manualS,
+			magnetS;
 	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal;
 	private Light light1, light2;
-	private Camera myCamera;
+	private Camera myCamera, myViewportCamera;
 	private InputManager inputManager;
 	private Vector3f location; // world object location
-	private Vector3f forward;  // n-vector/z-axis
-	private Vector3f up;       // v-vector/y-axis
-	private Vector3f right;    // u-vector/x-axis
+	private Vector3f forward; // n-vector/z-axis
+	private Vector3f up; // v-vector/y-axis
+	private Vector3f right; // u-vector/x-axis
 
-	public MyGame() { super(); }
+	public MyGame() {
+		super();
+	}
 
-	public static void main(String[] args)
-	{	MyGame game = new MyGame();
+	public static void main(String[] args) {
+		MyGame game = new MyGame();
 		engine = new Engine(game);
 		game.initializeSystem();
 		game.game_loop();
 	}
 
 	@Override
-	public void loadShapes()
-	{	dolS = new ImportedModel("dolphinHighPoly.obj");
+	public void loadShapes() {
+		dolS = new ImportedModel("dolphinHighPoly.obj");
 		cubS = new Cube();
 		torusS = new Torus();
 		sphereS = new Sphere();
@@ -72,8 +76,8 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	@Override
-	public void loadTextures()
-	{	doltx = new TextureImage("Dolphin_HighPolyUV.png");
+	public void loadTextures() {
+		doltx = new TextureImage("Dolphin_HighPolyUV.png");
 		brick = new TextureImage("brick1.jpg");
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
@@ -83,12 +87,12 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	@Override
-	public void buildObjects()
-	{	Matrix4f initialTranslation, initialScale;
+	public void buildObjects() {
+		Matrix4f initialTranslation, initialScale;
 
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0,0,0);
+		initialTranslation = (new Matrix4f()).translation(0, 0, 0);
 		initialScale = (new Matrix4f()).scaling(0.75f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
@@ -96,7 +100,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationCub, initialScaleCub;
 		// build a brick at the right side of the window
 		cub = new GameObject(GameObject.root(), cubS, brick);
-		initialTranslationCub = (new Matrix4f()).translation(3,1,-2);
+		initialTranslationCub = (new Matrix4f()).translation(3, 1, -2);
 		initialScaleCub = (new Matrix4f()).scaling(0.25f);
 		cub.setLocalTranslation(initialTranslationCub);
 		cub.setLocalScale(initialScaleCub);
@@ -104,7 +108,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationTorus, initialScaleTorus;
 		// build a grass torus at the left side of the window
 		torus = new GameObject(GameObject.root(), torusS, grass);
-		initialTranslationTorus = (new Matrix4f()).translation(-3,1,-2);
+		initialTranslationTorus = (new Matrix4f()).translation(-3, 1, -2);
 		initialScaleTorus = (new Matrix4f()).scaling(0.5f);
 		torus.setLocalTranslation(initialTranslationTorus);
 		torus.setLocalScale(initialScaleTorus);
@@ -112,7 +116,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationSphere, initialScaleSphere;
 		// build a sphere logo textured at the right side of the window
 		sphere = new GameObject(GameObject.root(), sphereS, corvette);
-		initialTranslationSphere = (new Matrix4f()).translation(3,-1,-1);
+		initialTranslationSphere = (new Matrix4f()).translation(3, -1, -1);
 		initialScaleSphere = (new Matrix4f()).scaling(0.5f);
 		sphere.setLocalTranslation(initialTranslationSphere);
 		sphere.setLocalScale(initialScaleSphere);
@@ -120,7 +124,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationPlane, initialScalePlane;
 		// build a plane textured at the left side of the window
 		plane = new GameObject(GameObject.root(), planeS, assignt);
-		initialTranslationPlane = (new Matrix4f()).translation(-3,-1,-1);
+		initialTranslationPlane = (new Matrix4f()).translation(-3, -1, -1);
 		initialScalePlane = (new Matrix4f()).scaling(0.75f);
 		plane.setLocalTranslation(initialTranslationPlane);
 		plane.setLocalScale(initialScalePlane);
@@ -128,7 +132,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f initialTranslationManual, initialScaleManual;
 		// build my manual object
 		manual = new GameObject(GameObject.root(), manualS, gold);
-		initialTranslationManual = (new Matrix4f()).translation(-4.5f,2,0);
+		initialTranslationManual = (new Matrix4f()).translation(-4.5f, 2, 0);
 		initialScaleManual = (new Matrix4f()).scaling(0.4f);
 		manual.setLocalTranslation(initialTranslationManual);
 		manual.setLocalScale(initialScaleManual);
@@ -147,8 +151,8 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	@Override
-	public void initializeLights()
-	{	Light.setGlobalAmbient(0.5f, 0.5f, 0.5f);
+	public void initializeLights() {
+		Light.setGlobalAmbient(0.5f, 0.5f, 0.5f);
 		light1 = new Light();
 		light1.setLocation(new Vector3f(5.0f, 4.0f, 2.0f));
 		(engine.getSceneGraph()).addLight(light1);
@@ -158,22 +162,38 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	@Override
-	public void initializeGame()
-	{	
+	public void createViewports() {
+		(engine.getRenderSystem()).addViewport("MAIN",0,0,1f,1f);
+		(engine.getRenderSystem()).addViewport("RIGHT", .75f, 0, .25f, .25f);
+
+		Viewport rightVp = (engine.getRenderSystem()).getViewport("RIGHT");
+
+		myViewportCamera = rightVp.getCamera();
+		rightVp.setHasBorder(true);
+		rightVp.setBorderWidth(4);
+		rightVp.setBorderColor(0.0f, 1.0f, 0.0f);
+
+		myViewportCamera.setLocation(new Vector3f(0, 2, 0));
+		myViewportCamera.setU(new Vector3f(1, 0, 0));
+		myViewportCamera.setV(new Vector3f(0, 0, -1));
+		myViewportCamera.setN(new Vector3f(0, -1, 0));
+	}
+
+	@Override
+	public void initializeGame() {
 		currFrameTime = System.currentTimeMillis();
 		lastFrameTime = currFrameTime;
 		elapsTime = 0.0;
-		(engine.getRenderSystem()).setWindowDimensions(1900,1000);
+		(engine.getRenderSystem()).setWindowDimensions(1900, 1000);
 
 		// ------------- positioning the camera -------------
 		myCamera = engine.getRenderSystem().getViewport("MAIN").getCamera();
-		myCamera.setLocation(new Vector3f(0,0,5.0f));
+		myCamera.setLocation(new Vector3f(0, 0, 5.0f));
 
 		inputManager = engine.getInputManager();
 		// Get all our controllers and print their info: name, type
 		ArrayList<Controller> controllers = inputManager.getControllers();
-		for (Controller controller : controllers)
-		{
+		for (Controller controller : controllers) {
 			System.err.println("Controller: " + controller.getName());
 			System.err.println("Type: " + controller.getType());
 		}
@@ -189,6 +209,10 @@ public class MyGame extends VariableFrameRateGame
 		YawActionJ XYaw = new YawActionJ(this);
 		RollActionK leftRoll = new RollActionK(this, -1);
 		RollActionK rightRoll = new RollActionK(this, 1);
+
+		// A2 New actions
+		SecondaryViewportZoomActionK zoomOut = new SecondaryViewportZoomActionK(this, 0.0002f);
+		SecondaryViewportZoomActionK zoomIn = new SecondaryViewportZoomActionK(this, -0.0002f);
 
 		// Bind keyboard keys W, S, A, D, Q, E, UP, DOWN to their actions
 		inputManager.associateActionWithAllKeyboards(
@@ -223,7 +247,20 @@ public class MyGame extends VariableFrameRateGame
 				net.java.games.input.Component.Identifier.Key.E,
 				rightRoll,
 				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-			// Now bind X, Y, YRot to joystick/game controller
+
+		//A2 New Actions
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.LBRACKET,
+				zoomOut,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.RBRACKET,
+				zoomIn,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+			
+
+		// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Button._1,
 				moveForward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -241,29 +278,26 @@ public class MyGame extends VariableFrameRateGame
 				moveJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	}
 
-	private float getFramesPerSecond()
-	{
+	private float getFramesPerSecond() {
 		return (float) (frameCounter / elapsTime);
 	}
 
 	@Override
-	public void update()
-	{
+	public void update() {
 		lastFrameTime = currFrameTime;
 		currFrameTime = System.currentTimeMillis();
-		if (!paused) 
-		{
+		if (!paused) {
 			elapsTime += (currFrameTime - lastFrameTime) / 1000.0;
 		}
 
 		// build and set HUD
-		int elapsTimeSec = Math.round((float)elapsTime);
+		int elapsTimeSec = Math.round((float) elapsTime);
 		String elapsTimeStr = Integer.toString(elapsTimeSec);
 		String counterStr = Integer.toString(counter);
 		String dispStr1 = "Time = " + elapsTimeStr + " Pos = " + dol.getWorldLocation().toString();
 		String dispStr2 = counter < 4 ? "Score = " + counterStr : "Score = " + counterStr + " You Win!";
-		Vector3f hud1Color = new Vector3f(1,0,0);
-		Vector3f hud2Color = new Vector3f(0,0,1);
+		Vector3f hud1Color = new Vector3f(1, 0, 0);
+		Vector3f hud2Color = new Vector3f(0, 0, 1);
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
 		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 700, 15);
 
@@ -273,18 +307,16 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e)
-	{	
+	public void keyPressed(KeyEvent e) {
 		Vector3f loc, fwd, newLocation;
-		switch (e.getKeyCode())
-		{	
+		switch (e.getKeyCode()) {
 			// case KeyEvent.VK_C:
-			// 	counter++;
-			// 	AddMagnetToManualObject();
-			// 	break;
+			// counter++;
+			// AddMagnetToManualObject();
+			// break;
 			// case KeyEvent.VK_1:
-			// 	paused = !paused;
-			// 	break;
+			// paused = !paused;
+			// break;
 			case KeyEvent.VK_2:
 				dol.getRenderStates().setWireframe(true);
 				break;
@@ -292,7 +324,7 @@ public class MyGame extends VariableFrameRateGame
 				dol.getRenderStates().setWireframe(false);
 				break;
 			case KeyEvent.VK_4:
-				(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0,0,0));
+				(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 0));
 				offDolphinCam = true;
 				break;
 			case KeyEvent.VK_SPACE:
@@ -306,18 +338,19 @@ public class MyGame extends VariableFrameRateGame
 		super.keyPressed(e);
 	}
 
-	public Camera getMyCamera()
-	{
+	public Camera getMyCamera() {
 		return myCamera;
 	}
 
-	public boolean onDolphinCam()
-	{
+	public Camera getMyViewportCamera() {
+		return myViewportCamera;
+	}
+
+	public boolean onDolphinCam() {
 		return !offDolphinCam;
 	}
 
-	public void setOnDolphinCam()
-	{
+	public void setOnDolphinCam() {
 		float hopOnDistance = -1.75f;
 		float upDistance = 0.5f;
 		location = dol.getWorldLocation();
@@ -328,13 +361,12 @@ public class MyGame extends VariableFrameRateGame
 		myCamera.setV(up);
 		myCamera.setN(forward);
 		myCamera.setLocation(location.add(up.mul(upDistance))
-			.add(forward.mul(hopOnDistance)));
-		
+				.add(forward.mul(hopOnDistance)));
+
 		offDolphinCam = false;
 	}
 
-	public void setOffDolphinCam()
-	{
+	public void setOffDolphinCam() {
 		float hopOffDistance = -2.0f;
 		float upDistance = 1.0f;
 		location = dol.getWorldLocation();
@@ -345,70 +377,60 @@ public class MyGame extends VariableFrameRateGame
 		myCamera.setV(up);
 		myCamera.setN(forward);
 		myCamera.setLocation(location.add(up.mul(upDistance))
-			.add(forward.mul(hopOffDistance)));
-		
+				.add(forward.mul(hopOffDistance)));
+
 		offDolphinCam = true;
 	}
 
-	public GameObject getDolphin()
-	{
+	public GameObject getDolphin() {
 		return dol;
 	}
 
-	public void AddMagnetToManualObject(int n_magnet)
-	{
+	public void AddMagnetToManualObject(int n_magnet) {
 		Matrix4f initialTranslationMagnet, initialScaleMagnet;
 		// build the magnet object
 		magnet = new GameObject(GameObject.root(), magnetS, metal);
 		initialTranslationMagnet = (new Matrix4f()).translation(
-			-4.6f+n_magnet*0.05f,2.5f-n_magnet*0.125f,-0.5f+n_magnet*0.05f);
+				-4.6f + n_magnet * 0.05f, 2.5f - n_magnet * 0.125f, -0.5f + n_magnet * 0.05f);
 		initialScaleMagnet = (new Matrix4f()).scaling(0.25f);
 		magnet.setLocalTranslation(initialTranslationMagnet);
 		magnet.setLocalScale(initialScaleMagnet);
 		magnet.getRenderStates().hasLighting(true);
 	}
 
-	public boolean checkDolphinNearObject(GameObject gObject)
-	{
+	public boolean checkDolphinNearObject(GameObject gObject) {
 		Vector3d distanceToObj = new Vector3d(0, 0, 0);
 		distanceToObj.x = (Math.abs(
-			dol.getWorldLocation().x() - gObject.getWorldLocation().x()));
+				dol.getWorldLocation().x() - gObject.getWorldLocation().x()));
 		distanceToObj.y = (Math.abs(
-			dol.getWorldLocation().y() - gObject.getWorldLocation().y()));
+				dol.getWorldLocation().y() - gObject.getWorldLocation().y()));
 		distanceToObj.z = (Math.abs(
-			dol.getWorldLocation().z() - gObject.getWorldLocation().z()));
+				dol.getWorldLocation().z() - gObject.getWorldLocation().z()));
 
 		double distance = distanceToObj.length();
 		return (distance < 0.5) ? true : false;
 	}
 
-	public void updateDolphinScore()
-	{
+	public void updateDolphinScore() {
 		// Check for each object (cub, torus, sphere, plane) and update visited state
-		if (!visitedSites[0])
-		{
+		if (!visitedSites[0]) {
 			visitedSites[0] = checkDolphinNearObject(cub);
-		} 
-		if (!visitedSites[1])
-		{
+		}
+		if (!visitedSites[1]) {
 			visitedSites[1] = checkDolphinNearObject(torus);
-		} 
-		if (!visitedSites[2])
-		{
+		}
+		if (!visitedSites[2]) {
 			visitedSites[2] = checkDolphinNearObject(sphere);
-		} 
-		if (!visitedSites[3])
-		{
+		}
+		if (!visitedSites[3]) {
 			visitedSites[3] = checkDolphinNearObject(plane);
 		}
 		// Update the score and add magnet(s) if site(s) were visited
 		int old_counter = counter;
 		counter = (visitedSites[0] ? 1 : 0) + (visitedSites[1] ? 1 : 0)
-			+ (visitedSites[2] ? 1 : 0) + (visitedSites[3] ? 1 : 0);
-		if (counter > old_counter)
-		{
-			for (int i=old_counter; i < counter; ++i)
-			{
+				+ (visitedSites[2] ? 1 : 0) + (visitedSites[3] ? 1 : 0);
+		if (counter > old_counter) {
+			for (int i = old_counter; i < counter; ++i) {
 				AddMagnetToManualObject(i);
 			}
 		}
