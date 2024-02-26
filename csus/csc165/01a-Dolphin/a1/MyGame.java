@@ -211,8 +211,12 @@ public class MyGame extends VariableFrameRateGame {
 		RollActionK rightRoll = new RollActionK(this, 1);
 
 		// A2 New actions
-		SecondaryViewportZoomActionK zoomOut = new SecondaryViewportZoomActionK(this, 0.0002f);
-		SecondaryViewportZoomActionK zoomIn = new SecondaryViewportZoomActionK(this, -0.0002f);
+		SecondaryViewportZoomActionK zoomOut = new SecondaryViewportZoomActionK(this, 0.0004f);
+		SecondaryViewportZoomActionK zoomIn = new SecondaryViewportZoomActionK(this, -0.0004f);
+		SecondaryViewportPanXActionK panLeft = new SecondaryViewportPanXActionK(this, -0.0004f);
+		SecondaryViewportPanXActionK panRight = new SecondaryViewportPanXActionK(this, 0.0004f);
+		SecondaryViewportPanYActionK panUp = new SecondaryViewportPanYActionK(this, -0.0004f);
+		SecondaryViewportPanYActionK panDown = new SecondaryViewportPanYActionK(this, 0.0004f);
 
 		// Bind keyboard keys W, S, A, D, Q, E, UP, DOWN to their actions
 		inputManager.associateActionWithAllKeyboards(
@@ -259,6 +263,25 @@ public class MyGame extends VariableFrameRateGame {
 				zoomIn,
 				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 			
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.O,
+				panLeft,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.P,
+				panRight,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key._0,
+				panUp,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.L,
+				panDown,
+				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(

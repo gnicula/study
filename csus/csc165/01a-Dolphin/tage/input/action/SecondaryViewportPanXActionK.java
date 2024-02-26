@@ -11,10 +11,10 @@
 
  
  /**
-  * SecondaryViewportZoomActionK implements zooming in and out of the "minimap" viewport.
+  * SecondaryViewportPanXActionK implements panning across the x-axis on the "minimap" viewport.
   * This InputAction works with the keyboard.
   */
- public class SecondaryViewportZoomActionK extends AbstractInputAction {
+ public class SecondaryViewportPanXActionK extends AbstractInputAction {
      // MyGame object where GameObjects are placed in.
      private MyGame game;
      // Camera object that is positioned for the viewport
@@ -25,11 +25,11 @@
      // has direction for joystick usage.
      private float direction_and_scale;
  
-     /** <code> SecondaryViewportZoomActionK() </code> is invoked to execute this input action.
+     /** <code> SecondaryViewportPanXActionK() </code> is invoked to execute this input action.
       * @param game -- MyGame object where movement is happening.
       * @param factor -- scaling factor that controls rate at which actions can occur.
       */
-     public SecondaryViewportZoomActionK(MyGame game, float factor) {
+     public SecondaryViewportPanXActionK(MyGame game, float factor) {
          this.game = game;
          this.camera = game.getMyViewportCamera();
          this.direction_and_scale = factor;
@@ -39,6 +39,6 @@
      public void performAction(float time, Event evt) {
          speed = direction_and_scale * time;
         
-         camera.setLocation(camera.getLocation().add(0.0f, speed, 0.0f));
+         camera.setLocation(camera.getLocation().add(speed, 0.0f, 0.0f));
      }
  }
