@@ -8,6 +8,8 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
+import tage.rml.Matrix4f;
+import tage.rml.Vector3f;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -87,6 +89,7 @@ public class MyGame extends VariableFrameRateGame {
 		assignt = new TextureImage("assign1.png");
 		gold = new TextureImage("gold1.jpg");
 		metal = new TextureImage("magnet1.jpg");
+		// https://www.pexels.com/photo/body-of-water-261403/
 		water = new TextureImage("water.jpg");
 	}
 
