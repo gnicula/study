@@ -8,8 +8,6 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
-// import tage.rml.Matrix4f;
-// import tage.rml.Vector3f;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -31,12 +29,13 @@ public class MyGame extends VariableFrameRateGame {
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, cub, torus, sphere, plane, wAxisX, wAxisY, wAxisZ, manual, magnet;
-	private ObjShape dolS, cubS, torusS, sphereS, planeS, wAxisLineShapeX, wAxisLineShapeY, wAxisLineShapeZ, manualS,
-			magnetS;
-	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal;
+	private GameObject dol, cub, torus, sphere, plane, groundPlane, wAxisX, wAxisY, wAxisZ, manual, magnet;
+	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
+			wAxisLineShapeZ, manualS, magnetS;
+	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
+	private CameraOrbit3D orbitController;
 	private InputManager inputManager;
 	private Vector3f location; // world object location
 	private Vector3f forward; // n-vector/z-axis
@@ -64,6 +63,7 @@ public class MyGame extends VariableFrameRateGame {
 		torusS = new Torus();
 		sphereS = new Sphere();
 		planeS = new Plane();
+		groundPlaneS = new Plane();
 		manualS = new MyManualObject();
 		magnetS = new MyMagnetObject();
 
@@ -87,6 +87,7 @@ public class MyGame extends VariableFrameRateGame {
 		assignt = new TextureImage("assign1.png");
 		gold = new TextureImage("gold1.jpg");
 		metal = new TextureImage("magnet1.jpg");
+		water = new TextureImage("water.jpg");
 	}
 
 	@Override
@@ -141,6 +142,16 @@ public class MyGame extends VariableFrameRateGame {
 		manual.setLocalScale(initialScaleManual);
 		manual.getRenderStates().hasLighting(true);
 
+		Matrix4f initialTranslationGround, initialScaleGround;
+		// build the ground plane on X-Z
+		groundPlane = new GameObject(GameObject.root(), groundPlaneS, water);
+		// initialTranslationGround = (new Matrix4f()).translation(-4.5f, 2, 0);
+		initialScaleGround = (new Matrix4f()).scaling(5.0f);
+		// groundPlane.setLocalTranslation(initialTranslationManual);
+		groundPlane.setLocalScale(initialScaleGround);
+		groundPlane.getRenderStates().hasLighting(true);
+
+
 		// Build World Axis Lines (X, Y, Z) in the center of the window
 		wAxisX = new GameObject(GameObject.root(), wAxisLineShapeX);
 		wAxisY = new GameObject(GameObject.root(), wAxisLineShapeY);
@@ -189,17 +200,24 @@ public class MyGame extends VariableFrameRateGame {
 		elapsTime = 0.0;
 		(engine.getRenderSystem()).setWindowDimensions(WindowSizeX, WindowSizeY);
 
+		inputManager = engine.getInputManager();
+		// Get all our controllers and print their info: name, type
+		ArrayList<Controller> controllers = inputManager.getControllers();
+		String controllerName = new String(" Controller (Xbox One For Windows)");
+		for (Controller controller : controllers) {
+			System.err.println("Controller: " + controller.getName());
+			System.err.println("Type: " + controller.getType());
+			if (controller.getType().toString() == "Gamepad") {
+				controllerName = controller.getName();
+			}
+		}
+
 		// ------------- positioning the camera -------------
 		myCamera = engine.getRenderSystem().getViewport("MAIN").getCamera();
 		myCamera.setLocation(new Vector3f(0, 0, 5.0f));
 
-		inputManager = engine.getInputManager();
-		// Get all our controllers and print their info: name, type
-		ArrayList<Controller> controllers = inputManager.getControllers();
-		for (Controller controller : controllers) {
-			System.err.println("Controller: " + controller.getName());
-			System.err.println("Type: " + controller.getType());
-		}
+		// CameraOrbit3D initialization
+		orbitController = new CameraOrbit3D(myCamera, dol, controllerName, engine);
 
 		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
 		PitchActionK pitchDown = new PitchActionK(this, -0.0002f);
@@ -347,6 +365,7 @@ public class MyGame extends VariableFrameRateGame {
 
 		arrangeHUD();
 		inputManager.update(getFramesPerSecond());
+		orbitController.updateCameraPosition();
 		updateDolphinScore();
 		frameCounter++;
 	}
@@ -372,13 +391,13 @@ public class MyGame extends VariableFrameRateGame {
 				(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 0));
 				offDolphinCam = true;
 				break;
-			case KeyEvent.VK_SPACE:
-				if (offDolphinCam) {
-					setOnDolphinCam();
-				} else {
-					setOffDolphinCam();
-				}
-				break;
+			// case KeyEvent.VK_SPACE:
+			// 	if (offDolphinCam) {
+			// 		setOnDolphinCam();
+			// 	} else {
+			// 		setOffDolphinCam();
+			// 	}
+			// 	break;
 		}
 		super.keyPressed(e);
 	}
