@@ -201,15 +201,15 @@ public class MyGame extends VariableFrameRateGame {
 		(engine.getRenderSystem()).setWindowDimensions(WindowSizeX, WindowSizeY);
 
 		inputManager = engine.getInputManager();
+		String gamepadName = inputManager.getFirstGamepadName();
 		// Get all our controllers and print their info: name, type
 		ArrayList<Controller> controllers = inputManager.getControllers();
-		String controllerName = new String(" Controller (Xbox One For Windows)");
 		for (Controller controller : controllers) {
 			System.err.println("Controller: " + controller.getName());
 			System.err.println("Type: " + controller.getType());
-			if (controller.getType().toString() == "Gamepad") {
-				controllerName = controller.getName();
-			}
+			// if (controller.getType().toString() == "Gamepad") {
+			// 	gamepadName = controller.getName();
+			// }
 		}
 
 		// ------------- positioning the camera -------------
@@ -217,7 +217,7 @@ public class MyGame extends VariableFrameRateGame {
 		myCamera.setLocation(new Vector3f(0, 0, 5.0f));
 
 		// CameraOrbit3D initialization
-		orbitController = new CameraOrbit3D(myCamera, dol, controllerName, engine);
+		orbitController = new CameraOrbit3D(myCamera, dol, gamepadName, engine);
 
 		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
 		PitchActionK pitchDown = new PitchActionK(this, -0.0002f);
