@@ -13,4 +13,4 @@ javac tage\rml\*.java
 javac tage\ai\behaviortrees\*.java
 javac tage\audio\*.java
 javac tage\audio\joal\*.java
-javac -Xlint:unchecked a1/*.java
+javac -Xlint:unchecked a2/*.java

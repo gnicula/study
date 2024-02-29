@@ -13,4 +13,4 @@ del .\tage\physics\*.class
 del .\tage\physics\JBullet\*.class
 del .\tage\rml\*.class
 del .\tage\shapes\*.class
-del .\a1\*.class
+del .\a2\*.class

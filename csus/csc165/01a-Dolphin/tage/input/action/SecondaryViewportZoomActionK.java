@@ -4,8 +4,8 @@
 
  package tage.input.action;
 
- import a1.MyGame;
- import net.java.games.input.Event;
+ import a2.MyGame;
+import net.java.games.input.Event;
  import tage.Camera;
  import tage.GameObject;
 
