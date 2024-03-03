@@ -8,8 +8,8 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
-import tage.rml.Matrix4f;
-import tage.rml.Vector3f;
+import tage.nodeControllers.RotationController;
+import tage.nodeControllers.StretchController;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import java.io.*;
 import javax.swing.*;
 
 import org.joml.*;
+
 
 public class MyGame extends VariableFrameRateGame {
 	private static Engine engine;
@@ -38,6 +39,7 @@ public class MyGame extends VariableFrameRateGame {
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
+	private ArrayList<NodeController> controllerArr = new ArrayList<NodeController>();
 	private InputManager inputManager;
 	private Vector3f location; // world object location
 	private Vector3f forward; // n-vector/z-axis
@@ -161,9 +163,9 @@ public class MyGame extends VariableFrameRateGame {
 		wAxisZ = new GameObject(GameObject.root(), wAxisLineShapeZ);
 
 		// Set world axis colors (red, green, blue) - X, Y, Z respectively
-		wAxisX.getRenderStates().setColor(new Vector3f(2f, 0, 0));
-		wAxisY.getRenderStates().setColor(new Vector3f(0, 2f, 0));
-		wAxisZ.getRenderStates().setColor(new Vector3f(0, 0, 2f));
+		wAxisX.getRenderStates().setColor(new Vector3f(1.0f, 0, 0));
+		wAxisY.getRenderStates().setColor(new Vector3f(0, 1.0f, 0));
+		wAxisZ.getRenderStates().setColor(new Vector3f(0, 0, 1.0f));
 
 	}
 
@@ -221,6 +223,23 @@ public class MyGame extends VariableFrameRateGame {
 
 		// CameraOrbit3D initialization
 		orbitController = new CameraOrbit3D(myCamera, dol, gamepadName, engine);
+		// Initialize our nodeControllers
+		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
+		rotController1.addTarget(cub);
+		controllerArr.add(rotController1);
+		NodeController stretchController1 = new StretchController(engine, 2000.0f);
+		stretchController1.addTarget(torus);
+		controllerArr.add(stretchController1);
+		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
+		rotController2.addTarget(sphere);
+		controllerArr.add(rotController2);
+		NodeController stretchController2 = new StretchController(engine, 2000.0f);
+		stretchController2.addTarget(plane);
+		controllerArr.add(stretchController2);
+
+		for (NodeController n : controllerArr) {
+			(engine.getSceneGraph()).addNodeController(n);
+		}
 
 		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
 		PitchActionK pitchDown = new PitchActionK(this, -0.0002f);
@@ -309,11 +328,11 @@ public class MyGame extends VariableFrameRateGame {
 
 		// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Button._1,
-				moveForward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Button._0,
+				pitchUp, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Button._2,
-				moveBackward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Button._1,
+				pitchDown, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Axis.RZ,
 				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -370,6 +389,7 @@ public class MyGame extends VariableFrameRateGame {
 		inputManager.update(getFramesPerSecond());
 		orbitController.updateCameraPosition();
 		updateDolphinScore();
+		toggleNodeControllers();
 		frameCounter++;
 	}
 
@@ -478,7 +498,7 @@ public class MyGame extends VariableFrameRateGame {
 		return (distance < 0.5) ? true : false;
 	}
 
-	public void updateDolphinScore() {
+	private void updateDolphinScore() {
 		// Check for each object (cub, torus, sphere, plane) and update visited state
 		if (!visitedSites[0]) {
 			visitedSites[0] = checkDolphinNearObject(cub);
@@ -499,6 +519,14 @@ public class MyGame extends VariableFrameRateGame {
 		if (counter > old_counter) {
 			for (int i = old_counter; i < counter; ++i) {
 				AddMagnetToManualObject(i);
+			}
+		}
+	}
+
+	private void toggleNodeControllers() {
+		for (int i = 0; i < visitedSites.length; ++i) {
+			if (visitedSites[i]) {
+				controllerArr.get(i).toggle();
 			}
 		}
 	}
