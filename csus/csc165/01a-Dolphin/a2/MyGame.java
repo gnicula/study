@@ -8,8 +8,8 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
-// import tage.rml.Matrix4f;
-// import tage.rml.Vector3f;
+import tage.rml.Matrix4f;
+import tage.rml.Vector3f;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
@@ -315,7 +315,7 @@ public class MyGame extends VariableFrameRateGame {
 				net.java.games.input.Component.Identifier.Button._2,
 				moveBackward, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Axis.SLIDER,
+				net.java.games.input.Component.Identifier.Axis.RZ,
 				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Axis.X,
