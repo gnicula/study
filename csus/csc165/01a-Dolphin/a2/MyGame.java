@@ -109,7 +109,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationCub, initialScaleCub;
 		// build a brick at the right side of the window
 		cub = new GameObject(GameObject.root(), cubS, brick);
-		initialTranslationCub = (new Matrix4f()).translation(3, 1, -2);
+		initialTranslationCub = (new Matrix4f()).translation(4, 0.15f, -4);
 		initialScaleCub = (new Matrix4f()).scaling(0.25f);
 		cub.setLocalTranslation(initialTranslationCub);
 		cub.setLocalScale(initialScaleCub);
@@ -117,7 +117,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationTorus, initialScaleTorus;
 		// build a grass torus at the left side of the window
 		torus = new GameObject(GameObject.root(), torusS, grass);
-		initialTranslationTorus = (new Matrix4f()).translation(-3, 1, -2);
+		initialTranslationTorus = (new Matrix4f()).translation(-3, 0.11f, -4);
 		initialScaleTorus = (new Matrix4f()).scaling(0.5f);
 		torus.setLocalTranslation(initialTranslationTorus);
 		torus.setLocalScale(initialScaleTorus);
@@ -125,7 +125,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationSphere, initialScaleSphere;
 		// build a sphere logo textured at the right side of the window
 		sphere = new GameObject(GameObject.root(), sphereS, corvette);
-		initialTranslationSphere = (new Matrix4f()).translation(3, -1, -1);
+		initialTranslationSphere = (new Matrix4f()).translation(4, 0.2f, 4);
 		initialScaleSphere = (new Matrix4f()).scaling(0.5f);
 		sphere.setLocalTranslation(initialTranslationSphere);
 		sphere.setLocalScale(initialScaleSphere);
@@ -133,7 +133,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationPlane, initialScalePlane;
 		// build a plane textured at the left side of the window
 		plane = new GameObject(GameObject.root(), planeS, assignt);
-		initialTranslationPlane = (new Matrix4f()).translation(-3, -1, -1);
+		initialTranslationPlane = (new Matrix4f()).translation(-3, .01f, 4);
 		initialScalePlane = (new Matrix4f()).scaling(0.75f);
 		plane.setLocalTranslation(initialTranslationPlane);
 		plane.setLocalScale(initialScalePlane);
@@ -141,7 +141,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationManual, initialScaleManual;
 		// build my manual object
 		manual = new GameObject(GameObject.root(), manualS, gold);
-		initialTranslationManual = (new Matrix4f()).translation(-4.5f, 2, 0);
+		initialTranslationManual = (new Matrix4f()).translation(-4.5f, 2.0f, 0);
 		initialScaleManual = (new Matrix4f()).scaling(0.4f);
 		manual.setLocalTranslation(initialTranslationManual);
 		manual.setLocalScale(initialScaleManual);
@@ -227,13 +227,13 @@ public class MyGame extends VariableFrameRateGame {
 		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
 		rotController1.addTarget(cub);
 		controllerArr.add(rotController1);
-		NodeController stretchController1 = new StretchController(engine, 2000.0f);
+		NodeController stretchController1 = new StretchController(engine, 3.0f);
 		stretchController1.addTarget(torus);
 		controllerArr.add(stretchController1);
 		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
 		rotController2.addTarget(sphere);
 		controllerArr.add(rotController2);
-		NodeController stretchController2 = new StretchController(engine, 2000.0f);
+		NodeController stretchController2 = new StretchController(engine, 3.0f);
 		stretchController2.addTarget(plane);
 		controllerArr.add(stretchController2);
 
@@ -525,8 +525,8 @@ public class MyGame extends VariableFrameRateGame {
 
 	private void toggleNodeControllers() {
 		for (int i = 0; i < visitedSites.length; ++i) {
-			if (visitedSites[i]) {
-				controllerArr.get(i).toggle();
+			if (visitedSites[i] && !controllerArr.get(i).isEnabled()) {
+				controllerArr.get(i).enable();
 			}
 		}
 	}
