@@ -163,7 +163,7 @@ public class MyGame extends VariableFrameRateGame {
 		// build the ground plane on X-Z
 		groundPlane = new GameObject(GameObject.root(), groundPlaneS, water);
 		// initialTranslationGround = (new Matrix4f()).translation(-4.5f, 2, 0);
-		initialScaleGround = (new Matrix4f()).scaling(5.0f);
+		initialScaleGround = (new Matrix4f()).scaling(6.0f);
 		// groundPlane.setLocalTranslation(initialTranslationManual);
 		groundPlane.setLocalScale(initialScaleGround);
 		groundPlane.getRenderStates().hasLighting(true);
@@ -354,6 +354,8 @@ public class MyGame extends VariableFrameRateGame {
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Axis.Y,
 				moveJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		printControls();
 	}
 
 	private float getFramesPerSecond() {
@@ -568,28 +570,32 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	private void printControls() {
+		System.out.println("**************************");
 		System.out.println("Gamepad and Key Bindings:");
-		System.out.println("\tMove Forward:\t\tW, Gamepad Left Joystick Y-axis up");
-		System.out.println("\tMove Backward:\t\tS, Gamepad Left Joystick Y-axis down");
-		System.out.println("\tYaw Left:\t\tA, Gamepad Left Joystick X-axis left");
-		System.out.println("\tYaw Right:\t\tD, Gamepad Left Joystick X-axis right");
-		System.out.println("\tRoll Left:\t\tQ");
-		System.out.println("\tRoll Right:\t\tE");
-		System.out.println("\tPitch Up:\t\tUp Arrow, Gamepad Button 0");
-		System.out.println("\tPitch Down:\t\tDown Arrow, Gamepad Button 1");
-		System.out.println("\tCamera Rotate Left:\t\tGamepad Right Joystick RX-axis left");
-		System.out.println("\tCamera Rotate Right:\t\tGamepad Right Joystick RX-axis right");
-		System.out.println("\tCamera Elevation Up:\t\tGamepad Right Joystick RY-axis up");
-		System.out.println("\tCamera Elevation Down:\t\tGamepad Right Joystick RY-axis down");
-		System.out.println("\tCamera Zoom In:\t\tGamepad Button 2");
-		System.out.println("\tCamera Zoom Out:\t\tGamepad Button 3");
-		System.out.println("\tPan Mini-Map Up:\t\t0");
-		System.out.println("\tPan Mini-Map Right:\t\tP");
-		System.out.println("\tPan Mini-Map Down:\t\tL");
-		System.out.println("\tPan Mini-Map Right:\t\tO");
-		System.out.println("\tMini-Map Zoom In:\t\t]");
-		System.out.println("\tMini-Map Zoom Out:\t\t[");
-		System.out.println("\tToggle World Axes Object:\t\t1");
-		System.out.println("\t");
+		System.out.println("**************************\n");
+		System.out.println("\tMove Forward:\t\t\t\tW, Gamepad Left Joystick Y-axis up");
+		System.out.println("\tMove Backward:\t\t\t\tS, Gamepad Left Joystick Y-axis down");
+		System.out.println("\tYaw Left:\t\t\t\tA, Gamepad Left Joystick X-axis left");
+		System.out.println("\tYaw Right:\t\t\t\tD, Gamepad Left Joystick X-axis right");
+		System.out.println("\tRoll Left:\t\t\t\tQ");
+		System.out.println("\tRoll Right:\t\t\t\tE");
+		System.out.println("\tPitch Up:\t\t\t\tUp Arrow, Gamepad Button 0");
+		System.out.println("\tPitch Down:\t\t\t\tDown Arrow, Gamepad Button 1");
+		System.out.println("\tCamera Rotate Left:\t\t\tGamepad Right Joystick RX-axis left");
+		System.out.println("\tCamera Rotate Right:\t\t\tGamepad Right Joystick RX-axis right");
+		System.out.println("\tCamera Elevation Up:\t\t\tGamepad Right Joystick RY-axis up");
+		System.out.println("\tCamera Elevation Down:\t\t\tGamepad Right Joystick RY-axis down");
+		System.out.println("\tCamera Zoom In:\t\t\t\tGamepad Button 2");
+		System.out.println("\tCamera Zoom Out:\t\t\tGamepad Button 3");
+		System.out.println("\tPan Mini-Map Up:\t\t\t0");
+		System.out.println("\tPan Mini-Map Right:\t\t\tP");
+		System.out.println("\tPan Mini-Map Down:\t\t\tL");
+		System.out.println("\tPan Mini-Map Right:\t\t\tO");
+		System.out.println("\tMini-Map Zoom In:\t\t\t]");
+		System.out.println("\tMini-Map Zoom Out:\t\t\t[");
+		System.out.println("\tToggle World Axes On/Off:\t\t1");
+		System.out.println("\tDolphin Wireframe On:\t\t\t2");
+		System.out.println("\tDolphin Wireframe Off:\t\t\t3");
+		System.out.println("\tExit Game:\t\t\t\tESC");
 	}
 }
