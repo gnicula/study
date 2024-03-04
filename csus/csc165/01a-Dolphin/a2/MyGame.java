@@ -27,6 +27,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	private boolean paused = false;
 	private boolean offDolphinCam = true; // default camera off dolphin
+	private boolean axesRenderState = true;
 	private boolean[] visitedSites = new boolean[4]; // default initialized to false
 	private int counter = 0;
 	private int frameCounter = 0;
@@ -35,7 +36,7 @@ public class MyGame extends VariableFrameRateGame {
 	private GameObject dol, cub, torus, sphere, plane, groundPlane, wAxisX, wAxisY, wAxisZ, manual, magnet;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
 			wAxisLineShapeZ, manualS, magnetS;
-	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water;
+	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, torusWater;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
@@ -93,6 +94,8 @@ public class MyGame extends VariableFrameRateGame {
 		metal = new TextureImage("magnet1.jpg");
 		// https://www.pexels.com/photo/body-of-water-261403/
 		water = new TextureImage("water.jpg");
+		// https://www.pexels.com/photo/aerial-shot-of-blue-water-3894157/
+		torusWater = new TextureImage("waterTorus.jpg");
 	}
 
 	@Override
@@ -101,7 +104,7 @@ public class MyGame extends VariableFrameRateGame {
 
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0, 0, 0);
+		initialTranslation = (new Matrix4f()).translation(0, 0.2f, 0);
 		initialScale = (new Matrix4f()).scaling(0.75f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
@@ -116,7 +119,8 @@ public class MyGame extends VariableFrameRateGame {
 
 		Matrix4f initialTranslationTorus, initialScaleTorus;
 		// build a grass torus at the left side of the window
-		torus = new GameObject(GameObject.root(), torusS, grass);
+		torus = new GameObject(GameObject.root(), torusS, torusWater);
+		torus.getRenderStates().setTiling(1);
 		initialTranslationTorus = (new Matrix4f()).translation(-3, 0.11f, -4);
 		initialScaleTorus = (new Matrix4f()).scaling(0.5f);
 		torus.setLocalTranslation(initialTranslationTorus);
@@ -129,6 +133,14 @@ public class MyGame extends VariableFrameRateGame {
 		initialScaleSphere = (new Matrix4f()).scaling(0.5f);
 		sphere.setLocalTranslation(initialTranslationSphere);
 		sphere.setLocalScale(initialScaleSphere);
+		// now create a example of a hierarchical relationship by adding 
+		// a smaller sphereSatellite to our sphere object.
+		GameObject sphereSatellite = new GameObject(sphere, sphereS, grass);
+		sphereSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
+		sphereSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
+		sphereSatellite.propagateTranslation(true);
+		sphereSatellite.propagateRotation(true);
+		sphereSatellite.applyParentRotationToPosition(true);
 
 		Matrix4f initialTranslationPlane, initialScalePlane;
 		// build a plane textured at the left side of the window
@@ -155,7 +167,7 @@ public class MyGame extends VariableFrameRateGame {
 		// groundPlane.setLocalTranslation(initialTranslationManual);
 		groundPlane.setLocalScale(initialScaleGround);
 		groundPlane.getRenderStates().hasLighting(true);
-
+		groundPlane.setIsTerrain(true);
 
 		// Build World Axis Lines (X, Y, Z) in the center of the window
 		wAxisX = new GameObject(GameObject.root(), wAxisLineShapeX);
@@ -224,16 +236,16 @@ public class MyGame extends VariableFrameRateGame {
 		// CameraOrbit3D initialization
 		orbitController = new CameraOrbit3D(myCamera, dol, gamepadName, engine);
 		// Initialize our nodeControllers
-		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
+		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.01f);
 		rotController1.addTarget(cub);
 		controllerArr.add(rotController1);
-		NodeController stretchController1 = new StretchController(engine, 3.0f);
+		NodeController stretchController1 = new StretchController(engine, 1.0f);
 		stretchController1.addTarget(torus);
 		controllerArr.add(stretchController1);
-		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
+		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.005f);
 		rotController2.addTarget(sphere);
 		controllerArr.add(rotController2);
-		NodeController stretchController2 = new StretchController(engine, 3.0f);
+		NodeController stretchController2 = new StretchController(engine, 1.0f);
 		stretchController2.addTarget(plane);
 		controllerArr.add(stretchController2);
 
@@ -348,6 +360,10 @@ public class MyGame extends VariableFrameRateGame {
 		return (float) (frameCounter / elapsTime);
 	}
 
+	private String printVector3f(Vector3f v) {
+		return String.format("x:%2.3f, y:%2.3f, z:%2.3f", v.x(), v.y(), v.z());
+	}
+
 	private void arrangeHUD() {
 		// build and set HUD
 		int elapsTimeSec = Math.round((float) elapsTime);
@@ -355,7 +371,7 @@ public class MyGame extends VariableFrameRateGame {
 		String counterStr = Integer.toString(counter);
 		counterStr =  counter < 4 ? "Score = " + counterStr : "Score = " + counterStr + " You Win!";
 		String dispStr1 = "Time = " + elapsTimeStr + " " + counterStr;
-		String dispStr2 = "Pos = " + dol.getWorldLocation().toString();
+		String dispStr2 = "Pos = " + printVector3f(dol.getWorldLocation());
 		Vector3f hud1Color = new Vector3f(1, 0, 0);
 		Vector3f hud2Color = new Vector3f(0, 0, 1);
 		int hud1x, hud1y, hud2x, hud2y;
@@ -401,9 +417,18 @@ public class MyGame extends VariableFrameRateGame {
 			// counter++;
 			// AddMagnetToManualObject();
 			// break;
-			// case KeyEvent.VK_1:
-			// paused = !paused;
-			// break;
+			case KeyEvent.VK_1:
+				axesRenderState = !axesRenderState;
+				if (axesRenderState) {
+					wAxisX.getRenderStates().enableRendering();
+					wAxisY.getRenderStates().enableRendering();
+					wAxisZ.getRenderStates().enableRendering();
+				} else {
+					wAxisX.getRenderStates().disableRendering();
+					wAxisY.getRenderStates().disableRendering();
+					wAxisZ.getRenderStates().disableRendering();
+				}
+				break;
 			case KeyEvent.VK_2:
 				dol.getRenderStates().setWireframe(true);
 				break;
@@ -474,15 +499,26 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	public void AddMagnetToManualObject(int n_magnet) {
-		Matrix4f initialTranslationMagnet, initialScaleMagnet;
+		Matrix4f initialTranslationMagnet, initialScaleMagnet, initialRotationMagnet;
 		// build the magnet object
 		magnet = new GameObject(GameObject.root(), magnetS, metal);
+		magnet.setParent(dol);
+		magnet.propagateRotation(true);
+		magnet.propagateTranslation(true);
+		magnet.applyParentRotationToPosition(true);
+		initialRotationMagnet = (new Matrix4f()).rotate(90.0f, new Vector3f(0.0f, 1.0f, 0.0f));
 		initialTranslationMagnet = (new Matrix4f()).translation(
-				-4.6f + n_magnet * 0.05f, 2.5f - n_magnet * 0.125f, -0.5f + n_magnet * 0.05f);
-		initialScaleMagnet = (new Matrix4f()).scaling(0.25f);
+				0.0f, 0.02f, -(n_magnet * 0.035f + 0.35f));
+		initialScaleMagnet = (new Matrix4f()).scaling(0.05f);
+		magnet.setLocalRotation(initialRotationMagnet);
 		magnet.setLocalTranslation(initialTranslationMagnet);
 		magnet.setLocalScale(initialScaleMagnet);
 		magnet.getRenderStates().hasLighting(true);
+		
+		NodeController magnetSpinController = new RotationController(engine, new Vector3f(0,1,0), 0.01f);
+		magnetSpinController.addTarget(magnet);
+		magnetSpinController.enable();
+		engine.getSceneGraph().addNodeController(magnetSpinController);
 	}
 
 	public boolean checkDolphinNearObject(GameObject gObject) {
@@ -529,5 +565,31 @@ public class MyGame extends VariableFrameRateGame {
 				controllerArr.get(i).enable();
 			}
 		}
+	}
+
+	private void printControls() {
+		System.out.println("Gamepad and Key Bindings:");
+		System.out.println("\tMove Forward:\t\tW, Gamepad Left Joystick Y-axis up");
+		System.out.println("\tMove Backward:\t\tS, Gamepad Left Joystick Y-axis down");
+		System.out.println("\tYaw Left:\t\tA, Gamepad Left Joystick X-axis left");
+		System.out.println("\tYaw Right:\t\tD, Gamepad Left Joystick X-axis right");
+		System.out.println("\tRoll Left:\t\tQ");
+		System.out.println("\tRoll Right:\t\tE");
+		System.out.println("\tPitch Up:\t\tUp Arrow, Gamepad Button 0");
+		System.out.println("\tPitch Down:\t\tDown Arrow, Gamepad Button 1");
+		System.out.println("\tCamera Rotate Left:\t\tGamepad Right Joystick RX-axis left");
+		System.out.println("\tCamera Rotate Right:\t\tGamepad Right Joystick RX-axis right");
+		System.out.println("\tCamera Elevation Up:\t\tGamepad Right Joystick RY-axis up");
+		System.out.println("\tCamera Elevation Down:\t\tGamepad Right Joystick RY-axis down");
+		System.out.println("\tCamera Zoom In:\t\tGamepad Button 2");
+		System.out.println("\tCamera Zoom Out:\t\tGamepad Button 3");
+		System.out.println("\tPan Mini-Map Up:\t\t0");
+		System.out.println("\tPan Mini-Map Right:\t\tP");
+		System.out.println("\tPan Mini-Map Down:\t\tL");
+		System.out.println("\tPan Mini-Map Right:\t\tO");
+		System.out.println("\tMini-Map Zoom In:\t\t]");
+		System.out.println("\tMini-Map Zoom Out:\t\t[");
+		System.out.println("\tToggle World Axes Object:\t\t1");
+		System.out.println("\t");
 	}
 }

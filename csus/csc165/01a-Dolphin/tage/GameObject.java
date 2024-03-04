@@ -421,12 +421,10 @@ public class GameObject
 				forwardVec.y(),
 				forwardVec.z());
 		
-		// Compute new location's distance to camera
-		double distanceToCamera = (cameraLoc.sub(newLocation)).length();
 		// Allow move if:
 		// newLocation is in allowed range around origin and
-		// newLocation is in allowed range around camera.
-		if ((newLocation.length() < 10.4) && (distanceToCamera < 5.8))
+		// newLocation is in allowed area above ground plane.
+		if ((newLocation.length() < 10.4) && newLocation.y() >= -0.02f && newLocation.y() <= 0.5f)
 		{
 			this.setLocalLocation(newLocation);
 		}
