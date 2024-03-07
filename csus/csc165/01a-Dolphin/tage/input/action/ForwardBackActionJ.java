@@ -47,6 +47,7 @@ public class ForwardBackActionJ extends AbstractInputAction {
         speed = scale * time * advance_direction;
 
         dolph.moveForwardBack(speed, camera.getLocation());
+        // For A2 camera is always off dolphin
         if (game.onDolphinCam())
         {
             game.setOnDolphinCam();

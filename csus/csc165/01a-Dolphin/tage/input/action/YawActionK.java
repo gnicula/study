@@ -44,6 +44,7 @@ public class YawActionK extends AbstractInputAction {
         speed = scale * time * yaw_direction;
 
         dolph.yaw(speed);
+        // For A2 camera is always off dolphin
         if (game.onDolphinCam())
         {
             game.setOnDolphinCam();

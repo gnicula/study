@@ -31,8 +31,10 @@ public class StretchController extends NodeController {
         curScale = go.getLocalScale();
         float scaleAmt = 1.0f + direction * scaleRate * elapsedTime;
         if (!flipAxis) {
+            // scale on the x axis
             newScale.scaling(curScale.m00() * scaleAmt, curScale.m11(), curScale.m22());
         } else {
+            // scale on the z axis
             newScale.scaling(curScale.m00(), curScale.m11(), curScale.m22() * scaleAmt);
         }
         

@@ -46,6 +46,7 @@ public class RollActionK extends AbstractInputAction {
         speed = scale * time * roll_direction;
 
         dolph.roll(speed);
+        // For A2 camera is always off dolphin
         if (game.onDolphinCam())
         {
             game.setOnDolphinCam();

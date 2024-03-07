@@ -33,10 +33,11 @@ public class MyGame extends VariableFrameRateGame {
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, cub, torus, sphere, plane, groundPlane, wAxisX, wAxisY, wAxisZ, manual, magnet;
+	private GameObject dol, cub, torus, sphere, sphereSatellite, plane, groundPlane,
+			wAxisX, wAxisY, wAxisZ, manual, magnet;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
-			wAxisLineShapeZ, manualS, magnetS;
-	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, torusWater;
+			wAxisLineShapeZ, manualS, magnetS, imported;
+	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, torusWater, fur;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
@@ -71,6 +72,7 @@ public class MyGame extends VariableFrameRateGame {
 		groundPlaneS = new Plane();
 		manualS = new MyManualObject();
 		magnetS = new MyMagnetObject();
+		imported = new ImportedModel("capsule.obj", "assets/defaultAssets/");
 
 		float lineLength = 1.0f;
 		Vector3f worldOrigin = new Vector3f(0f, 0f, 0f);
@@ -96,6 +98,8 @@ public class MyGame extends VariableFrameRateGame {
 		water = new TextureImage("water.jpg");
 		// https://www.pexels.com/photo/aerial-shot-of-blue-water-3894157/
 		torusWater = new TextureImage("waterTorus.jpg");
+		// https://www.pexels.com/photo/brown-thick-fur-7232502/
+		fur = new TextureImage("fur1.jpg");
 	}
 
 	@Override
@@ -110,18 +114,27 @@ public class MyGame extends VariableFrameRateGame {
 		dol.setLocalScale(initialScale);
 
 		Matrix4f initialTranslationCub, initialScaleCub;
-		// build a brick at the right side of the window
+		// build a brick cube at the right side of the window
 		cub = new GameObject(GameObject.root(), cubS, brick);
 		initialTranslationCub = (new Matrix4f()).translation(4, 0.15f, -4);
 		initialScaleCub = (new Matrix4f()).scaling(0.25f);
 		cub.setLocalTranslation(initialTranslationCub);
 		cub.setLocalScale(initialScaleCub);
 
+		// A2 requirement - add a hierarchical relationship
+		GameObject cubSatellite = new GameObject(cub, imported, fur);
+		cubSatellite.getRenderStates().setTiling(1);
+		cubSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
+		cubSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
+		cubSatellite.propagateTranslation(true);
+		cubSatellite.propagateRotation(true);
+		cubSatellite.applyParentRotationToPosition(true);
+
 		Matrix4f initialTranslationTorus, initialScaleTorus;
-		// build a grass torus at the left side of the window
+		// build a watery torus at the left side of the window
 		torus = new GameObject(GameObject.root(), torusS, torusWater);
 		torus.getRenderStates().setTiling(1);
-		initialTranslationTorus = (new Matrix4f()).translation(-3, 0.11f, -4);
+		initialTranslationTorus = (new Matrix4f()).translation(-4, 0.11f, -4);
 		initialScaleTorus = (new Matrix4f()).scaling(0.5f);
 		torus.setLocalTranslation(initialTranslationTorus);
 		torus.setLocalScale(initialScaleTorus);
@@ -135,7 +148,7 @@ public class MyGame extends VariableFrameRateGame {
 		sphere.setLocalScale(initialScaleSphere);
 		// now create a example of a hierarchical relationship by adding 
 		// a smaller sphereSatellite to our sphere object.
-		GameObject sphereSatellite = new GameObject(sphere, sphereS, grass);
+		sphereSatellite = new GameObject(sphere, sphereS, grass);
 		sphereSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
 		sphereSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
 		sphereSatellite.propagateTranslation(true);
@@ -145,7 +158,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationPlane, initialScalePlane;
 		// build a plane textured at the left side of the window
 		plane = new GameObject(GameObject.root(), planeS, assignt);
-		initialTranslationPlane = (new Matrix4f()).translation(-3, .01f, 4);
+		initialTranslationPlane = (new Matrix4f()).translation(-4, .01f, 4);
 		initialScalePlane = (new Matrix4f()).scaling(0.75f);
 		plane.setLocalTranslation(initialTranslationPlane);
 		plane.setLocalScale(initialScalePlane);
@@ -153,7 +166,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationManual, initialScaleManual;
 		// build my manual object
 		manual = new GameObject(GameObject.root(), manualS, gold);
-		initialTranslationManual = (new Matrix4f()).translation(-4.5f, 2.0f, 0);
+		initialTranslationManual = (new Matrix4f()).translation(0, 1.75f, -4);
 		initialScaleManual = (new Matrix4f()).scaling(0.4f);
 		manual.setLocalTranslation(initialTranslationManual);
 		manual.setLocalScale(initialScaleManual);
@@ -166,6 +179,7 @@ public class MyGame extends VariableFrameRateGame {
 		initialScaleGround = (new Matrix4f()).scaling(6.0f);
 		// groundPlane.setLocalTranslation(initialTranslationManual);
 		groundPlane.setLocalScale(initialScaleGround);
+		groundPlane.getRenderStates().setTiling(1);
 		groundPlane.getRenderStates().hasLighting(true);
 		groundPlane.setIsTerrain(true);
 
@@ -204,7 +218,7 @@ public class MyGame extends VariableFrameRateGame {
 		rightVp.setBorderWidth(4);
 		rightVp.setBorderColor(0.0f, 1.0f, 0.0f);
 
-		myViewportCamera.setLocation(new Vector3f(0, 2, 0));
+		myViewportCamera.setLocation(new Vector3f(0, 5, 0));
 		myViewportCamera.setU(new Vector3f(1, 0, 0));
 		myViewportCamera.setV(new Vector3f(0, 0, -1));
 		myViewportCamera.setN(new Vector3f(0, -1, 0));
@@ -231,34 +245,42 @@ public class MyGame extends VariableFrameRateGame {
 
 		// ------------- positioning the camera -------------
 		myCamera = engine.getRenderSystem().getViewport("MAIN").getCamera();
-		myCamera.setLocation(new Vector3f(0, 0, 5.0f));
+		// myCamera.setLocation(new Vector3f(0, 0, 5.0f));
 
 		// CameraOrbit3D initialization
 		orbitController = new CameraOrbit3D(myCamera, dol, gamepadName, engine);
-		// Initialize our nodeControllers
-		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.01f);
+		
+		// Initialize our nodeControllers for each target object
+		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
 		rotController1.addTarget(cub);
 		controllerArr.add(rotController1);
-		NodeController stretchController1 = new StretchController(engine, 1.0f);
-		stretchController1.addTarget(torus);
-		controllerArr.add(stretchController1);
-		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.005f);
-		rotController2.addTarget(sphere);
+		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		rotController2.addTarget(torus);
 		controllerArr.add(rotController2);
-		NodeController stretchController2 = new StretchController(engine, 1.0f);
-		stretchController2.addTarget(plane);
-		controllerArr.add(stretchController2);
-
+		NodeController rotController3 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		rotController3.addTarget(sphere);
+		controllerArr.add(rotController3);
+		NodeController rotController4 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		rotController4.addTarget(plane);
+		controllerArr.add(rotController4);
+		// put all object node controllers in an array for indexed access
+		// when the objects are visited
 		for (NodeController n : controllerArr) {
 			(engine.getSceneGraph()).addNodeController(n);
 		}
+		// Initialize a second node controller (dual axis stretch) on the pyramid manual object
+		NodeController stretchController1 = new StretchController(engine, 2.5f);
+		stretchController1.addTarget(manual);
+		stretchController1.enable();
+		(engine.getSceneGraph()).addNodeController(stretchController1);
+
 
 		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
 		PitchActionK pitchDown = new PitchActionK(this, -0.0002f);
 		PitchActionJ pitchJ = new PitchActionJ(this);
-		ForwardBackActionK moveForward = new ForwardBackActionK(this, 0.0002f);
-		ForwardBackActionK moveBackward = new ForwardBackActionK(this, -0.0002f);
-		ForwardBackActionJ moveJ = new ForwardBackActionJ(this, 0.0002f);
+		ForwardBackActionK moveForward = new ForwardBackActionK(this, 0.0004f);
+		ForwardBackActionK moveBackward = new ForwardBackActionK(this, -0.0004f);
+		ForwardBackActionJ moveJ = new ForwardBackActionJ(this, 0.0004f);
 		YawActionK leftYaw = new YawActionK(this, 1);
 		YawActionK rightYaw = new YawActionK(this, -1);
 		YawActionJ XYaw = new YawActionJ(this);
@@ -386,11 +408,11 @@ public class MyGame extends VariableFrameRateGame {
 		float secondaryViewportAbsoluteBottom = engine.getRenderSystem().getViewport("RIGHT").getActualBottom();
 		// System.out.println("viewport2 actual bottom: " + secondaryViewportAbsoluteBottom);
 
-		hud1x = (int)(mainViewportAbsoluteLeft) + 10; // - WindowSizeX / 2);
+		hud1x = (int)(mainViewportAbsoluteLeft) + 10;
 		hud1y = 10;
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, hud1x, hud1y);
 
-		hud2x = (int)(secondaryViewportAbsoluteLeft) + 10; // - WindowSizeX / 2);
+		hud2x = (int)(secondaryViewportAbsoluteLeft) + 10;
 		hud2y = 10;
 		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, hud2x, hud2y);
 	}
@@ -441,6 +463,8 @@ public class MyGame extends VariableFrameRateGame {
 				(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 0));
 				offDolphinCam = true;
 				break;
+			// Assignment A2, disable on/off dolphin Camera setting
+			// Camera is now an OrbitController3D and is always off dolphin
 			// case KeyEvent.VK_SPACE:
 			// 	if (offDolphinCam) {
 			// 		setOnDolphinCam();
@@ -460,10 +484,12 @@ public class MyGame extends VariableFrameRateGame {
 		return myViewportCamera;
 	}
 
+	// For A2 this should always return false.
 	public boolean onDolphinCam() {
 		return !offDolphinCam;
 	}
 
+	// No calls are made to this method for A2
 	public void setOnDolphinCam() {
 		float hopOnDistance = -1.75f;
 		float upDistance = 0.5f;
@@ -480,6 +506,7 @@ public class MyGame extends VariableFrameRateGame {
 		offDolphinCam = false;
 	}
 
+	// No calls are made to this method for A2
 	public void setOffDolphinCam() {
 		float hopOffDistance = -2.0f;
 		float upDistance = 1.0f;
@@ -510,8 +537,8 @@ public class MyGame extends VariableFrameRateGame {
 		magnet.applyParentRotationToPosition(true);
 		initialRotationMagnet = (new Matrix4f()).rotate(90.0f, new Vector3f(0.0f, 1.0f, 0.0f));
 		initialTranslationMagnet = (new Matrix4f()).translation(
-				0.0f, 0.02f, -(n_magnet * 0.035f + 0.35f));
-		initialScaleMagnet = (new Matrix4f()).scaling(0.05f);
+				0.0f, 0.02f - n_magnet* 0.01f, -(n_magnet * 0.04f + 0.4f));
+		initialScaleMagnet = (new Matrix4f()).scaling(0.075f);
 		magnet.setLocalRotation(initialRotationMagnet);
 		magnet.setLocalTranslation(initialTranslationMagnet);
 		magnet.setLocalScale(initialScaleMagnet);
@@ -570,6 +597,9 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	private void printControls() {
+		System.out.println("****************************************");
+		System.out.println("Gabriele Nicula, CSC 165 - Assignment #2");
+		System.out.println("****************************************\n");
 		System.out.println("**************************");
 		System.out.println("Gamepad and Key Bindings:");
 		System.out.println("**************************\n");

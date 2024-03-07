@@ -22,7 +22,7 @@ public class CameraOrbit3D {
         avatar = av;
         cameraAzimuth = 0.0f; // start BEHIND and ABOVE the target
         cameraElevation = 20.0f; // elevation is in degrees
-        cameraRadius = 2.0f; // distance from camera to avatar
+        cameraRadius = 3.5f; // distance from camera to avatar
         setupInputs(gpName);
         updateCameraPosition();
     }
@@ -96,6 +96,7 @@ public class CameraOrbit3D {
                 }
             }
             cameraElevation += elevAmount * time;
+            // Limit camera to not go over the object on the other side
             if (cameraElevation >= 90) {
                 cameraElevation = 89;
             } else if (cameraElevation <= -90) {
@@ -115,6 +116,7 @@ public class CameraOrbit3D {
         public void performAction(float time, Event event) {
             float zoomSpeed = time * factor;
             cameraRadius += zoomSpeed;
+            // Limit zoom in to near center of the object
             if (cameraRadius <= 0.1f) {
                 cameraRadius = 0.1f;
             }

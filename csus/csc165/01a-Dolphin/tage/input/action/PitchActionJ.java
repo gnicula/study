@@ -45,6 +45,7 @@ public class PitchActionJ extends AbstractInputAction {
         speed = scale * time * turn_direction;
 
         dolph.pitch(speed);
+        // For A2 camera is always off dolphin
         if (game.onDolphinCam())
         {
             game.setOnDolphinCam();
