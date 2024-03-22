@@ -57,7 +57,7 @@ nav, article, footer {
 
 nav {
   height: 32px;
-  background-color: #3633ee;
+  background-color: #878080;
   display: flex;
   margin-bottom: 15px;
 }
@@ -119,5 +119,6 @@ article {
 }
 
 footer {
+  background: #878080;
   margin-top: 10px;
 }
