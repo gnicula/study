@@ -32,12 +32,13 @@ public class MyGame extends VariableFrameRateGame {
 	private int counter = 0;
 	private int frameCounter = 0;
 	private double lastFrameTime, currFrameTime, elapsTime;
-
+	private ArrayList<GameObject> movingObjects = new ArrayList<GameObject>();
 	private GameObject dol, cub, torus, sphere, sphereSatellite, plane, groundPlane,
 			wAxisX, wAxisY, wAxisZ, manual, magnet;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
 			wAxisLineShapeZ, manualS, magnetS, imported;
-	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, torusWater, fur;
+	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, 
+			torusWater, fur, terrainTexture, terrainHeightMap;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
@@ -69,7 +70,8 @@ public class MyGame extends VariableFrameRateGame {
 		torusS = new Torus();
 		sphereS = new Sphere();
 		planeS = new Plane();
-		groundPlaneS = new Plane();
+		// groundPlaneS = new Plane();
+		groundPlaneS = new TerrainPlane(1000);
 		manualS = new MyManualObject();
 		magnetS = new MyMagnetObject();
 		imported = new ImportedModel("capsule.obj", "assets/defaultAssets/");
@@ -95,7 +97,9 @@ public class MyGame extends VariableFrameRateGame {
 		gold = new TextureImage("gold1.jpg");
 		metal = new TextureImage("magnet1.jpg");
 		// https://www.pexels.com/photo/body-of-water-261403/
-		water = new TextureImage("water.jpg");
+		// water = new TextureImage("water.jpg");
+		terrainTexture = new TextureImage("moon-craters.jpg");
+		terrainHeightMap = new TextureImage("terrain-map.png");
 		// https://www.pexels.com/photo/aerial-shot-of-blue-water-3894157/
 		torusWater = new TextureImage("waterTorus.jpg");
 		// https://www.pexels.com/photo/brown-thick-fur-7232502/
@@ -174,13 +178,14 @@ public class MyGame extends VariableFrameRateGame {
 
 		Matrix4f initialTranslationGround, initialScaleGround;
 		// build the ground plane on X-Z
-		groundPlane = new GameObject(GameObject.root(), groundPlaneS, water);
+		groundPlane = new GameObject(GameObject.root(), groundPlaneS, terrainTexture);
+		// groundPlane.setHeightMap(terrainHeightMap);
 		// initialTranslationGround = (new Matrix4f()).translation(-4.5f, 2, 0);
-		initialScaleGround = (new Matrix4f()).scaling(6.0f);
+		initialScaleGround = (new Matrix4f()).scaling(1.0f);
 		// groundPlane.setLocalTranslation(initialTranslationManual);
 		groundPlane.setLocalScale(initialScaleGround);
-		groundPlane.getRenderStates().setTiling(1);
-		groundPlane.getRenderStates().hasLighting(true);
+		// groundPlane.getRenderStates().setTiling(1);
+		// groundPlane.getRenderStates().hasLighting(true);
 		groundPlane.setIsTerrain(true);
 
 		// Build World Axis Lines (X, Y, Z) in the center of the window
@@ -295,6 +300,9 @@ public class MyGame extends VariableFrameRateGame {
 		SecondaryViewportPanYActionK panUp = new SecondaryViewportPanYActionK(this, -0.0004f);
 		SecondaryViewportPanYActionK panDown = new SecondaryViewportPanYActionK(this, 0.0004f);
 
+		// A3 New Actions
+		FireMissileActionK fireMissile = new FireMissileActionK(this, 0.0005f);
+
 		// Bind keyboard keys W, S, A, D, Q, E, UP, DOWN to their actions
 		inputManager.associateActionWithAllKeyboards(
 				net.java.games.input.Component.Identifier.Key.UP,
@@ -359,6 +367,12 @@ public class MyGame extends VariableFrameRateGame {
 				net.java.games.input.Component.Identifier.Key.L,
 				panDown,
 				InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		// A3 New Actions
+		inputManager.associateActionWithAllKeyboards(
+				net.java.games.input.Component.Identifier.Key.SPACE, 
+				fireMissile, 
+				InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 
 		// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(
@@ -426,8 +440,10 @@ public class MyGame extends VariableFrameRateGame {
 		}
 
 		arrangeHUD();
-		inputManager.update(getFramesPerSecond());
+		float elapsedFramesPerSecond = getFramesPerSecond();
+		inputManager.update(elapsedFramesPerSecond);
 		orbitController.updateCameraPosition();
+		updateMovingObjects(elapsedFramesPerSecond);
 		updateDolphinScore();
 		toggleNodeControllers();
 		frameCounter++;
@@ -596,9 +612,33 @@ public class MyGame extends VariableFrameRateGame {
 		}
 	}
 
+	public void fireMissile(float speed) {
+		GameObject missileObject = new GameObject(GameObject.root(), imported, metal);
+		// missileObject.setParent(GameObject.root());
+		Vector3f dolLocation = dol.getWorldLocation();
+		Vector3f dolDirection = dol.getLocalForwardVector();
+
+		Matrix4f initialTranslation = (new Matrix4f()).translation(dolLocation.x(), dolLocation.y(), dolLocation.z());
+		Matrix4f initialScale = (new Matrix4f()).scaling(0.1f);
+		missileObject.setLocalTranslation(initialTranslation);
+		missileObject.setLocalScale(initialScale);
+
+		// missileObject.setLocation(dol.getWorldLocation());
+		missileObject.setLocalRotation(dol.getLocalRotation());
+		// missileObject.lookAt(dolDirection.x(), dolDirection.y(), dolDirection.z());
+		movingObjects.add(missileObject);
+	}
+
+	private void updateMovingObjects(float elapsedFramesPerSecond) {
+		for (GameObject go : movingObjects) {
+			go.moveForwardBack(0.001f*elapsedFramesPerSecond, new Vector3f());
+			// TODO: Check if out of boundary and remove object
+		} 
+	}
+
 	private void printControls() {
 		System.out.println("****************************************");
-		System.out.println("Gabriele Nicula, CSC 165 - Assignment #2");
+		System.out.println("Gabriele Nicula, CSC 165 - Assignment #3");
 		System.out.println("****************************************\n");
 		System.out.println("**************************");
 		System.out.println("Gamepad and Key Bindings:");
