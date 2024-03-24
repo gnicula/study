@@ -8,12 +8,15 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.InputManager; // input management
 import tage.input.action.*;
+import tage.networking.IGameConnection.ProtocolType;
 import tage.nodeControllers.RotationController;
 import tage.nodeControllers.StretchController;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
 import java.lang.Math;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -21,6 +24,9 @@ import javax.swing.*;
 
 import org.joml.*;
 
+import a2.client.GhostAvatar;
+import a2.client.GhostManager;
+import a2.client.ProtocolClient;
 
 public class MyGame extends VariableFrameRateGame {
 	private static Engine engine;
@@ -49,15 +55,30 @@ public class MyGame extends VariableFrameRateGame {
 	private Vector3f up; // v-vector/y-axis
 	private Vector3f right; // u-vector/x-axis
 
+	private GhostManager gm;
+	private String serverAddress;
+	private int serverPort;
+	private ProtocolType serverProtocol;
+	private ProtocolClient protClient;
+	private boolean isClientConnected = false;
+
 	private final int WindowSizeX = 2000;
 	private final int WindowSizeY = 1000;
 
-	public MyGame() {
-		super();
+	
+	public MyGame(String serverAddress, int serverPort, String protocol)
+	{	super();
+		gm = new GhostManager(this);
+		this.serverAddress = serverAddress;
+		this.serverPort = serverPort;
+		if (protocol.toUpperCase().compareTo("TCP") == 0)
+			this.serverProtocol = ProtocolType.TCP;
+		else
+			this.serverProtocol = ProtocolType.UDP;
 	}
 
 	public static void main(String[] args) {
-		MyGame game = new MyGame();
+		MyGame game = new MyGame(args[0], Integer.parseInt(args[1]), args[2]);
 		engine = new Engine(game);
 		game.initializeSystem();
 		game.game_loop();
@@ -391,6 +412,8 @@ public class MyGame extends VariableFrameRateGame {
 				net.java.games.input.Component.Identifier.Axis.Y,
 				moveJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
+		
+		setupNetworking();
 		printControls();
 	}
 
@@ -446,6 +469,9 @@ public class MyGame extends VariableFrameRateGame {
 		updateMovingObjects(elapsedFramesPerSecond);
 		updateDolphinScore();
 		toggleNodeControllers();
+		protClient.sendRotationMessage(dol.getWorldRotation());
+		// protClient.sendMoveMessage(dol.getWorldLocation()); //TODO optimiz?e this message
+		processNetworking((float)elapsTime);
 		frameCounter++;
 	}
 
@@ -634,6 +660,55 @@ public class MyGame extends VariableFrameRateGame {
 			go.moveForwardBack(0.001f*elapsedFramesPerSecond, new Vector3f());
 			// TODO: Check if out of boundary and remove object
 		} 
+	}
+
+	// ---------- NETWORKING SECTION ----------------
+
+	public ObjShape getGhostShape() { return dolS; }
+	public TextureImage getGhostTexture() { return doltx; }
+	public GhostManager getGhostManager() { return gm; }
+	public Engine getEngine() { return engine; }
+	
+	private void setupNetworking()
+	{	isClientConnected = false;	
+		try 
+		{	protClient = new ProtocolClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
+		} 	catch (UnknownHostException e) 
+		{	e.printStackTrace();
+		}	catch (IOException e) 
+		{	e.printStackTrace();
+		}
+		if (protClient == null)
+		{	System.out.println("missing protocol host");
+		}
+		else
+		{	// Send the initial join message with a unique identifier for this client
+			System.out.println("sending join message to protocol host");
+			protClient.sendJoinMessage();
+		}
+	}
+	
+	protected void processNetworking(float elapsTime)
+	{	// Process packets received by the client from the server
+		if (protClient != null)
+			protClient.processPackets();
+	}
+
+	public Vector3f getPlayerPosition() { return dol.getWorldLocation(); }
+
+	public void setIsConnected(boolean value) { this.isClientConnected = value; }
+	
+	private class SendCloseConnectionPacketAction extends AbstractInputAction
+	{	@Override
+		public void performAction(float time, net.java.games.input.Event evt) 
+		{	if(protClient != null && isClientConnected == true)
+			{	protClient.sendByeMessage();
+			}
+		}
+	}
+
+	public void updateGhost(GameObject go) {
+		protClient.sendMoveMessage(go.getWorldLocation());
 	}
 
 	private void printControls() {

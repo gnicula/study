@@ -14,3 +14,5 @@ del .\tage\physics\JBullet\*.class
 del .\tage\rml\*.class
 del .\tage\shapes\*.class
 del .\a2\*.class
+del .\a2\client\*.class
+del .\Server\*.class
