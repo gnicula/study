@@ -424,17 +424,21 @@ public class GameObject
 		// Allow move if:
 		// newLocation is in allowed range around origin and
 		// newLocation is in allowed area above ground plane.
-		if ((newLocation.length() < 9.0f) ) {
-			if (newLocation.y() >= -0.02f && newLocation.y() <= 2.0f) {
-				this.setLocalLocation(newLocation);
-			} else {
-				if (newLocation.y() <= -0.02f) {
-					this.setLocalLocation(new Vector3f(newLocation.x(), -0.02f, newLocation.z()));
-				} else {
-					this.setLocalLocation(new Vector3f(newLocation.x(), 2.0f, newLocation.z()));
-				}
-			}
-		}
+
+		// if ((newLocation.length() < 9.0f) ) {
+		// 	if (newLocation.y() >= -0.02f && newLocation.y() <= 2.0f) {
+		// 		this.setLocalLocation(newLocation);
+		// 	} else {
+		// 		if (newLocation.y() <= -0.02f) {
+		// 			this.setLocalLocation(new Vector3f(newLocation.x(), -0.02f, newLocation.z()));
+		// 		} else {
+		// 			this.setLocalLocation(new Vector3f(newLocation.x(), 2.0f, newLocation.z()));
+		// 		}
+		// 	}
+		// }
+
+		// Unrestricted move
+		this.setLocalLocation(newLocation);
 	}
 
 	/**

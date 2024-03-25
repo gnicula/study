@@ -42,9 +42,9 @@ public class MyGame extends VariableFrameRateGame {
 	private GameObject dol, cub, torus, sphere, sphereSatellite, plane, groundPlane,
 			wAxisX, wAxisY, wAxisZ, manual, magnet;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
-			wAxisLineShapeZ, manualS, magnetS, imported;
+			wAxisLineShapeZ, manualS, magnetS, imported, worldObj;
 	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, 
-			torusWater, fur, terrainTexture, terrainHeightMap;
+			torusWater, fur, terrainTexture, terrainHeightMap, canopy, metalHull;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
@@ -86,12 +86,13 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadShapes() {
-		dolS = new ImportedModel("dolphinHighPoly.obj");
+		dolS = new ImportedModel("ship.obj");
 		cubS = new Cube();
 		torusS = new Torus();
 		sphereS = new Sphere();
 		planeS = new Plane();
 		// groundPlaneS = new Plane();
+		// worldObj = new ImportedModel("terrain.obj");
 		groundPlaneS = new TerrainPlane(1000);
 		manualS = new MyManualObject();
 		magnetS = new MyMagnetObject();
@@ -110,7 +111,8 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadTextures() {
-		doltx = new TextureImage("Dolphin_HighPolyUV.png");
+		canopy = new TextureImage("Glass_Col.png"); 
+		doltx = new TextureImage("Plating_Col_A.png");
 		brick = new TextureImage("brick1.jpg");
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
@@ -119,8 +121,8 @@ public class MyGame extends VariableFrameRateGame {
 		metal = new TextureImage("magnet1.jpg");
 		// https://www.pexels.com/photo/body-of-water-261403/
 		// water = new TextureImage("water.jpg");
-		terrainTexture = new TextureImage("moon-craters.jpg");
-		terrainHeightMap = new TextureImage("terrain-map.png");
+		terrainTexture = new TextureImage("snowmap.png");
+		terrainHeightMap = new TextureImage("snowmapheight.png");
 		// https://www.pexels.com/photo/aerial-shot-of-blue-water-3894157/
 		torusWater = new TextureImage("waterTorus.jpg");
 		// https://www.pexels.com/photo/brown-thick-fur-7232502/
@@ -133,8 +135,9 @@ public class MyGame extends VariableFrameRateGame {
 
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
+		dol.setTextureImage(canopy);
 		initialTranslation = (new Matrix4f()).translation(0, 0.2f, 0);
-		initialScale = (new Matrix4f()).scaling(0.75f);
+		initialScale = (new Matrix4f()).scaling(0.3f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
 
@@ -200,14 +203,16 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslationGround, initialScaleGround;
 		// build the ground plane on X-Z
 		groundPlane = new GameObject(GameObject.root(), groundPlaneS, terrainTexture);
-		// groundPlane.setHeightMap(terrainHeightMap);
-		// initialTranslationGround = (new Matrix4f()).translation(-4.5f, 2, 0);
-		initialScaleGround = (new Matrix4f()).scaling(1.0f);
-		// groundPlane.setLocalTranslation(initialTranslationManual);
+		groundPlane.setHeightMap(terrainHeightMap);
+		initialScaleGround = (new Matrix4f()).scaling(10.0f);
 		groundPlane.setLocalScale(initialScaleGround);
+		// initialTranslationGround = (new Matrix4f()).translation(0, 0, 0.0f);
+		// groundPlane.setLocalTranslation(initialTranslationManual);
+		groundPlane.setIsTerrain(true);
+
 		// groundPlane.getRenderStates().setTiling(1);
 		// groundPlane.getRenderStates().hasLighting(true);
-		groundPlane.setIsTerrain(true);
+	
 
 		// Build World Axis Lines (X, Y, Z) in the center of the window
 		wAxisX = new GameObject(GameObject.root(), wAxisLineShapeX);
@@ -473,6 +478,8 @@ public class MyGame extends VariableFrameRateGame {
 		// protClient.sendMoveMessage(dol.getWorldLocation()); //TODO optimiz?e this message
 		processNetworking((float)elapsTime);
 		frameCounter++;
+		// float heightOffset = groundPlane.getHeight(0, 0);
+		// System.out.println("height offset: " + heightOffset);
 	}
 
 	@Override
@@ -662,6 +669,11 @@ public class MyGame extends VariableFrameRateGame {
 		} 
 	}
 
+	public void setAvatarHeightAtLocation() {
+		Vector3f loc = dol.getWorldLocation();
+		float height = groundPlane.getHeight(loc.x(), loc.z());
+		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+	}
 	// ---------- NETWORKING SECTION ----------------
 
 	public ObjShape getGhostShape() { return dolS; }
