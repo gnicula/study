@@ -6,6 +6,24 @@ import net.java.games.input.Event;
 import tage.input.*;
 import tage.input.action.*;
 
+
+/**
+* CameraOrbit3D is a moveable Camera around a given GameObject.
+* <br>
+* It holds references to the: Engine, Camera being controlled, GameObject
+* and its azimuth, elevation, and its distance to the Camera.
+* <ul>
+* <li> Engine
+* <li> Camera being controlled
+* <li> GameObject and its azimuth, elevation, and its distance to the Camera.
+* </ul>
+* <p>
+* Each CameraOrbit3D object is associated with a GameObject and its always facing that GameObject.
+* Camera can be moved in a circular fashion up/down and left/right around the object.
+* Camera can be zoomed in/out of the object.
+* @author Gabriele Nicula
+*/
+
 public class CameraOrbit3D {
     private Engine engine;
     private Camera camera; // the camera being controlled
@@ -15,6 +33,7 @@ public class CameraOrbit3D {
     private float cameraRadius; // distance between camera and target
     private static final float SMOOTHNESS_FACTOR = 0.005f;
 
+    /** instantiates a CameraOrbit3D with a Camera object, GameObject, String name, and Engine*/
     public CameraOrbit3D(Camera cam, GameObject av,
             String gpName, Engine e) {
         engine = e;
@@ -25,8 +44,9 @@ public class CameraOrbit3D {
         cameraRadius = 3.5f; // distance from camera to avatar
         setupInputs(gpName);
         updateCameraPosition();
-    }
+    } 
 
+    /** Associates named controller gp axis rx/ry and buttons 2/3 with azimuth, elevate, and zoom camera controls. */
     private void setupInputs(String gp) {
         OrbitAzimuthAction azmAction = new OrbitAzimuthAction();
         OrbitElevationAction elevAction = new OrbitElevationAction();
@@ -47,9 +67,11 @@ public class CameraOrbit3D {
                 InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
     }
 
-    // Compute the camera’s azimuth, elevation, and distance, relative to
-    // the target in spherical coordinates, then convert to world Cartesian
-    // coordinates and set the camera position from that.
+    /** 
+     * Compute the camera’s azimuth, elevation, and distance, relative to
+     * the target in spherical coordinates, then convert to world Cartesian
+     * coordinates and set the camera position from that.
+     */
     public void updateCameraPosition() {
         Vector3f avatarRot = avatar.getWorldForwardVector();
         double avatarAngle = Math.toDegrees((double)
@@ -64,7 +86,13 @@ public class CameraOrbit3D {
             Vector3f(x,y,z).add(avatar.getWorldLocation()));
         camera.lookAt(avatar);
     }
-
+    
+    /** Adds a box physics object in the physics world, with specified mass, matrix transform, and size.
+	*  <br>
+	*  The transform is a 4x4 homogeneous matrix, stored in an array of type double, which should only contain translation and/or rotation.<br>
+	*  The size is specified using a 3-element array of type double, with desired dimensions in X, Y, and Z.<br>
+	*  Also adds a corresponding renderable object if displaying the physics world has been enabled.
+	*/
     private class OrbitAzimuthAction extends AbstractInputAction {
         public void performAction(float time, Event event) {
             float rotAmount;
@@ -83,6 +111,7 @@ public class CameraOrbit3D {
         }
     }
 
+    /** Implements a TAGE AbstractInputAction which changes the elevation of the CameraOrbit3D Object. */
     private class OrbitElevationAction extends AbstractInputAction {
         public void performAction(float time, Event event) {
             float elevAmount;
@@ -105,7 +134,7 @@ public class CameraOrbit3D {
             updateCameraPosition();
         }
     }
-
+    /** Implements a TAGE AbstractInputAction which zooms the CameraOrbit3D object in and out from the GameObject */
     private class OrbitZoomAction extends AbstractInputAction {
         private float factor;
 

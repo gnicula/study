@@ -37,14 +37,15 @@ public class MyGame extends VariableFrameRateGame {
 	private boolean[] visitedSites = new boolean[4]; // default initialized to false
 	private int counter = 0;
 	private int frameCounter = 0;
+	private int skyBoxID;
 	private double lastFrameTime, currFrameTime, elapsTime;
 	private ArrayList<GameObject> movingObjects = new ArrayList<GameObject>();
 	private GameObject dol, cub, torus, sphere, sphereSatellite, plane, groundPlane,
-			wAxisX, wAxisY, wAxisZ, manual, magnet;
+			wAxisX, wAxisY, wAxisZ, manual, magnet, animSoldier;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
-			wAxisLineShapeZ, manualS, magnetS, imported, worldObj;
+			wAxisLineShapeZ, manualS, magnetS, imported, worldObj, animSoldierS;
 	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, 
-			torusWater, fur, terrainTexture, terrainHeightMap, canopy, metalHull;
+			torusWater, fur, terrainTexture, terrainHeightMap;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
@@ -85,8 +86,17 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	@Override
+	public void loadSkyBoxes() {
+		skyBoxID = (engine.getSceneGraph()).loadCubeMap("daylightSky");
+		(engine.getSceneGraph()).setActiveSkyBoxTexture(skyBoxID);
+		(engine.getSceneGraph()).setSkyBoxEnabled(true);
+	}
+
+	@Override
 	public void loadShapes() {
-		dolS = new ImportedModel("ship.obj");
+		// dolS = new ImportedModel("f15.obj");
+		dolS = new AnimatedShape("drone1.rkm", "drone.rks");
+		((AnimatedShape)dolS).loadAnimation("WALK", "drone_prop.rka");
 		cubS = new Cube();
 		torusS = new Torus();
 		sphereS = new Sphere();
@@ -111,8 +121,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadTextures() {
-		canopy = new TextureImage("Glass_Col.png"); 
-		doltx = new TextureImage("Plating_Col_A.png");
+		doltx = new TextureImage("F15A.jpg");
 		brick = new TextureImage("brick1.jpg");
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
@@ -134,10 +143,9 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslation, initialScale;
 
 		// build dolphin in the center of the window
-		dol = new GameObject(GameObject.root(), dolS, doltx);
-		dol.setTextureImage(canopy);
-		initialTranslation = (new Matrix4f()).translation(0, 0.2f, 0);
-		initialScale = (new Matrix4f()).scaling(0.3f);
+		dol = new GameObject(GameObject.root(), dolS, brick);
+		initialTranslation = (new Matrix4f()).translation(0, 0.5f, 0);
+		initialScale = (new Matrix4f()).scaling(0.02f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
 
@@ -420,6 +428,7 @@ public class MyGame extends VariableFrameRateGame {
 		
 		setupNetworking();
 		printControls();
+		((AnimatedShape)dolS).playAnimation("WALK", 0.5f, AnimatedShape.EndType.LOOP, 0);
 	}
 
 	private float getFramesPerSecond() {
@@ -472,6 +481,7 @@ public class MyGame extends VariableFrameRateGame {
 		inputManager.update(elapsedFramesPerSecond);
 		orbitController.updateCameraPosition();
 		updateMovingObjects(elapsedFramesPerSecond);
+		((AnimatedShape)dolS).updateAnimation();
 		updateDolphinScore();
 		toggleNodeControllers();
 		protClient.sendRotationMessage(dol.getWorldRotation());

@@ -42,7 +42,7 @@ public class ForwardBackActionK extends AbstractInputAction {
         speed = direction_and_scale * time;
 
         dolph.moveForwardBack(speed, camera.getLocation());
-        game.setAvatarHeightAtLocation();
+        // game.setAvatarHeightAtLocation();
         game.updateGhost(dolph);
         // For A2 camera is always off dolphin
         if (game.onDolphinCam())
