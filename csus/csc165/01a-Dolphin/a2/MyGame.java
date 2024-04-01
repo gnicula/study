@@ -14,6 +14,7 @@ import tage.nodeControllers.StretchController;
 import net.java.games.input.Controller;
 
 import java.util.ArrayList;
+import java.util.ListIterator;
 import java.lang.Math;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -36,11 +37,13 @@ public class MyGame extends VariableFrameRateGame {
 	private boolean axesRenderState = true;
 	private boolean[] visitedSites = new boolean[4]; // default initialized to false
 	private int counter = 0;
+	private int gameOver = 0;
 	private int frameCounter = 0;
 	private int skyBoxID;
 	private double lastFrameTime, currFrameTime, elapsTime;
 	private ArrayList<GameObject> movingObjects = new ArrayList<GameObject>();
-	private GameObject dol, cub, torus, sphere, sphereSatellite, plane, groundPlane,
+	private ArrayList<GameObject> movingEnemies = new ArrayList<GameObject>();
+	private GameObject dol, base, torus, sphere, sphereSatellite, plane, groundPlane,
 			wAxisX, wAxisY, wAxisZ, manual, magnet, animSoldier;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
 			wAxisLineShapeZ, manualS, magnetS, imported, worldObj, animSoldierS;
@@ -94,13 +97,13 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadShapes() {
-		// dolS = new ImportedModel("f15.obj");
-		dolS = new AnimatedShape("drone1.rkm", "drone.rks");
-		((AnimatedShape)dolS).loadAnimation("WALK", "drone_prop.rka");
+		dolS = new ImportedModel("f15.obj");
+		// dolS = new AnimatedShape("drone.rkm", "drone.rks");
+		// ((AnimatedShape)dolS).loadAnimation("WALK", "drone_flying.rka");
 		cubS = new Cube();
-		torusS = new Torus();
+		// torusS = new Torus();
 		sphereS = new Sphere();
-		planeS = new Plane();
+		// planeS = new Plane();
 		// groundPlaneS = new Plane();
 		// worldObj = new ImportedModel("terrain.obj");
 		groundPlaneS = new TerrainPlane(1000);
@@ -138,89 +141,101 @@ public class MyGame extends VariableFrameRateGame {
 		fur = new TextureImage("fur1.jpg");
 	}
 
+	private void buildEnemyObjects(int numEnemies) {
+		Matrix4f initialTranslation, initialScale;
+		for (int i = 0; i < numEnemies; ++i) {
+			GameObject enemy = new GameObject(GameObject.root(), sphereS, gold);
+			double ranAngle = Math.random() * 360;
+			float ranX = (float)Math.cos(ranAngle) * 30.0f;
+			float ranZ = (float)Math.sin(ranAngle) * 30.0f;
+			initialScale = (new Matrix4f()).scale(0.5f);
+			enemy.setLocalScale(initialScale);
+			initialTranslation = (new Matrix4f()).translation(ranX, 0, ranZ);
+			enemy.setLocalTranslation(initialTranslation);
+			movingEnemies.add(enemy);
+		}
+	}
+
 	@Override
 	public void buildObjects() {
+		// Local temporaries for building objects
 		Matrix4f initialTranslation, initialScale;
 
-		// build dolphin in the center of the window
-		dol = new GameObject(GameObject.root(), dolS, brick);
-		initialTranslation = (new Matrix4f()).translation(0, 0.5f, 0);
-		initialScale = (new Matrix4f()).scaling(0.02f);
-		dol.setLocalTranslation(initialTranslation);
-		dol.setLocalScale(initialScale);
-
-		Matrix4f initialTranslationCub, initialScaleCub;
-		// build a brick cube at the right side of the window
-		cub = new GameObject(GameObject.root(), cubS, brick);
-		initialTranslationCub = (new Matrix4f()).translation(4, 0.15f, -4);
-		initialScaleCub = (new Matrix4f()).scaling(0.25f);
-		cub.setLocalTranslation(initialTranslationCub);
-		cub.setLocalScale(initialScaleCub);
-
-		// A2 requirement - add a hierarchical relationship
-		GameObject cubSatellite = new GameObject(cub, imported, fur);
-		cubSatellite.getRenderStates().setTiling(1);
-		cubSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
-		cubSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
-		cubSatellite.propagateTranslation(true);
-		cubSatellite.propagateRotation(true);
-		cubSatellite.applyParentRotationToPosition(true);
-
-		Matrix4f initialTranslationTorus, initialScaleTorus;
-		// build a watery torus at the left side of the window
-		torus = new GameObject(GameObject.root(), torusS, torusWater);
-		torus.getRenderStates().setTiling(1);
-		initialTranslationTorus = (new Matrix4f()).translation(-4, 0.11f, -4);
-		initialScaleTorus = (new Matrix4f()).scaling(0.5f);
-		torus.setLocalTranslation(initialTranslationTorus);
-		torus.setLocalScale(initialScaleTorus);
-
-		Matrix4f initialTranslationSphere, initialScaleSphere;
-		// build a sphere logo textured at the right side of the window
-		sphere = new GameObject(GameObject.root(), sphereS, corvette);
-		initialTranslationSphere = (new Matrix4f()).translation(4, 0.2f, 4);
-		initialScaleSphere = (new Matrix4f()).scaling(0.5f);
-		sphere.setLocalTranslation(initialTranslationSphere);
-		sphere.setLocalScale(initialScaleSphere);
-		// now create a example of a hierarchical relationship by adding 
-		// a smaller sphereSatellite to our sphere object.
-		sphereSatellite = new GameObject(sphere, sphereS, grass);
-		sphereSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
-		sphereSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
-		sphereSatellite.propagateTranslation(true);
-		sphereSatellite.propagateRotation(true);
-		sphereSatellite.applyParentRotationToPosition(true);
-
-		Matrix4f initialTranslationPlane, initialScalePlane;
-		// build a plane textured at the left side of the window
-		plane = new GameObject(GameObject.root(), planeS, assignt);
-		initialTranslationPlane = (new Matrix4f()).translation(-4, .01f, 4);
-		initialScalePlane = (new Matrix4f()).scaling(0.75f);
-		plane.setLocalTranslation(initialTranslationPlane);
-		plane.setLocalScale(initialScalePlane);
-
-		Matrix4f initialTranslationManual, initialScaleManual;
-		// build my manual object
-		manual = new GameObject(GameObject.root(), manualS, gold);
-		initialTranslationManual = (new Matrix4f()).translation(0, 1.75f, -4);
-		initialScaleManual = (new Matrix4f()).scaling(0.4f);
-		manual.setLocalTranslation(initialTranslationManual);
-		manual.setLocalScale(initialScaleManual);
-		manual.getRenderStates().hasLighting(true);
-
-		Matrix4f initialTranslationGround, initialScaleGround;
 		// build the ground plane on X-Z
 		groundPlane = new GameObject(GameObject.root(), groundPlaneS, terrainTexture);
 		groundPlane.setHeightMap(terrainHeightMap);
-		initialScaleGround = (new Matrix4f()).scaling(10.0f);
-		groundPlane.setLocalScale(initialScaleGround);
+		initialScale = (new Matrix4f()).scaling(40.0f);
+		groundPlane.setLocalScale(initialScale);
 		// initialTranslationGround = (new Matrix4f()).translation(0, 0, 0.0f);
 		// groundPlane.setLocalTranslation(initialTranslationManual);
 		groundPlane.setIsTerrain(true);
 
 		// groundPlane.getRenderStates().setTiling(1);
 		// groundPlane.getRenderStates().hasLighting(true);
-	
+
+		// build dolphin in the center of the window
+		dol = new GameObject(GameObject.root(), dolS, doltx);
+		initialTranslation = (new Matrix4f()).translation(0, 15.0f, 0);
+		initialScale = (new Matrix4f()).scaling(0.05f);
+		dol.setLocalTranslation(initialTranslation);
+		dol.setLocalScale(initialScale);
+
+		// build our base at the center of the map.
+		base = new GameObject(GameObject.root(), cubS, brick);
+		initialTranslation = (new Matrix4f()).translation(0, 12.12f, 0);
+		initialScale = (new Matrix4f()).scaling(0.25f);
+		base.setLocalTranslation(initialTranslation);
+		base.setLocalScale(initialScale);
+
+		// A2 requirement - add a hierarchical relationship
+		// GameObject cubSatellite = new GameObject(cub, imported, fur);
+		// cubSatellite.getRenderStates().setTiling(1);
+		// cubSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
+		// cubSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
+		// cubSatellite.propagateTranslation(true);
+		// cubSatellite.propagateRotation(true);
+		// cubSatellite.applyParentRotationToPosition(true);
+
+		// build a watery torus at the left side of the window
+		// torus = new GameObject(GameObject.root(), torusS, torusWater);
+		// torus.getRenderStates().setTiling(1);
+		// initialTranslationTorus = (new Matrix4f()).translation(-4, 0.11f, -4);
+		// initialScaleTorus = (new Matrix4f()).scaling(0.5f);
+		// torus.setLocalTranslation(initialTranslationTorus);
+		// torus.setLocalScale(initialScaleTorus);
+
+
+		// build a sphere logo textured at the right side of the window
+		// sphere = new GameObject(GameObject.root(), sphereS, corvette);
+		// initialTranslationSphere = (new Matrix4f()).translation(4, 0.2f, 4);
+		// initialScaleSphere = (new Matrix4f()).scaling(0.5f);
+		// sphere.setLocalTranslation(initialTranslationSphere);
+		// sphere.setLocalScale(initialScaleSphere);
+		// now create a example of a hierarchical relationship by adding 
+		// a smaller sphereSatellite to our sphere object.
+		// sphereSatellite = new GameObject(sphere, sphereS, grass);
+		// sphereSatellite.setLocalScale((new Matrix4f()).scaling(0.25f));
+		// sphereSatellite.setLocalTranslation((new Matrix4f()).translation(0.75f, 0.5f, 0));
+		// sphereSatellite.propagateTranslation(true);
+		// sphereSatellite.propagateRotation(true);
+		// sphereSatellite.applyParentRotationToPosition(true);
+
+		// build a plane textured at the left side of the window
+		// plane = new GameObject(GameObject.root(), planeS, assignt);
+		// initialTranslationPlane = (new Matrix4f()).translation(-4, .01f, 4);
+		// initialScalePlane = (new Matrix4f()).scaling(0.75f);
+		// plane.setLocalTranslation(initialTranslationPlane);
+		// plane.setLocalScale(initialScalePlane);
+
+		// build my manual object
+		// manual = new GameObject(GameObject.root(), manualS, gold);
+		// initialTranslationManual = (new Matrix4f()).translation(0, 1.75f, -4);
+		// initialScaleManual = (new Matrix4f()).scaling(0.4f);
+		// manual.setLocalTranslation(initialTranslationManual);
+		// manual.setLocalScale(initialScaleManual);
+		// manual.getRenderStates().hasLighting(true);	
+
+		buildEnemyObjects(5);
 
 		// Build World Axis Lines (X, Y, Z) in the center of the window
 		wAxisX = new GameObject(GameObject.root(), wAxisLineShapeX);
@@ -290,28 +305,28 @@ public class MyGame extends VariableFrameRateGame {
 		orbitController = new CameraOrbit3D(myCamera, dol, gamepadName, engine);
 		
 		// Initialize our nodeControllers for each target object
-		NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
-		rotController1.addTarget(cub);
-		controllerArr.add(rotController1);
-		NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
-		rotController2.addTarget(torus);
-		controllerArr.add(rotController2);
-		NodeController rotController3 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
-		rotController3.addTarget(sphere);
-		controllerArr.add(rotController3);
-		NodeController rotController4 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
-		rotController4.addTarget(plane);
-		controllerArr.add(rotController4);
+		// NodeController rotController1 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		// rotController1.addTarget(base);
+		// controllerArr.add(rotController1);
+		// NodeController rotController2 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		// rotController2.addTarget(torus);
+		// controllerArr.add(rotController2);
+		// NodeController rotController3 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		// rotController3.addTarget(sphere);
+		// controllerArr.add(rotController3);
+		// NodeController rotController4 = new RotationController(engine, new Vector3f(0,1,0), 0.002f);
+		// rotController4.addTarget(plane);
+		// controllerArr.add(rotController4);
 		// put all object node controllers in an array for indexed access
 		// when the objects are visited
-		for (NodeController n : controllerArr) {
-			(engine.getSceneGraph()).addNodeController(n);
-		}
+		// for (NodeController n : controllerArr) {
+		// 	(engine.getSceneGraph()).addNodeController(n);
+		// }
 		// Initialize a second node controller (dual axis stretch) on the pyramid manual object
-		NodeController stretchController1 = new StretchController(engine, 2.5f);
-		stretchController1.addTarget(manual);
-		stretchController1.enable();
-		(engine.getSceneGraph()).addNodeController(stretchController1);
+		// NodeController stretchController1 = new StretchController(engine, 2.5f);
+		// stretchController1.addTarget(manual);
+		// stretchController1.enable();
+		// (engine.getSceneGraph()).addNodeController(stretchController1);
 
 
 		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
@@ -428,7 +443,7 @@ public class MyGame extends VariableFrameRateGame {
 		
 		setupNetworking();
 		printControls();
-		((AnimatedShape)dolS).playAnimation("WALK", 0.5f, AnimatedShape.EndType.LOOP, 0);
+		// ((AnimatedShape)dolS).playAnimation("WALK", 0.5f, AnimatedShape.EndType.LOOP, 0);
 	}
 
 	private float getFramesPerSecond() {
@@ -444,7 +459,7 @@ public class MyGame extends VariableFrameRateGame {
 		int elapsTimeSec = Math.round((float) elapsTime);
 		String elapsTimeStr = Integer.toString(elapsTimeSec);
 		String counterStr = Integer.toString(counter);
-		counterStr =  counter < 4 ? "Score = " + counterStr : "Score = " + counterStr + " You Win!";
+		counterStr =  gameOver == 2 ? "Score = " + " You Lose!" : "Score = " + counterStr + " You Win!";
 		String dispStr1 = "Time = " + elapsTimeStr + " " + counterStr;
 		String dispStr2 = "Pos = " + printVector3f(dol.getWorldLocation());
 		Vector3f hud1Color = new Vector3f(1, 0, 0);
@@ -481,15 +496,15 @@ public class MyGame extends VariableFrameRateGame {
 		inputManager.update(elapsedFramesPerSecond);
 		orbitController.updateCameraPosition();
 		updateMovingObjects(elapsedFramesPerSecond);
-		((AnimatedShape)dolS).updateAnimation();
-		updateDolphinScore();
+		updateMovingEnemies(elapsedFramesPerSecond);
+		// ((AnimatedShape)dolS).updateAnimation();
+		// updateDolphinScore();
 		toggleNodeControllers();
 		protClient.sendRotationMessage(dol.getWorldRotation());
 		// protClient.sendMoveMessage(dol.getWorldLocation()); //TODO optimiz?e this message
 		processNetworking((float)elapsTime);
 		frameCounter++;
-		// float heightOffset = groundPlane.getHeight(0, 0);
-		// System.out.println("height offset: " + heightOffset);
+		float heightOffset = groundPlane.getHeight(0, 0);
 	}
 
 	@Override
@@ -625,7 +640,7 @@ public class MyGame extends VariableFrameRateGame {
 	private void updateDolphinScore() {
 		// Check for each object (cub, torus, sphere, plane) and update visited state
 		if (!visitedSites[0]) {
-			visitedSites[0] = checkDolphinNearObject(cub);
+			visitedSites[0] = checkDolphinNearObject(base);
 		}
 		if (!visitedSites[1]) {
 			visitedSites[1] = checkDolphinNearObject(torus);
@@ -675,8 +690,32 @@ public class MyGame extends VariableFrameRateGame {
 	private void updateMovingObjects(float elapsedFramesPerSecond) {
 		for (GameObject go : movingObjects) {
 			go.moveForwardBack(0.001f*elapsedFramesPerSecond, new Vector3f());
+			checkCollisionWithEnemy(go);
 			// TODO: Check if out of boundary and remove object
 		} 
+	}
+
+	private void updateMovingEnemies(float elapsedFramesPerSecond) {
+		for (GameObject go : movingEnemies) {
+			go.lookAt(base);
+			go.moveForwardBack(0.0001f*elapsedFramesPerSecond, new Vector3f());
+			setObjectHeightAtLocation(go);
+			if (go.getWorldLocation().sub(base.getWorldLocation()).length() < 0.1) {
+				gameOver = 2;
+			}
+		} 
+	}
+
+	private void checkCollisionWithEnemy(GameObject go) {
+		ListIterator<GameObject> iter = movingEnemies.listIterator();
+		while (iter.hasNext()) {
+			GameObject enemy = iter.next();
+			float distance = go.getWorldLocation().sub(enemy.getWorldLocation()).length();
+			if (distance < 0.2f) {
+				enemy.setLocalScale((new Matrix4f()).scale(0.00001f));
+				iter.remove(); // TODO remove the missile as well.
+			}
+		}
 	}
 
 	public void setAvatarHeightAtLocation() {
@@ -684,6 +723,13 @@ public class MyGame extends VariableFrameRateGame {
 		float height = groundPlane.getHeight(loc.x(), loc.z());
 		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
 	}
+
+	public void setObjectHeightAtLocation(GameObject go) {
+		Vector3f loc = go.getWorldLocation();
+		float height = groundPlane.getHeight(loc.x(), loc.z());
+		go.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+	}
+
 	// ---------- NETWORKING SECTION ----------------
 
 	public ObjShape getGhostShape() { return dolS; }
