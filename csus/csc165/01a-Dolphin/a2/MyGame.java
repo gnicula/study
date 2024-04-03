@@ -44,11 +44,11 @@ public class MyGame extends VariableFrameRateGame {
 	private ArrayList<GameObject> movingObjects = new ArrayList<GameObject>();
 	private ArrayList<GameObject> movingEnemies = new ArrayList<GameObject>();
 	private GameObject dol, base, torus, sphere, sphereSatellite, plane, groundPlane,
-			wAxisX, wAxisY, wAxisZ, manual, magnet, animSoldier;
+			wAxisX, wAxisY, wAxisZ, manual, magnet, missileObj, tower;
 	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
-			wAxisLineShapeZ, manualS, magnetS, imported, worldObj, animSoldierS;
+			wAxisLineShapeZ, manualS, magnetS, worldObj, missileShape, towerS;
 	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, 
-			torusWater, fur, terrainTexture, terrainHeightMap;
+			torusWater, fur, terrainTexture, terrainHeightMap, missile, towerTexture;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
 	private CameraOrbit3D orbitController;
@@ -97,6 +97,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadShapes() {
+		towerS = new ImportedModel("tower.obj");
 		dolS = new ImportedModel("f15.obj");
 		// dolS = new AnimatedShape("drone.rkm", "drone.rks");
 		// ((AnimatedShape)dolS).loadAnimation("WALK", "drone_flying.rka");
@@ -105,11 +106,15 @@ public class MyGame extends VariableFrameRateGame {
 		sphereS = new Sphere();
 		// planeS = new Plane();
 		// groundPlaneS = new Plane();
-		// worldObj = new ImportedModel("terrain.obj");
+		System.out.println("about to load terrain shape");
+		// groundPlaneS = new ImportedModel("terrain.obj");
 		groundPlaneS = new TerrainPlane(1000);
+		System.out.println("loaded terrain shape");
+		// groundPlaneS = new TerrainPlane(1000);
 		manualS = new MyManualObject();
 		magnetS = new MyMagnetObject();
-		imported = new ImportedModel("capsule.obj", "assets/defaultAssets/");
+		missileShape = new ImportedModel("asca.obj");
+
 
 		float lineLength = 1.0f;
 		Vector3f worldOrigin = new Vector3f(0f, 0f, 0f);
@@ -125,16 +130,17 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadTextures() {
 		doltx = new TextureImage("F15A.jpg");
-		brick = new TextureImage("brick1.jpg");
+		towerTexture = new TextureImage("towertexture.png");
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
 		assignt = new TextureImage("assign1.png");
 		gold = new TextureImage("gold1.jpg");
 		metal = new TextureImage("magnet1.jpg");
+		missile = new TextureImage("missile.jpg");
 		// https://www.pexels.com/photo/body-of-water-261403/
 		// water = new TextureImage("water.jpg");
-		terrainTexture = new TextureImage("snowmap.png");
-		terrainHeightMap = new TextureImage("snowmapheight.png");
+		terrainTexture = new TextureImage("surface1.png");
+		terrainHeightMap = new TextureImage("aworldheightmap.png");
 		// https://www.pexels.com/photo/aerial-shot-of-blue-water-3894157/
 		torusWater = new TextureImage("waterTorus.jpg");
 		// https://www.pexels.com/photo/brown-thick-fur-7232502/
@@ -162,17 +168,19 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslation, initialScale;
 
 		// build the ground plane on X-Z
+		System.out.println("about to create terain object");
 		groundPlane = new GameObject(GameObject.root(), groundPlaneS, terrainTexture);
+		System.out.println("created terain object");
 		groundPlane.setHeightMap(terrainHeightMap);
-		initialScale = (new Matrix4f()).scaling(40.0f);
+		initialScale = (new Matrix4f()).scaling(20.0f);
 		groundPlane.setLocalScale(initialScale);
-		// initialTranslationGround = (new Matrix4f()).translation(0, 0, 0.0f);
-		// groundPlane.setLocalTranslation(initialTranslationManual);
+		initialTranslation = (new Matrix4f()).translation(0, 0, 0.0f);
+		groundPlane.setLocalTranslation(initialTranslation);
 		groundPlane.setIsTerrain(true);
 
 		// groundPlane.getRenderStates().setTiling(1);
 		// groundPlane.getRenderStates().hasLighting(true);
-
+		
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
 		initialTranslation = (new Matrix4f()).translation(0, 15.0f, 0);
@@ -181,9 +189,9 @@ public class MyGame extends VariableFrameRateGame {
 		dol.setLocalScale(initialScale);
 
 		// build our base at the center of the map.
-		base = new GameObject(GameObject.root(), cubS, brick);
-		initialTranslation = (new Matrix4f()).translation(0, 12.12f, 0);
-		initialScale = (new Matrix4f()).scaling(0.25f);
+		base = new GameObject(GameObject.root(), towerS, brick);
+		initialTranslation = (new Matrix4f()).translation(0, 10.5f, 0.5f);
+		initialScale = (new Matrix4f()).scaling(0.10f);
 		base.setLocalTranslation(initialTranslation);
 		base.setLocalScale(initialScale);
 
@@ -496,15 +504,17 @@ public class MyGame extends VariableFrameRateGame {
 		inputManager.update(elapsedFramesPerSecond);
 		orbitController.updateCameraPosition();
 		updateMovingObjects(elapsedFramesPerSecond);
-		updateMovingEnemies(elapsedFramesPerSecond);
 		// ((AnimatedShape)dolS).updateAnimation();
 		// updateDolphinScore();
 		toggleNodeControllers();
+		// avatarGroundCollision();
 		protClient.sendRotationMessage(dol.getWorldRotation());
-		// protClient.sendMoveMessage(dol.getWorldLocation()); //TODO optimiz?e this message
+		protClient.sendMoveMessage(dol.getWorldLocation()); //TODO optimiz?e this message
 		processNetworking((float)elapsTime);
 		frameCounter++;
-		float heightOffset = groundPlane.getHeight(0, 0);
+		// float heightOffset = groundPlane.getHeight(0, 0);
+		Vector3f dolcoords = dol.getWorldLocation();
+		// System.out.println(dolcoords.x() + " " + dolcoords.y() + " " + dolcoords.z());
 	}
 
 	@Override
@@ -671,7 +681,7 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	public void fireMissile(float speed) {
-		GameObject missileObject = new GameObject(GameObject.root(), imported, metal);
+		GameObject missileObject = new GameObject(GameObject.root(), missileShape, missile);
 		// missileObject.setParent(GameObject.root());
 		Vector3f dolLocation = dol.getWorldLocation();
 		Vector3f dolDirection = dol.getLocalForwardVector();
@@ -685,43 +695,53 @@ public class MyGame extends VariableFrameRateGame {
 		missileObject.setLocalRotation(dol.getLocalRotation());
 		// missileObject.lookAt(dolDirection.x(), dolDirection.y(), dolDirection.z());
 		movingObjects.add(missileObject);
+		protClient.sendCreateMissileMessage(missileObject.getWorldLocation());
 	}
 
 	private void updateMovingObjects(float elapsedFramesPerSecond) {
-		for (GameObject go : movingObjects) {
+		// First perform the scheduled object moves
+		for (GameObject go: movingObjects) {
 			go.moveForwardBack(0.001f*elapsedFramesPerSecond, new Vector3f());
-			checkCollisionWithEnemy(go);
-			// TODO: Check if out of boundary and remove object
-		} 
-	}
-
-	private void updateMovingEnemies(float elapsedFramesPerSecond) {
-		for (GameObject go : movingEnemies) {
+			protClient.sendMoveMissileMessage(go.getWorldLocation());
+			protClient.sendMissileRotationMessage(go.getWorldRotation());
+		}
+		for (GameObject go: movingEnemies) {
 			go.lookAt(base);
 			go.moveForwardBack(0.0001f*elapsedFramesPerSecond, new Vector3f());
 			setObjectHeightAtLocation(go);
 			if (go.getWorldLocation().sub(base.getWorldLocation()).length() < 0.1) {
 				gameOver = 2;
 			}
+		}
+		// Now we have to check for collisions
+		ListIterator<GameObject> iterMoving = movingObjects.listIterator();
+		while (iterMoving.hasNext()) {
+			GameObject goMoving = iterMoving.next();
+			ListIterator<GameObject> iterEnemies = movingEnemies.listIterator();
+			while (iterEnemies.hasNext()) {
+				GameObject goEnemy = iterEnemies.next();
+				float distance = goEnemy.getWorldLocation().sub(goMoving.getWorldLocation()).length();
+				// Remove objects that collided.
+				if (distance < 0.2f) {
+					GameObject.root().removeChild(goEnemy);
+					GameObject.root().removeChild(goMoving);
+					iterMoving.remove();
+					iterEnemies.remove();
+					engine.getSceneGraph().removeGameObject(goEnemy);
+					engine.getSceneGraph().removeGameObject(goMoving);
+				}
+			}
+			// TODO: Check if out of boundary and remove object
 		} 
 	}
 
-	private void checkCollisionWithEnemy(GameObject go) {
-		ListIterator<GameObject> iter = movingEnemies.listIterator();
-		while (iter.hasNext()) {
-			GameObject enemy = iter.next();
-			float distance = go.getWorldLocation().sub(enemy.getWorldLocation()).length();
-			if (distance < 0.2f) {
-				enemy.setLocalScale((new Matrix4f()).scale(0.00001f));
-				iter.remove(); // TODO remove the missile as well.
-			}
-		}
-	}
-
-	public void setAvatarHeightAtLocation() {
+	public void avatarGroundCollision() {
 		Vector3f loc = dol.getWorldLocation();
 		float height = groundPlane.getHeight(loc.x(), loc.z());
-		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+		Matrix4f initialTranslation = (new Matrix4f()).translation(0, 15.0f, 0);
+		if (Math.abs(loc.y() - height) < 0.1 || (loc.y() - height < 0.1) ) {
+			dol.setLocalTranslation(initialTranslation);
+		}
 	}
 
 	public void setObjectHeightAtLocation(GameObject go) {
@@ -730,10 +750,13 @@ public class MyGame extends VariableFrameRateGame {
 		go.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
 	}
 
+
 	// ---------- NETWORKING SECTION ----------------
 
 	public ObjShape getGhostShape() { return dolS; }
 	public TextureImage getGhostTexture() { return doltx; }
+	public ObjShape getMissileShape() { return missileShape; }
+	public TextureImage getMissileTexture() { return missile; }
 	public GhostManager getGhostManager() { return gm; }
 	public Engine getEngine() { return engine; }
 	

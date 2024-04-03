@@ -205,7 +205,8 @@ public class GameObject
 	public boolean hasChildren() { return !(children.isEmpty()); }
 
 	protected void addChild(GameObject g) { children.add(g); }
-	protected void removeChild(GameObject g) { children.remove(g); }
+	// Changing this method to public to be able to remove objects from the scene
+	public void removeChild(GameObject g) { children.remove(g); }
 	protected Iterator getChildrenIterator() { return children.iterator(); }
 
 	// ------------------ Look At methods ------------------------------
@@ -425,20 +426,18 @@ public class GameObject
 		// newLocation is in allowed range around origin and
 		// newLocation is in allowed area above ground plane.
 
-		// if ((newLocation.length() < 9.0f) ) {
-		// 	if (newLocation.y() >= -0.02f && newLocation.y() <= 2.0f) {
-		// 		this.setLocalLocation(newLocation);
-		// 	} else {
-		// 		if (newLocation.y() <= -0.02f) {
-		// 			this.setLocalLocation(new Vector3f(newLocation.x(), -0.02f, newLocation.z()));
-		// 		} else {
-		// 			this.setLocalLocation(new Vector3f(newLocation.x(), 2.0f, newLocation.z()));
-		// 		}
-		// 	}
-		// }
+		if ((newLocation.length() < 70.0f) ) {
+			this.setLocalLocation(newLocation);
+		} else {
+			Vector4f backVector4f = forwardVec.mul(10);
+			this.setLocalLocation(curLocation.sub(
+					backVector4f.x(),
+					backVector4f.y(),
+					backVector4f.z()));
+		}
 
 		// Unrestricted move
-		this.setLocalLocation(newLocation);
+		// this.setLocalLocation(newLocation);
 	}
 
 	/**

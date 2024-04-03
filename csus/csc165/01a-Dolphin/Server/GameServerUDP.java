@@ -53,6 +53,29 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				sendWantsDetailsMessages(clientID);
 			}
 			
+			// CREATE -- Case where server receives a create message (to specify avatar location)
+			// Received Message Format: (create,localId,x,y,z)
+			if(messageTokens[0].compareTo("createMissile") == 0)
+			{	UUID clientID = UUID.fromString(messageTokens[1]);
+				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
+				sendCreateMissileMessages(clientID, pos);
+				// sendWantsDetailsMessages(clientID);
+			}
+
+			// MOVE --- Case where server receives a move message
+			// Received Message Format: (move,localId,x,y,z)
+			if(messageTokens[0].compareTo("moveMissile") == 0)
+			{	UUID clientID = UUID.fromString(messageTokens[1]);
+				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
+				sendMoveMissileMessage(clientID, pos);
+			}
+
+			if(messageTokens[0].compareTo("rotateMissile") == 0)
+			{	UUID clientID = UUID.fromString(messageTokens[1]);
+				sendRotateMissileMessages(clientID, message);
+			}
+
+
 			// DETAILS-FOR --- Case where server receives a details for message
 			// Received Message Format: (dsfr,remoteId,localId,x,y,z)
 			if(messageTokens[0].compareTo("dsfr") == 0)
@@ -132,6 +155,41 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{	e.printStackTrace();
 	}	}
 	
+	public void sendCreateMissileMessages(UUID clientID, String[] position)
+	{	try 
+		{	String message = new String("createMissile," + clientID.toString());
+			message += "," + position[0];
+			message += "," + position[1];
+			message += "," + position[2];	
+			forwardPacketToAll(message, clientID);
+		} 
+		catch (IOException e) 
+		{	e.printStackTrace();
+	}	}
+
+	public void sendMoveMissileMessage(UUID clientID, String[] position) {
+		try {
+			String message = new String("moveMissile," + clientID.toString());
+			message += "," + position[0];
+			message += "," + position[1];
+			message += "," + position[2];
+			forwardPacketToAll(message, clientID);
+		} 
+		catch (IOException e) 
+		{	e.printStackTrace();
+		}
+		
+	}
+
+	public void sendRotateMissileMessages(UUID clientID, String message)
+	{
+		try {
+			forwardPacketToAll(message, clientID);
+		} catch (IOException e) 
+		{	e.printStackTrace();
+		}
+	}
+
 	// Informs a client of the details for a remote client�s avatar. This message is in response 
 	// to the server receiving a DETAILS_FOR message from a remote client. That remote client�s 
 	// message�s localId becomes the remoteId for this message, and the remote client�s message�s 
