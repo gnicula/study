@@ -130,7 +130,7 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadTextures() {
 		doltx = new TextureImage("F15A.jpg");
-		towerTexture = new TextureImage("towertexture.png");
+		towerTexture = new TextureImage("towertexture.jpg");
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
 		assignt = new TextureImage("assign1.png");
@@ -189,7 +189,7 @@ public class MyGame extends VariableFrameRateGame {
 		dol.setLocalScale(initialScale);
 
 		// build our base at the center of the map.
-		base = new GameObject(GameObject.root(), towerS, brick);
+		base = new GameObject(GameObject.root(), towerS, towerTexture);
 		initialTranslation = (new Matrix4f()).translation(0, 10.5f, 0.5f);
 		initialScale = (new Matrix4f()).scaling(0.10f);
 		base.setLocalTranslation(initialTranslation);
