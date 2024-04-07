@@ -97,4 +97,11 @@ public class GhostManager
 		{	System.out.println("tried to update ghost missile rotation, but unable to find ghost in list");
 		}
 	}
+
+	// public void createGhostNPC(UUID id, Vector3f position) throws IOException {
+	// 	ObjShape ghostNPC = game.getGhostNPCShape();
+	// 	TextureImage ghostNPCTexture = game.getGhostNPCTexture();
+		
+
+	// }
 }

@@ -2,7 +2,7 @@
  * @author Gabriele Nicula
  */
 
- package tage.input.action;
+package tage.input.action;
 
 import a2.MyGame;
 import net.java.games.input.Event;
@@ -10,10 +10,10 @@ import tage.Camera;
 import tage.GameObject;
 
 /**
- * PitchActionJ implements pitch up/down of the Game object.
- * This InputAction works with the controller.
+ * PitchActionJ nose up/down around local side axis.
+ * This InputAction works with the game controller.
  */
-public class PitchActionJ extends AbstractInputAction {
+public class CameraPitchActionJ extends AbstractInputAction {
     // MyGame object where GameObjects are placed in.
     private MyGame game;
     // Dolphin GameObject which moves.
@@ -21,20 +21,17 @@ public class PitchActionJ extends AbstractInputAction {
     // Camera object that is slaved to GameObject dolph.
     private Camera camera;
     // Speed at which action can occur.
-    private float speed;
-    // Scaling factor to slow or speed up rate at which actions can occur. 
-    // Also positive nose up, negative nose down
-    private float scale; 
+    // Scaling factor to slow or speed up rate at which actions can occur.
+    private float speed, scale = 0.0002f;
 
-    /** <code> PitchActionJ() </code> is invoked to execute this input action.
+    /** <code> ForwardBackActionJ() </code> is invoked to execute this input action.
+     * 
      * @param game -- MyGame object where movement is happening.
-     * @param factor -- scaling factor that controls rate at which actions can occur.
      */
-    public PitchActionJ(MyGame game, float factor) {
+    public CameraPitchActionJ(MyGame game) {
         this.game = game;
         this.dolph = game.getDolphin();
         this.camera = game.getMyCamera();
-        this.scale = factor;
     }
 
     @Override
@@ -44,8 +41,8 @@ public class PitchActionJ extends AbstractInputAction {
         {
             return; // deadzone
         }
-        float advance_direction = (keyValue >= .2) ? -1 : 1;
-        speed = scale * time * advance_direction;
+        float turn_direction = (keyValue >= .2) ? -1 : 1;
+        speed = scale * time * turn_direction;
 
         dolph.pitch(speed);
         // For A2 camera is always off dolphin
@@ -53,6 +50,5 @@ public class PitchActionJ extends AbstractInputAction {
         {
             game.setOnDolphinCam();
         }
-
     }
 }

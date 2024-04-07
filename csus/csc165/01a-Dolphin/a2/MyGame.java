@@ -45,9 +45,9 @@ public class MyGame extends VariableFrameRateGame {
 	private ArrayList<GameObject> movingEnemies = new ArrayList<GameObject>();
 	private GameObject dol, base, torus, sphere, sphereSatellite, plane, groundPlane,
 			wAxisX, wAxisY, wAxisZ, manual, magnet, missileObj, tower;
-	private ObjShape dolS, cubS, torusS, sphereS, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
+	private ObjShape dolS, cubS, torusS, enemyShape, planeS, groundPlaneS, wAxisLineShapeX, wAxisLineShapeY, 
 			wAxisLineShapeZ, manualS, magnetS, worldObj, missileShape, towerS;
-	private TextureImage doltx, brick, grass, corvette, assignt, gold, metal, water, 
+	private TextureImage doltx, brick, grass, corvette, assignt, enemyTexture, metal, water, 
 			torusWater, fur, terrainTexture, terrainHeightMap, missile, towerTexture;
 	private Light light1, light2;
 	private Camera myCamera, myViewportCamera;
@@ -97,13 +97,13 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadShapes() {
-		towerS = new ImportedModel("tower.obj");
+		towerS = new ImportedModel("towertest.obj");
 		dolS = new ImportedModel("f15.obj");
 		// dolS = new AnimatedShape("drone.rkm", "drone.rks");
 		// ((AnimatedShape)dolS).loadAnimation("WALK", "drone_flying.rka");
 		cubS = new Cube();
 		// torusS = new Torus();
-		sphereS = new Sphere();
+		enemyShape = new Sphere();
 		// planeS = new Plane();
 		// groundPlaneS = new Plane();
 		System.out.println("about to load terrain shape");
@@ -130,11 +130,11 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadTextures() {
 		doltx = new TextureImage("F15A.jpg");
-		towerTexture = new TextureImage("towertexture.jpg");
+		towerTexture = new TextureImage("towertexturetest.jpg");
 		grass = new TextureImage("grass1.jpg");
 		corvette = new TextureImage("corvette1.jpg");
 		assignt = new TextureImage("assign1.png");
-		gold = new TextureImage("gold1.jpg");
+		enemyTexture = new TextureImage("gold1.jpg");
 		metal = new TextureImage("magnet1.jpg");
 		missile = new TextureImage("missile.jpg");
 		// https://www.pexels.com/photo/body-of-water-261403/
@@ -147,10 +147,10 @@ public class MyGame extends VariableFrameRateGame {
 		fur = new TextureImage("fur1.jpg");
 	}
 
-	private void buildEnemyObjects(int numEnemies) {
+	public void buildEnemyObjects(int numEnemies) {
 		Matrix4f initialTranslation, initialScale;
 		for (int i = 0; i < numEnemies; ++i) {
-			GameObject enemy = new GameObject(GameObject.root(), sphereS, gold);
+			GameObject enemy = new GameObject(GameObject.root(), enemyShape, enemyTexture);
 			double ranAngle = Math.random() * 360;
 			float ranX = (float)Math.cos(ranAngle) * 30.0f;
 			float ranZ = (float)Math.sin(ranAngle) * 30.0f;
@@ -339,23 +339,26 @@ public class MyGame extends VariableFrameRateGame {
 
 		PitchActionK pitchUp = new PitchActionK(this, 0.0002f);
 		PitchActionK pitchDown = new PitchActionK(this, -0.0002f);
-		PitchActionJ pitchJ = new PitchActionJ(this);
+		CameraPitchActionJ CameraPitchJ = new CameraPitchActionJ(this);
+		PitchActionJ pitchJ = new PitchActionJ(this, 0.0004f);
 		ForwardBackActionK moveForward = new ForwardBackActionK(this, 0.0004f);
 		ForwardBackActionK moveBackward = new ForwardBackActionK(this, -0.0004f);
 		ForwardBackActionJ moveJ = new ForwardBackActionJ(this, 0.0004f);
 		YawActionK leftYaw = new YawActionK(this, 1);
 		YawActionK rightYaw = new YawActionK(this, -1);
-		YawActionJ XYaw = new YawActionJ(this);
+		YawActionK leftYawController = new YawActionK(this, 1);
+		YawActionK rightYawController = new YawActionK(this, -1);
+		// YawActionJ XYaw = new YawActionJ(this);
 		RollActionK leftRoll = new RollActionK(this, -1);
 		RollActionK rightRoll = new RollActionK(this, 1);
 
 		// A2 New actions
-		SecondaryViewportZoomActionK zoomOut = new SecondaryViewportZoomActionK(this, 0.0004f);
-		SecondaryViewportZoomActionK zoomIn = new SecondaryViewportZoomActionK(this, -0.0004f);
-		SecondaryViewportPanXActionK panLeft = new SecondaryViewportPanXActionK(this, -0.0004f);
-		SecondaryViewportPanXActionK panRight = new SecondaryViewportPanXActionK(this, 0.0004f);
-		SecondaryViewportPanYActionK panUp = new SecondaryViewportPanYActionK(this, -0.0004f);
-		SecondaryViewportPanYActionK panDown = new SecondaryViewportPanYActionK(this, 0.0004f);
+		SecondaryViewportZoomActionK zoomOut = new SecondaryViewportZoomActionK(this, 0.0008f);
+		SecondaryViewportZoomActionK zoomIn = new SecondaryViewportZoomActionK(this, -0.0008f);
+		SecondaryViewportPanXActionK panLeft = new SecondaryViewportPanXActionK(this, -0.0008f);
+		SecondaryViewportPanXActionK panRight = new SecondaryViewportPanXActionK(this, 0.0008f);
+		SecondaryViewportPanYActionK panUp = new SecondaryViewportPanYActionK(this, -0.0008f);
+		SecondaryViewportPanYActionK panDown = new SecondaryViewportPanYActionK(this, 0.0008f);
 
 		// A3 New Actions
 		FireMissileActionK fireMissile = new FireMissileActionK(this, 0.0005f);
@@ -433,19 +436,23 @@ public class MyGame extends VariableFrameRateGame {
 
 		// Now bind X, Y, YRot to joystick/game controller
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Button._0,
-				pitchUp, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Button._1,
-				pitchDown, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Axis.Y,
+				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
 		inputManager.associateActionWithAllGamepads(
 				net.java.games.input.Component.Identifier.Axis.RZ,
-				pitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				CameraPitchJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Axis.X,
-				XYaw, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+				net.java.games.input.Component.Identifier.Button._5,
+				leftYawController, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
 		inputManager.associateActionWithAllGamepads(
-				net.java.games.input.Component.Identifier.Axis.Y,
+				net.java.games.input.Component.Identifier.Button._6,
+				rightYawController, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		inputManager.associateActionWithAllGamepads(
+				net.java.games.input.Component.Identifier.Axis.Z,
 				moveJ, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		
@@ -757,6 +764,8 @@ public class MyGame extends VariableFrameRateGame {
 	public TextureImage getGhostTexture() { return doltx; }
 	public ObjShape getMissileShape() { return missileShape; }
 	public TextureImage getMissileTexture() { return missile; }
+	public ObjShape getGhostNPCShape() { return enemyShape; }
+	public TextureImage getGhostNPCTexture() { return enemyTexture; }
 	public GhostManager getGhostManager() { return gm; }
 	public Engine getEngine() { return engine; }
 	
